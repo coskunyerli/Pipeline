@@ -2,6 +2,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <iostream>
+#include <Widgets/nodegraphview.h>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_actor(nullptr)
@@ -15,67 +17,74 @@ MainWindow::MainWindow(QWidget *parent)
     auto *mainWidget = new QWidget(this);
     auto *mainLayout = new QVBoxLayout(mainWidget);
     auto *pushButton = new QPushButton("Start", mainWidget);
-
     mainLayout->addWidget(pushButton);
+    Pipeline::UI::NodeGraphView *nodeGraph = new Pipeline::UI::NodeGraphView(mainWidget);
+    mainLayout->addWidget(nodeGraph);
+    resize(600, 600);
     auto threadPool = new QThreadPool(this);
     threadPool->setMaxThreadCount(1);
-
     m_actor = new Pipeline::Actor(threadPool, this);
-    m_actor->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext& context){
+    m_actor->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    {
         size_t total = 0;
         std::cout << "root actor started " << total << std::endl;
-        for(size_t i = 0;i < 1000; i++)
+
+        for (size_t i = 0; i < 1000; i++)
         {
-            total+=i;
+            total += i;
         }
+
         std::cout << "root actor finished " << total << std::endl;
         return QVariant(total);
     }));
-
     auto *childActor = new Pipeline::Actor(threadPool, this);
-    childActor->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext& context){
-
+    childActor->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    {
         size_t total = context.m_variants[0].toLongLong();
         std::cout << "child1 actor started " << total << std::endl;
-        for(size_t i = 0; i < 1000; i++)
+
+        for (size_t i = 0; i < 1000; i++)
         {
-            total+=i;
+            total += i;
         }
+
         std::cout << "child1 actor finished " << total << std::endl;
         return QVariant(total);
     }));
-
     auto *childActor2 = new Pipeline::Actor(threadPool, this);
-    childActor2->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext& context){
+    childActor2->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    {
         size_t total = context.m_variants[0].toLongLong();
         std::cout << "child2 actor started " << total << std::endl;
-        for(size_t i = 0;i < 1000;i++)
+
+        for (size_t i = 0; i < 1000; i++)
         {
-            total+=i;
+            total += i;
         }
+
         std::cout << "child2 actor finished " << total << std::endl;
         return QVariant(total);
     }));
-
     auto *childActor3 = new Pipeline::Actor(threadPool, this);
-    childActor3->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext& context){
+    childActor3->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    {
         size_t total = context.m_variants[0].toLongLong() + context.m_variants[1].toLongLong();
         std::cout << "child3 actor started " << total << std::endl;
-        for(size_t i = 0; i < 1000;i++)
+
+        for (size_t i = 0; i < 1000; i++)
         {
-            total+=i;
+            total += i;
         }
+
         std::cout << "child3 actor finished " << total << std::endl;
         return QVariant(total);
     }));
-
     m_actor->addNextActor(childActor);
     m_actor->addNextActor(childActor2);
-
     childActor->addNextActor(childActor3);
     childActor2->addNextActor(childActor3);
-
-    connect(pushButton,&QPushButton::clicked, this, [this](){
+    connect(pushButton, &QPushButton::clicked, this, [this]()
+    {
         m_actor->reset();
         m_actor->startRequest();
     });

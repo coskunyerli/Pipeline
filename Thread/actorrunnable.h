@@ -5,11 +5,11 @@ namespace Pipeline
 {
     class ActorRunnable : public QRunnable
     {
-    public:
-        ActorRunnable(Actor* actor);
-        virtual void run();
-    private:
-        Actor *m_actor;
+        public:
+            ActorRunnable(Actor* actor);
+            virtual void run();
+        private:
+            Actor* m_actor;
     };
 }
 

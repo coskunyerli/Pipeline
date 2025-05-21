@@ -6,12 +6,11 @@ namespace Pipeline
     ActorRunnable::ActorRunnable(Actor *actor)
         : m_actor(actor)
     {
-
     }
 
     void ActorRunnable::run()
     {
-        if(m_actor)
+        if (m_actor)
         {
             try
             {
@@ -22,12 +21,12 @@ namespace Pipeline
                 m_actor->m_state = Actor::FINISHED;
                 emit m_actor->finished(value);
             }
-            catch(std::exception &e)
+            catch (std::exception &e)
             {
-                 m_actor->m_state = Actor::FAILED;
-                 emit m_actor->failed(e.what());
+                m_actor->m_state = Actor::FAILED;
+                emit m_actor->failed(e.what());
             }
-            catch(...)
+            catch (...)
             {
                 m_actor->m_state = Actor::FAILED;
                 emit m_actor->failed("Unknow Exception");
