@@ -1,4 +1,5 @@
 #include "nodegraphview.h"
+#include "nodegraphicsscene.h"
 #include <QMenu>
 #include <QGraphicsScene>
 #include "GraphicsItems/basenodegraphicsitem.h"
@@ -10,7 +11,7 @@ namespace Pipeline
         NodeGraphView::NodeGraphView(QWidget *parent)
             : QGraphicsView(parent)
         {
-            auto *scene = new QGraphicsScene(this);
+            auto *scene = new NodeGraphicsScene(this);
             scene->setItemIndexMethod(QGraphicsScene::NoIndex);
             this->setScene(scene);
             setContextMenuPolicy(Qt::CustomContextMenu);
@@ -30,8 +31,9 @@ namespace Pipeline
 
             if (action == addAction)
             {
-                auto *nodeGraphicsItem = new BaseNodeGraphicsItem();
-                auto *portItem = new PortGraphicsItem(nodeGraphicsItem);
+                auto *nodeGraphicsItem = new BaseNodeGraphicsItem(QModelIndex());
+                nodeGraphicsItem->setPos(mapToScene(pos));
+                auto *portItem = new PortGraphicsItem(pos.x(), nodeGraphicsItem);
                 portItem->moveBy(80, 0);
                 this->scene()->addItem(nodeGraphicsItem);
             }

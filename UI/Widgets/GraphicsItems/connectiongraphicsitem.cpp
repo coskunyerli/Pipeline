@@ -1,6 +1,8 @@
 #include "connectiongraphicsitem.h"
 #include <QLineF>
 #include <QPen>
+#include <QDebug>
+#include <QGraphicsSceneMouseEvent>
 namespace Pipeline
 {
     namespace UI

@@ -11,6 +11,7 @@ namespace Pipeline
             public:
                 NodeGraphView(QWidget * parent = nullptr);
                 void setModel(QAbstractItemModel *model);
+
             private:
                 void onCustomContextMenuRequested(const QPoint &pos);
                 void initSignalsAndSlots();

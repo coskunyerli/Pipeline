@@ -16,6 +16,9 @@ add_library(NodeGraph
             Widgets/GraphicsItems/connectiongraphicsitem.cpp
             Widgets/GraphicsItems/portgraphicsitem.h
             Widgets/GraphicsItems/portgraphicsitem.cpp
+            Widgets/nodegraphicsscene.h
+            Widgets/nodegraphicsscene.cpp
+
 )
 
 target_link_libraries(NodeGraph PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets)
