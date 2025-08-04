@@ -4,6 +4,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QMimeData>
 #include <QDebug>
+#include "portgraphicsitem.h"
+#include "Models/nodegraphtreemodel.h"
 
 namespace Pipeline
 {
@@ -18,6 +20,18 @@ namespace Pipeline
             this->setPen(QPen(QColor("red")));
             setCursor(Qt::PointingHandCursor);
             setAcceptDrops(true);
+
+            for (int i = 0; i < index.data(Roles::OutPortCount).toInt(); i++)
+            {
+                auto *portItem = new PortGraphicsItem(i, this);
+                portItem->moveBy(80, i * 40);
+            }
+
+            for (int i = 0; i < index.data(Roles::InPortCount).toInt(); i++)
+            {
+                auto *portItem = new PortGraphicsItem(i, this);
+                portItem->moveBy(0, i * 40);
+            }
         }
 
         void BaseNodeGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -52,6 +66,7 @@ namespace Pipeline
         void BaseNodeGraphicsItem::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
         {
             this->setPen(QPen(QColor("red")));
+            event->ignore();
         }
 
         void BaseNodeGraphicsItem::dragEnterEvent(QGraphicsSceneDragDropEvent *event)

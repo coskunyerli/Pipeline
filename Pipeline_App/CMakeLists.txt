@@ -30,11 +30,12 @@ else()
         add_executable(Pipeline
             ${PROJECT_SOURCES}
 
+
         )
     endif()
 endif()
 
-target_link_libraries(Pipeline PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Actor NodeGraph)
+target_link_libraries(Pipeline PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Actor NodeGraph NodeCore)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -60,3 +61,8 @@ install(TARGETS Pipeline
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(Pipeline)
 endif()
+
+add_custom_command(TARGET Pipeline POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:NodeCore>
+    $<TARGET_FILE_DIR:Pipeline>)

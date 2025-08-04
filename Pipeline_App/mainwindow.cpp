@@ -3,7 +3,8 @@
 #include <QVBoxLayout>
 #include <iostream>
 #include <Widgets/nodegraphview.h>
-
+#include <Models/nodegraphtreemodel.h>
+#include <Models/nodegraphmodel.h>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_actor(nullptr)
@@ -14,22 +15,27 @@ MainWindow::MainWindow(QWidget *parent)
     // Buna bir tane Graph editor yazılmalı
     // Her module için bir behaviour override yapılabilir
     //
+    resize(600, 600);
     auto *mainWidget = new QWidget(this);
     auto *mainLayout = new QVBoxLayout(mainWidget);
     auto *pushButton = new QPushButton("Start", mainWidget);
     mainLayout->addWidget(pushButton);
     Pipeline::UI::NodeGraphView *nodeGraph = new Pipeline::UI::NodeGraphView(mainWidget);
     mainLayout->addWidget(nodeGraph);
-    resize(600, 600);
+    auto *scene = nodeGraph->graphScene();
+    Pipeline::UI::NodeGraphTreeModel* nodeGraphModel = new Pipeline::UI::NodeGraphTreeModel(this);
+    Pipeline::UI::NodeGraphModel* nodeGraphViewModel = new Pipeline::UI::NodeGraphModel(this);
+    nodeGraphViewModel->setSourceModel(nodeGraphModel);
+    scene->setModel(nodeGraphViewModel);
     auto threadPool = new QThreadPool(this);
-    threadPool->setMaxThreadCount(1);
-    m_actor = new Pipeline::Actor(threadPool, this);
-    m_actor->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    threadPool->setMaxThreadCount(4);
+    m_actor = new Pipeline::Thread::Actor(threadPool, this);
+    m_actor->setBehaviour(Pipeline::Thread::Behaviour([](const Pipeline::Thread::BehaviourContext & context)
     {
         size_t total = 0;
         std::cout << "root actor started " << total << std::endl;
 
-        for (size_t i = 0; i < 1000; i++)
+        for (size_t i = 0; i < 100000; i++)
         {
             total += i;
         }
@@ -37,13 +43,13 @@ MainWindow::MainWindow(QWidget *parent)
         std::cout << "root actor finished " << total << std::endl;
         return QVariant(total);
     }));
-    auto *childActor = new Pipeline::Actor(threadPool, this);
-    childActor->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    auto *childActor = new Pipeline::Thread::Actor(threadPool, this);
+    childActor->setBehaviour(Pipeline::Thread::Behaviour([](const Pipeline::Thread::BehaviourContext & context)
     {
         size_t total = context.m_variants[0].toLongLong();
         std::cout << "child1 actor started " << total << std::endl;
 
-        for (size_t i = 0; i < 1000; i++)
+        for (size_t i = 0; i < 100000; i++)
         {
             total += i;
         }
@@ -51,13 +57,13 @@ MainWindow::MainWindow(QWidget *parent)
         std::cout << "child1 actor finished " << total << std::endl;
         return QVariant(total);
     }));
-    auto *childActor2 = new Pipeline::Actor(threadPool, this);
-    childActor2->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    auto *childActor2 = new Pipeline::Thread::Actor(threadPool, this);
+    childActor2->setBehaviour(Pipeline::Thread::Behaviour([](const Pipeline::Thread::BehaviourContext & context)
     {
         size_t total = context.m_variants[0].toLongLong();
         std::cout << "child2 actor started " << total << std::endl;
 
-        for (size_t i = 0; i < 1000; i++)
+        for (size_t i = 0; i < 100000; i++)
         {
             total += i;
         }
@@ -65,13 +71,13 @@ MainWindow::MainWindow(QWidget *parent)
         std::cout << "child2 actor finished " << total << std::endl;
         return QVariant(total);
     }));
-    auto *childActor3 = new Pipeline::Actor(threadPool, this);
-    childActor3->setBehaviour(Pipeline::Behaviour([](const Pipeline::BehaviourContext & context)
+    auto *childActor3 = new Pipeline::Thread::Actor(threadPool, this);
+    childActor3->setBehaviour(Pipeline::Thread::Behaviour([](const Pipeline::Thread::BehaviourContext & context)
     {
         size_t total = context.m_variants[0].toLongLong() + context.m_variants[1].toLongLong();
         std::cout << "child3 actor started " << total << std::endl;
 
-        for (size_t i = 0; i < 1000; i++)
+        for (size_t i = 0; i < 100000; i++)
         {
             total += i;
         }

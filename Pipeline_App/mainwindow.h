@@ -12,6 +12,6 @@ class MainWindow : public QMainWindow
         ~MainWindow();
         void start();
     private:
-        Pipeline::Actor* m_actor;
+        Pipeline::Thread::Actor* m_actor;
 };
 #endif // MAINWINDOW_H

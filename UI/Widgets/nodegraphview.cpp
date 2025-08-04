@@ -1,9 +1,6 @@
 #include "nodegraphview.h"
-#include "nodegraphicsscene.h"
 #include <QMenu>
 #include <QGraphicsScene>
-#include "GraphicsItems/basenodegraphicsitem.h"
-#include "GraphicsItems/portgraphicsitem.h"
 namespace Pipeline
 {
     namespace UI
@@ -18,24 +15,34 @@ namespace Pipeline
             initSignalsAndSlots();
         }
 
-        void NodeGraphView::setModel(QAbstractItemModel *model)
+        NodeGraphicsScene* NodeGraphView::graphScene() const
         {
-            // TODOJ burada connection işlerini yap UI işlerini yap
+            return qobject_cast<NodeGraphicsScene*>(scene());
         }
 
         void NodeGraphView::onCustomContextMenuRequested(const QPoint &pos)
         {
+            auto *graphScene = this->graphScene();
+
+            if (!graphScene || !graphScene->model() || !graphScene->model()->graphModel())
+            {
+                return;
+            }
+
+            auto *graphModel = graphScene->model()->graphModel();
             QMenu menu;
             auto *addAction = menu.addAction("Add Item");
             auto *action = menu.exec(mapToGlobal(pos));
 
             if (action == addAction)
             {
-                auto *nodeGraphicsItem = new BaseNodeGraphicsItem(QModelIndex());
-                nodeGraphicsItem->setPos(mapToScene(pos));
-                auto *portItem = new PortGraphicsItem(pos.x(), nodeGraphicsItem);
-                portItem->moveBy(80, 0);
-                this->scene()->addItem(nodeGraphicsItem);
+                auto scenePos = mapToScene(pos);
+                auto *node = new MNode();
+                auto *port = new MPort(node);
+                node->addPort(port, false);
+                node->setX(scenePos.x());
+                node->setY(scenePos.y());
+                graphModel->addNode(node);
             }
         }
 

@@ -1,21 +1,19 @@
 #pragma once
 #include <QAbstractProxyModel>
 #include "nodegraphtreemodel.h"
+
 namespace Pipeline
 {
     namespace UI
     {
-        // This is model for holding nodes and connection items to put graphics view
-        class NodeGraphModel : public QAbstractProxyModel
+        class ConnectionGraphModel : public QAbstractProxyModel
         {
                 Q_OBJECT
-                Q_PROPERTY(QModelIndex flowIndex READ getFlowIndex WRITE setFlowIndex NOTIFY flowIndexChanged)
-
             public:
-                explicit NodeGraphModel(QObject *parent = nullptr);
-                QModelIndex index(int row, int column,
-                                  const QModelIndex &parent = QModelIndex()) const;
-                QModelIndex parent(const QModelIndex &child) const;
+                explicit ConnectionGraphModel(QObject *parent = nullptr);
+                QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+                QModelIndex parent(const QModelIndex &child) const override;
+
                 QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
                 QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
                 int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -27,13 +25,12 @@ namespace Pipeline
                 {
                     return m_flowIndex;
                 }
-                Q_INVOKABLE bool addConnection(const QModelIndex inPortIndex, const QModelIndex outPortIndex);
-            signals:
-                void flowIndexChanged();
+
             private:
                 void onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int>& roles);
                 //void onRowsAboutToBeInserted(const QModelIndex &parent, int first, int last);
                 void onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
+                void onRowsAboutToBeInserted(const QModelIndex &parent, int first, int last);
                 void onRowsInserted(const QModelIndex &parent, int first, int last);
                 void onRowsRemoved(const QModelIndex &parent, int first, int last);
                 void onModelAboutToBeReset();

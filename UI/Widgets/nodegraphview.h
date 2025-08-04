@@ -1,6 +1,6 @@
 #pragma once
 #include <QGraphicsView>
-#include <QAbstractItemModel>
+#include "nodegraphicsscene.h"
 namespace Pipeline
 {
     namespace UI
@@ -10,13 +10,11 @@ namespace Pipeline
                 Q_OBJECT
             public:
                 NodeGraphView(QWidget * parent = nullptr);
-                void setModel(QAbstractItemModel *model);
+                NodeGraphicsScene* graphScene() const;
 
             private:
                 void onCustomContextMenuRequested(const QPoint &pos);
                 void initSignalsAndSlots();
-            private:
-                QAbstractItemModel* m_model;
         };
 
     }

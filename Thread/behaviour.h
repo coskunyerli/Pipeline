@@ -2,20 +2,25 @@
 #include <QVariant>
 namespace Pipeline
 {
-
-    class BehaviourContext
+    namespace Thread
     {
-        public:
-            QVariantList m_variants;
-    };
+        class BehaviourContext
+        {
+            public:
+                BehaviourContext();
+            public:
+                QVariantList m_variants;
+                bool m_hasDependentActor;
+        };
 
-    class Behaviour
-    {
-        public:
-            Behaviour();
-            Behaviour(std::function<QVariant(BehaviourContext)> func);
-            virtual QVariant run(const BehaviourContext& context);
-        private:
-            std::function<QVariant(BehaviourContext)> m_func;
-    };
+        class Behaviour
+        {
+            public:
+                Behaviour();
+                Behaviour(std::function<QVariant(BehaviourContext)> func);
+                virtual QVariant run(const BehaviourContext& context);
+            private:
+                std::function<QVariant(BehaviourContext)> m_func;
+        };
+    }
 }

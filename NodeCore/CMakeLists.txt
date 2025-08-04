@@ -10,7 +10,11 @@ add_library(NodeCore
     port.cpp
     connection.h
     connection.cpp
+    flownode.h
+    flownode.cpp
+    pipeline_core_dll.h
 )
 
 target_link_libraries(NodeCore PRIVATE Qt${QT_VERSION_MAJOR}::Core)
+#target_compile_definitions(NodeCore PRIVATE PIPELINE_CORE_EXPORTS)
 target_include_directories(NodeCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
