@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>GraphicsView.qml</file>
+        <file>NodeConnection.qml</file>
+        <file>Node.qml</file>
+        <file>Port.qml</file>
+    </qresource>
+</RCC>
