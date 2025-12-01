@@ -1,7 +1,9 @@
 #include "graphmodelservice.h"
-#include "pythonactornode.h"
+#include "pythonfileactornode.h"
+#include "pythonscriptactornode.h"
 #include "Models/constants.h"
 #include <QFile>
+
 namespace Pipeline
 {
     namespace Runtime
@@ -13,13 +15,7 @@ namespace Pipeline
                 return false;
             }
 
-            QFile file("C:\\Users\\yerli\\PycharmProjects\\opengl\\cppTest.py");
-
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-                return false;
-
-            QString script = file.readAll();
-            auto *node = new PythonActorNode(script);
+            auto *node = new PythonFileActorNode();
             auto *outPort = new UI::MPort(node);
             auto *inPort = new UI::MPort(node);
             //auto *inPort2 = new UI::MPort(node);
@@ -77,7 +73,8 @@ namespace Pipeline
 
             if (m_model)
             {
-                m_model->registerNodeType<PythonActorNode>();
+                m_model->registerNodeType<PythonScriptActorNode>();
+                m_model->registerNodeType<PythonFileActorNode>();
                 connect(m_model, &QAbstractItemModel::rowsInserted, this, &GraphModelService::onRowsInserted);
                 // connect(sourceModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, &ConnectionGraphViewModel::onRowsAboutToBeRemoved);
                 // connect(sourceModel, &QAbstractItemModel::rowsAboutToBeInserted, this, &ConnectionGraphViewModel::onRowsAboutToBeInserted);

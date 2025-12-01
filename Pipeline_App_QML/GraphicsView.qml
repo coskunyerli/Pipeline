@@ -245,7 +245,7 @@ Rectangle
             container.move(graphicsViewMouseArea.pressedPoint.x - scenePos.x, graphicsViewMouseArea.pressedPoint.y - scenePos.y)
             graphicsViewMouseArea.pressedPoint = container.mapToScene(mouse.x, mouse.y);
         }
-        onWheel:
+        onWheel:(wheel) =>
         {
             let sign = Math.abs(wheel.angleDelta.y) / wheel.angleDelta.y
             if(wheel.modifiers & Qt.ControlModifier)

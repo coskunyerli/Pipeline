@@ -7,7 +7,8 @@ namespace Pipeline
     {
         enum NodeRoles
         {
-            PythonFileName = UI::Roles::PortConnectionIndexEnd + 100
+            PythonFileName = UI::Roles::PortConnectionIndexEnd + 100,
+            PythonScript
         };
     }
 }

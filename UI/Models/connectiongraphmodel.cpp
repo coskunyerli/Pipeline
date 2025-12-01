@@ -1,6 +1,7 @@
 #include "connectiongraphmodel.h"
 #include "constants.h"
 #include <QSet>
+#include <QPoint>
 namespace
 {
     int findStartConnectionIndexPort(const QModelIndex &sourcePortIndex)

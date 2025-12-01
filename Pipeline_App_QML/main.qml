@@ -1,9 +1,10 @@
 import QtQuick 2.12
+import QtQml 2.15 as QQML
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.12
 import Pipeline.Models 1.0 as PM
 import QtQml.Models 2.12 as QM
-import QtQuick.Controls 1.4
+import QtQuick.Controls  2.15
 import Pipeline.Services 1.0 as PS
 import Pipeline.Managers 1.0 as PMan
 
@@ -12,6 +13,17 @@ Window {
     height: 800
     visible: true
     title: qsTr("Hello World")
+
+    Loader {
+        id: dialogLoader
+        active: false
+        onLoaded: {
+                    // Yüklenen pencere kapandığında Loader'ı sıfırla
+                    item.dialogClosed.connect(() => {
+                        dialogLoader.active = false
+                    })
+                }
+    }
 
     PS.GraphModelService
     {
@@ -68,8 +80,12 @@ Window {
     {
         id:nodeSelectionModel
         model:nodeGraphViewModel
+        // onSelectedIndexesChanged:
+        // {
+        //     console.log(selectedIndexes,currentIndex)
+        // }
     }
-    
+
 
 
     ColumnLayout
@@ -114,11 +130,25 @@ Window {
                             Node
                             {
                                 z:1
+                                isSelected: nodeSelectionModel.currentIndex === nodeGraphViewModel.index(index,0)
                                 nodeModel: model
                                 id:node
-                                onPortDropped:
+                                onPortDropped: (portInIndex, portOutIndex) =>
                                 {
                                     nodeGraphTreeModel.addConnection(portInIndex, portOutIndex)
+                                }
+                                onPressed:
+                                {
+                                    nodeSelectionModel.setCurrentIndex(nodeGraphViewModel.index(index,0), QM.ItemSelectionModel.SelectCurrent)
+                                    //propertyEditor.node = model
+                                }
+                                onDoubleClicked:
+                                {
+                                    if (!dialogLoader.active)
+                                    {
+                                        dialogLoader.source = "NodeDialog.qml"
+                                        dialogLoader.active = true
+                                    }
                                 }
                             }
                         }
@@ -145,6 +175,7 @@ Window {
 
 
                     }
+
                 MouseArea {
                     id: mouseArea
                     property point pos
@@ -152,8 +183,10 @@ Window {
                     acceptedButtons: Qt.RightButton
                     onClicked: (mouse) => {
                         if (mouse.button === Qt.RightButton)
-                            contextMenu.popup();
-                            pos = Qt.point(mouse.x,mouse.y);
+                            {
+                               contextMenu.popup();
+                               pos = Qt.point(mouse.x,mouse.y);
+                            }
                     }
                     onPressAndHold: (mouse) => {
                         if (mouse.source === Qt.MouseEventNotSynthesized)
@@ -169,23 +202,22 @@ Window {
                             {
                                 addNode(graphicsView.mapToScene(mouseArea.pos.x,mouseArea.pos.y));
                             }
+
+                        }
+                        MenuItem
+                        {
+                            text: "Add Node2"
+                            onTriggered:
+                            {
+                                nodeUIManager.nodeSize = Qt.size(300,50)
+                            }
+
                         }
                     }
                 }
-            }
-            Rectangle
-            {
-                Layout.preferredWidth: 200
-                Layout.fillHeight: true
-                color:"#202020"
             }
         }
 
 
     }
-
-
-
-
-
 }

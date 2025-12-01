@@ -3,6 +3,7 @@
 #include <QQmlEngine>
 #include <QJSEngine>
 #include "Models/nodegraphtreemodel.h"
+#include <QPointF>
 
 namespace Pipeline
 {

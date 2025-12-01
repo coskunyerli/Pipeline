@@ -1,12 +1,15 @@
 import QtQuick 2.12
-import QtGraphicalEffects 1.12
 import Pipeline.Models 1.0 as PM
 Item
 {
-
+    property bool isSelected:false
     property var nodeModel
     readonly property var itemModel : nodeModel ? nodeModel.dataIndex.model : nullptr
     signal portDropped(var portInIndex, var portOutIndex);
+    signal pressed(var event);
+    signal released(var event);
+    signal clicked(var event);
+    signal doubleClicked(var event);
     id: node
     x:nodeModel.posX
     y:nodeModel.posY
@@ -33,13 +36,6 @@ Item
         Drag.mimeData: {
             "text/plain": "Copied text"
         }
-        MouseArea
-        {
-            onPositionChanged:
-            {
-                console.log(mouse.x,mouse.y)
-            }
-        }
     }
 
     Rectangle
@@ -48,7 +44,7 @@ Item
         anchors.fill: parent
         radius: 6
         color: "#404040"
-        border.color: "#505050"
+        border.color: isSelected ? "#808080" : "#505050"
         border.width: 1
 
         // Başlık (sürüklenebilir alan)
@@ -66,11 +62,12 @@ Item
                 id: nodeMouseArea
                 property point clickedPos
                 anchors.fill: parent
-                onPressed:
+                onPressed:(mouse) =>
                 {
                     nodeMouseArea.clickedPos = nodeMouseArea.mapToGlobal(mouse.x,mouse.y)
+                    node.pressed(mouse);
                 }
-                onPositionChanged:
+                onPositionChanged:(mouse) =>
                 {
                     let globalPos = nodeMouseArea.mapToGlobal(mouse.x,mouse.y)
                     let diff = Qt.point(globalPos.x - nodeMouseArea.clickedPos.x, globalPos.y - nodeMouseArea.clickedPos.y)
@@ -79,9 +76,19 @@ Item
                     nodeMouseArea.clickedPos = globalPos
                 }
 
-                onReleased:
+                onReleased:(mouse) =>
                 {
                     nodeMouseArea.clickedPos = Qt.point(-1,-1)
+                    node.released(mouse)
+                }
+
+                onClicked: (mouse) =>
+                {
+                    node.clicked(mouse)
+                }
+                onDoubleClicked: (mouse) =>
+                {
+                    node.doubleClicked(mouse);
                 }
             }
         }
@@ -114,7 +121,7 @@ Item
                     {
                         id:portDropArea
                         anchors.fill: parent
-                        onEntered:
+                        onEntered:(drag) =>
                         {
                             let nodePos = inPort.mapToItem(node, 0, inPort.height / 2)
                             let endPos = node.mapToItem(node.parent, 0, nodePos.y)

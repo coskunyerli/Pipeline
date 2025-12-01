@@ -5,5 +5,11 @@
         <file>NodeConnection.qml</file>
         <file>Node.qml</file>
         <file>Port.qml</file>
+        <file>PropertyEditor.qml</file>
+        <file>Section.qml</file>
+        <file>EditorRowText.qml</file>
+        <file>EditorRowCheck.qml</file>
+        <file>EditorRowCombo.qml</file>
+        <file>NodeDialog.qml</file>
     </qresource>
 </RCC>

@@ -61,7 +61,8 @@ namespace Pipeline
                         {Roles::HasConnection, "hasConnection"},
                     };
                 }
-                bool setData(const QVariant &value, int role);
+                virtual bool setData(const QVariant &value, int role);
+                virtual QVariant data(int role) const;
 
         };
 

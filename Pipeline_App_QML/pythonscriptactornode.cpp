@@ -2,7 +2,7 @@
 #include <Python.h>
 
 
-#include "pythonactornode.h"
+#include "pythonscriptactornode.h"
 #include <QDebug>
 #include "constants.h"
 
@@ -10,23 +10,22 @@ namespace Pipeline
 {
     namespace Runtime
     {
-        PythonActorNode::PythonActorNode()
+        PythonScriptActorNode::PythonScriptActorNode()
             : ActorNode()
         {
         }
 
-        void PythonActorNode::setScript(const QString &script)
+        void PythonScriptActorNode::setScript(const QString &script)
         {
             m_pythonScript = script;
         }
 
-        QVariant PythonActorNode::behaviour(const Thread::BehaviourContext &behaviour)
+        QVariant PythonScriptActorNode::behaviour(const Thread::BehaviourContext &behaviour)
         {
             // 1. Python yorumlayıcıyı başlat (ilk kez başlatılmamışsa)
             if (!Py_IsInitialized())
                 Py_Initialize();
 
-            qDebug() << 24;
             QVariant result;
             // 2. Python scripti QString'den al
             QByteArray scriptUtf8 = m_pythonScript.toUtf8();
@@ -36,11 +35,9 @@ namespace Pipeline
             PyDict_SetItemString(pGlobalDict, "__builtins__", PyEval_GetBuiltins());
             // 4. Scripti çalıştır (fonksiyon tanımı vs)
             PyObject* execResult = PyRun_String(scriptCStr, Py_file_input, pGlobalDict, pGlobalDict);
-            qDebug() << 34;
 
             if (execResult == nullptr)
             {
-                qDebug() << 37;
                 PyErr_Print();
                 Py_DECREF(pGlobalDict);
                 return {};
@@ -51,7 +48,6 @@ namespace Pipeline
 
             if (pFunc && PyCallable_Check(pFunc))
             {
-                qDebug() << 47;
                 // Basit bir örnek context: Python'a dict olarak gönderilecek
                 PyObject* pyContext = PyDict_New();
                 PyDict_SetItemString(pyContext, "input", PyUnicode_FromString("Hello from C++"));
@@ -102,16 +98,16 @@ namespace Pipeline
             return result;
         }
 
-        QHash<int, QByteArray> PythonActorNode::roleNames() const
+        QHash<int, QByteArray> PythonScriptActorNode::roleNames() const
         {
             auto roles = ActorNode::roleNames();
-            roles[NodeRoles::PythonFileName] = "pythonFilename";
+            roles[NodeRoles::PythonScript] = "pythonScript";
             return roles;
         }
 
-        bool PythonActorNode::setData(const QVariant &value, int role)
+        bool PythonScriptActorNode::setData(const QVariant &value, int role)
         {
-            if (role == NodeRoles::PythonFileName)
+            if (role == NodeRoles::PythonScript)
             {
                 this->setScript(value.toString());
                 return true;
@@ -122,12 +118,24 @@ namespace Pipeline
             }
         }
 
-        PythonActorNode::PythonActorNode(Thread::Actor *actor)
+        QVariant PythonScriptActorNode::data(int role) const
+        {
+            if (role == NodeRoles::PythonScript)
+            {
+                return m_pythonScript;
+            }
+            else
+            {
+                return ActorNode::data(role);
+            }
+        }
+
+        PythonScriptActorNode::PythonScriptActorNode(Thread::Actor *actor)
             : ActorNode(actor)
         {
         }
 
-        PythonActorNode::PythonActorNode(QString script)
+        PythonScriptActorNode::PythonScriptActorNode(QString script)
             : ActorNode()
             , m_pythonScript(script)
         {

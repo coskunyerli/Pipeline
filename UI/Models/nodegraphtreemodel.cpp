@@ -165,194 +165,149 @@ namespace Pipeline
                     break;
             }
 
-            switch (role)
+            if (index.data(Roles::Type) == DataType::Node)
             {
-                case Qt::DisplayRole:
-                case Roles::Name:
-                case Roles::PosX:
-                case Roles::PosY:
-                case Roles::InConnectionCount:
-                case Roles::OutConnectionCount:
-                case Roles::InPortCount:
-                case Roles::OutPortCount:
-                    {
-                        MNode* node = getData<MNode>(index);
-
-                        if (index.data(Roles::Type) == DataType::Node && node)
+                MNode* node = getData<MNode>(index);
+                return node->data(role);
+            }
+            else
+            {
+                switch (role)
+                {
+                    case Roles::OutPortIndex:
+                    case Roles::InPortIndex:
+                    case Roles::InRelatedNode:
+                    case Roles::InRelatedPort:
+                    case Roles::OutRelatedNode:
+                    case Roles::OutRelatedPort:
                         {
-                            switch (role)
+                            // For Connection Role names
+                            auto* connection = getData<MConnection>(index);
+
+                            if (index.data(Roles::Type) == DataType::Connection && connection)
                             {
-                                case Qt::DisplayRole:
-                                case Roles::Name:
-                                    return QString::fromStdString(node->getName());
-
-                                case Roles::InConnectionCount:
-                                    {
-                                        return node->findInConnectionCount();
-                                    }
-
-                                case Roles::OutConnectionCount:
-                                    {
-                                        return node->findOutConnectionCount();
-                                    }
-
-                                case Roles::InPortCount:
-                                    {
-                                        return node->getInPortCount();
-                                    }
-
-                                case Roles::OutPortCount:
-                                    {
-                                        return node->getOutPortCount();
-                                    }
-
-                                case Roles::PosX:
-                                    {
-                                        return node->getX();
-                                    }
-
-                                case Roles::PosY:
-                                    {
-                                        return node->getY();
-                                    }
-                            }
-                        }
-                    }
-                    break;
-
-                case Roles::OutPortIndex:
-                case Roles::InPortIndex:
-                case Roles::InRelatedNode:
-                case Roles::InRelatedPort:
-                case Roles::OutRelatedNode:
-                case Roles::OutRelatedPort:
-                    {
-                        // For Connection Role names
-                        auto* connection = getData<MConnection>(index);
-
-                        if (index.data(Roles::Type) == DataType::Connection && connection)
-                        {
-                            switch (role)
-                            {
-                                case Roles::OutPortIndex:
-                                    {
-                                        auto *outPort = connection->getOutPort();
-
-                                        if (outPort)
+                                switch (role)
+                                {
+                                    case Roles::OutPortIndex:
                                         {
-                                            return index.parent();
-                                        }
+                                            auto *outPort = connection->getOutPort();
 
-                                        return QModelIndex();
-                                    }
-
-                                case Roles::InPortIndex:
-                                    {
-                                        Core::Port *inPort = connection->getInPort();
-
-                                        if (inPort && inPort->getOwnerNode())
-                                        {
-                                            bool has;
-                                            size_t portIndex = indexOfPort(inPort->getOwnerNode(), inPort, true, has);
-
-                                            if (has)
+                                            if (outPort)
                                             {
-                                                return createIndex(static_cast<int>(portIndex), 0, dynamic_cast<MPort*>(inPort));
+                                                return index.parent();
                                             }
+
+                                            return QModelIndex();
                                         }
 
-                                        return QModelIndex();
-                                    }
-
-                                case Roles::InRelatedPort:
-                                    {
-                                        if (auto *inPort = connection->getInPort())
+                                    case Roles::InPortIndex:
                                         {
-                                            if (MNode *ownerNode = dynamic_cast<MNode*>(inPort->getOwnerNode()))
-                                            {
-                                                for (int p = 0; p < ownerNode->getInPortCount(); p++)
-                                                {
-                                                    if (inPort == ownerNode->getInPort(p))
-                                                    {
-                                                        return createIndex(static_cast<int>(p), 0, inPort);
-                                                    }
-                                                }
-                                            }
-                                        }
+                                            Core::Port *inPort = connection->getInPort();
 
-                                        return QModelIndex();
-                                    }
-
-                                case Roles::InRelatedNode:
-                                    {
-                                        if (auto *inPort = connection->getInPort())
-                                        {
-                                            if (MNode *ownerNode = dynamic_cast<MNode*>(inPort->getOwnerNode()))
+                                            if (inPort && inPort->getOwnerNode())
                                             {
                                                 bool has;
-                                                size_t nodeIndex = ownerNode->parent()->indexOf(ownerNode, has);
+                                                size_t portIndex = indexOfPort(inPort->getOwnerNode(), inPort, true, has);
 
                                                 if (has)
                                                 {
-                                                    return createIndex(static_cast<int>(nodeIndex), 0, ownerNode);
+                                                    return createIndex(static_cast<int>(portIndex), 0, dynamic_cast<MPort*>(inPort));
                                                 }
                                             }
+
+                                            return QModelIndex();
                                         }
 
-                                        return QModelIndex();
-                                    }
+                                    case Roles::InRelatedPort:
+                                        {
+                                            if (auto *inPort = connection->getInPort())
+                                            {
+                                                if (MNode *ownerNode = dynamic_cast<MNode*>(inPort->getOwnerNode()))
+                                                {
+                                                    for (int p = 0; p < ownerNode->getInPortCount(); p++)
+                                                    {
+                                                        if (inPort == ownerNode->getInPort(p))
+                                                        {
+                                                            return createIndex(static_cast<int>(p), 0, inPort);
+                                                        }
+                                                    }
+                                                }
+                                            }
 
-                                case Roles::OutRelatedNode:
-                                    {
-                                        return index.parent().parent().siblingAtColumn(ColumnNames::NodeColumn);
-                                    }
+                                            return QModelIndex();
+                                        }
 
-                                case Roles::OutRelatedPort:
-                                    {
-                                        return index.parent();
-                                    }
+                                    case Roles::InRelatedNode:
+                                        {
+                                            if (auto *inPort = connection->getInPort())
+                                            {
+                                                if (MNode *ownerNode = dynamic_cast<MNode*>(inPort->getOwnerNode()))
+                                                {
+                                                    bool has;
+                                                    size_t nodeIndex = ownerNode->parent()->indexOf(ownerNode, has);
+
+                                                    if (has)
+                                                    {
+                                                        return createIndex(static_cast<int>(nodeIndex), 0, ownerNode);
+                                                    }
+                                                }
+                                            }
+
+                                            return QModelIndex();
+                                        }
+
+                                    case Roles::OutRelatedNode:
+                                        {
+                                            return index.parent().parent().siblingAtColumn(ColumnNames::NodeColumn);
+                                        }
+
+                                    case Roles::OutRelatedPort:
+                                        {
+                                            return index.parent();
+                                        }
+                                }
                             }
+
+                            break;
                         }
 
-                        break;
-                    }
-
-                case Roles::RelatedNode:
-                case Roles::ConnectionCount:
-                case Roles::PortIsIn:
-                case Roles::HasConnection:
-                    {
-                        // for port role names
-                        auto* port = getData<MPort>(index);
-
-                        if (index.data(Roles::Type) == DataType::Port && port)
+                    case Roles::RelatedNode:
+                    case Roles::ConnectionCount:
+                    case Roles::PortIsIn:
+                    case Roles::HasConnection:
                         {
-                            switch (role)
+                            // for port role names
+                            auto* port = getData<MPort>(index);
+
+                            if (index.data(Roles::Type) == DataType::Port && port)
                             {
-                                case Roles::RelatedNode:
-                                    {
-                                        return index.parent().siblingAtColumn(ColumnNames::NodeColumn);
-                                    }
+                                switch (role)
+                                {
+                                    case Roles::RelatedNode:
+                                        {
+                                            return index.parent().siblingAtColumn(ColumnNames::NodeColumn);
+                                        }
 
-                                case Roles::ConnectionCount:
-                                    {
-                                        return port->getConnectionCount();
-                                    }
+                                    case Roles::ConnectionCount:
+                                        {
+                                            return port->getConnectionCount();
+                                        }
 
-                                case Roles::PortIsIn:
-                                    {
-                                        return index.parent().column() == ColumnNames::InPortColumn ? true : false;
-                                    }
+                                    case Roles::PortIsIn:
+                                        {
+                                            return index.parent().column() == ColumnNames::InPortColumn ? true : false;
+                                        }
 
-                                case Roles::HasConnection:
-                                    {
-                                        return port->getConnectionCount() > 0;
-                                    }
+                                    case Roles::HasConnection:
+                                        {
+                                            return port->getConnectionCount() > 0;
+                                        }
+                                }
                             }
-                        }
 
-                        break;
-                    }
+                            break;
+                        }
+                }
             }
 
             return {};
@@ -728,6 +683,48 @@ namespace Pipeline
             }
 
             return false;
+        }
+
+        QVariant MNode::data(int role) const
+        {
+            switch (role)
+            {
+                case Qt::DisplayRole:
+                case Roles::Name:
+                    return QString::fromStdString(this->getName());
+
+                case Roles::InConnectionCount:
+                    {
+                        return this->findInConnectionCount();
+                    }
+
+                case Roles::OutConnectionCount:
+                    {
+                        return this->findOutConnectionCount();
+                    }
+
+                case Roles::InPortCount:
+                    {
+                        return this->getInPortCount();
+                    }
+
+                case Roles::OutPortCount:
+                    {
+                        return this->getOutPortCount();
+                    }
+
+                case Roles::PosX:
+                    {
+                        return this->getX();
+                    }
+
+                case Roles::PosY:
+                    {
+                        return this->getY();
+                    }
+            }
+
+            return {};
         }
 
     }
