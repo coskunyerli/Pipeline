@@ -22,13 +22,22 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         graphmodelservice.h
         graphmodelservice.cpp
-        actornode.h
-        actornode.cpp
-        pythonscriptactornode.h
-        pythonscriptactornode.cpp
+        nodes/actornode.h
+        nodes/actornode.cpp
+        nodes/pythonscriptactornode.h
+        nodes/pythonscriptactornode.cpp
         constants.h
-        pythonfileactornode.h
-        pythonfileactornode.cpp #
+        nodes/pythonfileactornode.h
+        nodes/pythonfileactornode.cpp
+        data/pythonnoderesult.h
+        models/nodetablemodel.h
+        models/nodetablemodel.cpp
+        data/pythonnoderesult.cpp
+        bindings/pythonnoderesult_python.h
+        bindings/pythonrunner.h
+        nodes/pythonprocessactornode.h
+        nodes/pythonprocessactornode.cpp
+        #
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Pipeline_App_QML APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -48,9 +57,9 @@ else()
     endif()
 endif()
 
-target_include_directories(Pipeline_App_QML PRIVATE ${Python3_INCLUDE_DIRS})
+target_include_directories(Pipeline_App_QML PRIVATE ${Python3_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Pipeline_App_QML
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Actor NodeCore NodeGraph ${Python3_LIBRARIES})
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Actor NodeCore NodeGraph ${Python3_LIBRARIES} pybind11::embed)
 
 target_compile_definitions(Pipeline_App_QML PRIVATE -D_hypot=hypot)
 

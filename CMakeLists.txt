@@ -9,6 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_subdirectory(external/pybind11)
 add_subdirectory(Thread)
 add_subdirectory(UI)
 add_subdirectory(Pipeline_App)

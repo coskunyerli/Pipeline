@@ -1,6 +1,6 @@
 #include "flownode.h"
 #include "port.h"
-
+#include <algorithm>
 namespace Pipeline
 {
     namespace Core

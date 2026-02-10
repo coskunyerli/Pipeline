@@ -15,6 +15,9 @@ namespace Pipeline
             {
                 return this->behaviour(context);
             }));
+            Thread::Actor::connect(m_actor, &Thread::Actor::failed, [](QVariant res){
+                qDebug() << res;
+            });
         }
 
         ActorNode::ActorNode(Thread::Actor *actor)

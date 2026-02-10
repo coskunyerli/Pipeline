@@ -1,5 +1,6 @@
 #include "flownode.h"
 #include <vector>
+#include <algorithm>
 namespace Pipeline
 {
     namespace Core

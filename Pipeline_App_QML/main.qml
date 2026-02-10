@@ -16,7 +16,19 @@ Window {
 
     Loader {
         id: dialogLoader
+        property var nodeModel
         active: false
+        sourceComponent: NodeDialog
+        {
+            pythonFilename: dialogLoader.nodeModel.pythonFilename
+            onPythonFilenameChanged :
+            {
+                nodeModel.pythonFilename = pythonFilename
+            }
+
+            model: dialogLoader.nodeModel.tableModel
+        }
+
         onLoaded: {
                     // Yüklenen pencere kapandığında Loader'ı sıfırla
                     item.dialogClosed.connect(() => {
@@ -80,10 +92,6 @@ Window {
     {
         id:nodeSelectionModel
         model:nodeGraphViewModel
-        // onSelectedIndexesChanged:
-        // {
-        //     console.log(selectedIndexes,currentIndex)
-        // }
     }
 
 
@@ -140,13 +148,14 @@ Window {
                                 onPressed:
                                 {
                                     nodeSelectionModel.setCurrentIndex(nodeGraphViewModel.index(index,0), QM.ItemSelectionModel.SelectCurrent)
-                                    //propertyEditor.node = model
                                 }
                                 onDoubleClicked:
                                 {
                                     if (!dialogLoader.active)
                                     {
-                                        dialogLoader.source = "NodeDialog.qml"
+                                        //dialogLoader.pythonFilename = nodeModel.pythonFilename
+                                        //dialogLoader.model = nodeModel.tableModel;
+                                        dialogLoader.nodeModel = nodeModel
                                         dialogLoader.active = true
                                     }
                                 }

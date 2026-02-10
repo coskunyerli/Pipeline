@@ -4,7 +4,7 @@
 
 #include "pythonscriptactornode.h"
 #include <QDebug>
-#include "constants.h"
+#include "../constants.h"
 
 namespace Pipeline
 {
