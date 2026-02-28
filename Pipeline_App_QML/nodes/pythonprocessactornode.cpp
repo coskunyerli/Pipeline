@@ -4,7 +4,8 @@
 #include <QUuid>
 #include <constants.h>
 
-struct Row {
+struct Row
+{
     int id;
     float value;
     QString name;
@@ -16,17 +17,13 @@ namespace Pipeline
     {
         PythonProcessActorNode::PythonProcessActorNode()
             : ActorNode()
-            , m_memory(nullptr)
+            , m_inputDataTable(new NodeTableModel())
+            , m_outputDataTable(new NodeTableModel())
         {
         }
 
         PythonProcessActorNode::~PythonProcessActorNode()
         {
-            if(m_memory)
-            {
-                m_memory->deleteLater();
-            }
-
         }
 
         void PythonProcessActorNode::setFilename(const QString &filename)
@@ -38,51 +35,27 @@ namespace Pipeline
         {
             QVariant result;
             QProcess process;
-
-
             process.start("C:\\Users\\yerli\\AppData\\Local\\Programs\\Python\\Python39\\python.exe", QStringList() << m_filename);
 
-            if (!process.waitForStarted()) {
+            if (!process.waitForStarted())
+            {
                 qDebug() << "Python başlatılamadı";
                 return false;
             }
 
-            QList<Row> rows = {
-                {1, 10.5f, "Apple"},
-                {2, 20.25f, "Banana"},
-                {3, 30.75f, "Cherry"}
-            };
+            auto data = m_inputDataTable->getRoot()->serialize();
 
-            QByteArray buffer;
-            QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-            // Endianness sabitle (çok önemli)
-            stream.setByteOrder(QDataStream::LittleEndian);
-            stream.setFloatingPointPrecision(QDataStream::SinglePrecision); // 🔥 BU ŞART
-
-            // row count
-            stream << static_cast<qint32>(rows.size());
-
-            for (const Row& r : rows) {
-                stream << static_cast<qint32>(r.id);
-                stream << r.value;
-
-                QByteArray strBytes = r.name.toUtf8();
-                stream << static_cast<qint32>(strBytes.size());
-                stream.writeRawData(strBytes.constData(), strBytes.size());
-            }
-
+            QByteArray buffer(
+                reinterpret_cast<const char*>(data.data()),
+                static_cast<int>(data.size())
+                );
 
             process.write(buffer);
-
             process.closeWriteChannel(); // stdin kapatılmazsa Python bekler
             process.waitForFinished();
-
             qDebug() << "Python output:";
             qDebug().noquote() << process.readAllStandardOutput();
             qDebug().noquote() << process.readAllStandardError();
-            delete m_memory;
-            m_memory = nullptr;
             return result;
         }
 
@@ -90,6 +63,7 @@ namespace Pipeline
         {
             auto roles = ActorNode::roleNames();
             roles[NodeRoles::PythonFileName] = "pythonFilename";
+            roles[NodeRoles::TableModel] = "tableModel";
             return roles;
         }
 
@@ -111,6 +85,11 @@ namespace Pipeline
             if (role == NodeRoles::PythonFileName)
             {
                 return m_filename;
+            }
+            else if (role == NodeRoles::TableModel)
+            {
+                QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
+                return v;
             }
             else
             {

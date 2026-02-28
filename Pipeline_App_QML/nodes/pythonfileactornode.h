@@ -23,8 +23,6 @@ namespace Pipeline
                 QString m_filename;
                 NodeTableModel *m_inputDataTable;
                 NodeTableModel *m_outputDataTable;
-                QSharedMemory* m_memory;
-
         };
     }
 }

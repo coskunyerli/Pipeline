@@ -1,5 +1,6 @@
 #pragma once
 #include "actornode.h"
+#include <models/nodetablemodel.h>
 class QSharedMemory;
 namespace Pipeline
 {
@@ -17,7 +18,8 @@ namespace Pipeline
                 virtual QVariant data(int role) const override;
             private:
                 QString m_filename;
-                QSharedMemory *m_memory;
+                NodeTableModel* m_inputDataTable;
+                NodeTableModel* m_outputDataTable;
         };
     }
 }
