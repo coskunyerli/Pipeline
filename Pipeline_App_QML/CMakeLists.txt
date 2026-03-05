@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick QuickControls2) #
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick QuickControls2)
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -33,19 +32,17 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         models/nodetablemodel.h
         models/nodetablemodel.cpp
         data/pythonnoderesult.cpp
-
         nodes/pythonprocessactornode.h
         nodes/pythonprocessactornode.cpp
-        #
     )
 
 
-pybind11_add_module(PythonNodeResult
-    bindings/pythonnoderesult_python.cpp
-    data/pythonnoderesult.h data/pythonnoderesult.cpp
-)
+# pybind11_add_module(PythonNodeResult
+#     bindings/pythonnoderesult_python.cpp
+#     data/pythonnoderesult.h data/pythonnoderesult.cpp
+# )
 
-target_include_directories(PythonNodeResult PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+# target_include_directories(PythonNodeResult PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # Define target properties for Android with Qt 6 as:

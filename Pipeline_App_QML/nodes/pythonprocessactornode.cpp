@@ -54,8 +54,14 @@ namespace Pipeline
             process.closeWriteChannel(); // stdin kapatılmazsa Python bekler
             process.waitForFinished();
             qDebug() << "Python output:";
-            qDebug().noquote() << process.readAllStandardOutput();
-            qDebug().noquote() << process.readAllStandardError();
+            auto output = process.readAllStandardOutput();
+
+            const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
+            size_t size = static_cast<size_t>(output.size());
+
+            auto outputResult = PythonNodeResult::deserialize(outputData,size);
+            m_outputDataTable->setRoot(outputResult);
+            //qDebug().noquote() << process.readAllStandardError();
             return result;
         }
 

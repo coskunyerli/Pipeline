@@ -16,7 +16,7 @@ PYBIND11_MODULE(PythonNodeResult, m) {
         .value("All", PythonNodeResult::ValueType::All)
         .export_values();
 
-    py::class_<PythonNodeResult>(m, "NodeResult")
+    py::class_<PythonNodeResult>(m, "PythonNodeResult")
         .def(py::init<>())
         .def("set_size", &PythonNodeResult::setSize)
         .def_property_readonly("column_count", &PythonNodeResult::getColumnCount)
@@ -53,5 +53,5 @@ PYBIND11_MODULE(PythonNodeResult, m) {
             return node;
         }, py::arg("data"),
         py::return_value_policy::take_ownership,
-        "Deserialize binary bytes into a NodeResult tree");
+        "Deserialize binary bytes into a PythonNodeResult tree");
 }

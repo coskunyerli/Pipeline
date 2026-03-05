@@ -1,5 +1,5 @@
 #include "graphmodelservice.h"
-#include "nodes/pythonprocessactornode.h""
+#include "nodes/pythonprocessactornode.h"
 #include "nodes/pythonscriptactornode.h"
 #include "Models/constants.h"
 #include <QFile>

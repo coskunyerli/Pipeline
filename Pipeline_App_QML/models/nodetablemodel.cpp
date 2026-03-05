@@ -166,6 +166,19 @@ namespace Pipeline
             return false;
         }
 
+        void NodeTableModel::setRoot(PythonNodeResult *root)
+        {
+            if(m_rootResult)
+            {
+                delete m_rootResult;
+                m_rootResult = nullptr;
+            }
+
+            this->beginResetModel();
+            m_rootResult = root;
+            this->endResetModel();
+        }
+
         int NodeTableModel::rows() const
         {
             return this->rowCount();

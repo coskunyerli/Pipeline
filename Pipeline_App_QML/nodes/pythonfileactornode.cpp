@@ -1,4 +1,3 @@
-#include <Python.h>
 #include <QDebug>
 #include <QFile>
 #include <QSharedMemory>
