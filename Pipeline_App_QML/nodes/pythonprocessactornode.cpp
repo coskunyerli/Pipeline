@@ -63,7 +63,8 @@ namespace Pipeline
         {
             auto roles = ActorNode::roleNames();
             roles[NodeRoles::PythonFileName] = "pythonFilename";
-            roles[NodeRoles::TableModel] = "tableModel";
+            roles[NodeRoles::InputTableModel] = "inputTableModel";
+            roles[NodeRoles::OutputTableModel] = "outputTableModel";
             return roles;
         }
 
@@ -86,9 +87,14 @@ namespace Pipeline
             {
                 return m_filename;
             }
-            else if (role == NodeRoles::TableModel)
+            else if (role == NodeRoles::InputTableModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
+                return v;
+            }
+            else if (role == NodeRoles::OutputTableModel)
+            {
+                QVariant v = QVariant::fromValue(static_cast<QObject*>(m_outputDataTable));
                 return v;
             }
             else

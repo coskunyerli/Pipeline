@@ -55,7 +55,7 @@ namespace Pipeline
         {
             auto roles = ActorNode::roleNames();
             roles[NodeRoles::PythonFileName] = "pythonFilename";
-            roles[NodeRoles::TableModel] = "tableModel";
+            roles[NodeRoles::InputTableModel] = "tableModel";
             return roles;
         }
 
@@ -78,7 +78,7 @@ namespace Pipeline
             {
                 return m_filename;
             }
-            else if (role == NodeRoles::TableModel)
+            else if (role == NodeRoles::InputTableModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
                 return v;

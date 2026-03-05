@@ -7,8 +7,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick) #
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick QuickControls2) #
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick QuickControls2)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 set(PROJECT_SOURCES
@@ -68,7 +68,7 @@ endif()
 
 target_include_directories(Pipeline_App_QML PRIVATE ${Python3_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Pipeline_App_QML
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Actor NodeCore NodeGraph ${Python3_LIBRARIES})
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::QuickControls2 Actor NodeCore NodeGraph ${Python3_LIBRARIES})
 
 target_compile_definitions(Pipeline_App_QML PRIVATE -D_hypot=hypot)
 

@@ -26,7 +26,8 @@ Window {
                 nodeModel.pythonFilename = pythonFilename
             }
 
-            model: dialogLoader.nodeModel.tableModel
+            inputModel: dialogLoader.nodeModel.inputTableModel
+            outputModel: dialogLoader.nodeModel.outputTableModel
         }
 
         onLoaded: {
