@@ -7,7 +7,7 @@ import QtQuick.Dialogs
 Window {
     id: detachedDialog
     width: 1100
-    height: 650
+    height: 750
     title: "Python Node Dialog"
     flags: Qt.Dialog | Qt.WindowCloseButtonHint | Qt.WindowTitleHint
     modality: Qt.NonModal
@@ -42,54 +42,14 @@ Window {
             id: tabBar
             Layout.fillWidth: true
 
-            TabButton {
+            PTabButton {
                 id: controlInput
                 text: "Input"
-                height: 24
-
-                background: Rectangle {
-                    radius: 3
-                    color: controlInput.checked
-                           ? inputTable.selectionColor
-                           : controlInput.hovered
-                                ? inputTable.hoverColor
-                                : inputTable.bgLight
-
-                    border.color: inputTable.borderColor
-                }
-
-                contentItem: Text {
-                    text: controlInput.text
-                    color: inputTable.textColor
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.bold: controlInput.checked
-                }
             }
 
-            TabButton {
+            PTabButton {
                 id: controlOutput
                 text: "Output"
-                height: 24
-
-                background: Rectangle {
-                    radius: 3
-                    color: controlOutput.checked
-                           ? inputTable.selectionColor
-                           : controlOutput.hovered
-                                ? inputTable.hoverColor
-                                : inputTable.bgLight
-
-                    border.color: inputTable.borderColor
-                }
-
-                contentItem: Text {
-                    text: controlOutput.text
-                    color: inputTable.textColor
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.bold: controlOutput.checked
-                }
             }
         }
 
@@ -121,42 +81,15 @@ Window {
                         color: inputTable.textColor
                     }
 
-                    Rectangle {
+                    PTextEdit {
+                        id: pythonFilenameTextEdit
                         Layout.fillWidth: true
-                        height: 28
-                        radius: 3
-                        color: inputTable.bgLight
-                        border.color: inputTable.borderColor
-
-                        TextEdit {
-                            id: pythonFilenameTextEdit
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            color: inputTable.textColor
-                            selectByMouse: true
-                        }
                     }
 
-                    Button {
+                    PButton {
                         id: control
+                        Layout.preferredWidth: 90
                         text: "Browse"
-                        height: 28
-
-                        background: Rectangle {
-                            radius: 3
-                            color: control.down ? Qt.darker(inputTable.bgLight, 1.2)
-                                                : control.hovered ? inputTable.hoverColor
-                                                : inputTable.bgLight
-                            border.color: inputTable.borderColor
-                        }
-
-                        contentItem: Text {
-                            text: control.text
-                            color: inputTable.textColor
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            font.pixelSize: 13
-                        }
                         onClicked: fileDialog.open()
                     }
                 }
@@ -172,59 +105,82 @@ Window {
                         color: inputTable.textColor
                     }
 
-                    Rectangle {
+
+
+                    PTextEdit {
                         Layout.preferredWidth: 120
-                        height: 28
-                        radius: 3
-                        color: inputTable.bgLight
-                        border.color: inputTable.borderColor
-
-                        TextEdit {
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            color: inputTable.textColor
-                            text: inputModel.rows
-                            selectByMouse: true
-
-                            onTextChanged: {
-                                let val = Number(text)
-                                if(inputModel.rows !== val)
-                                    inputModel.rows = val
-                            }
+                        text: inputModel.rows
+                        onTextChanged: {
+                            let val = Number(text)
+                            if(inputModel.rows !== val)
+                                inputModel.rows = val
                         }
                     }
+
 
                     Label {
                         text: "Column Count:"
                         color: inputTable.textColor
                     }
 
-                    Rectangle {
+                    PTextEdit {
                         Layout.preferredWidth: 120
-                        height: 28
-                        radius: 3
-                        color: inputTable.bgLight
-                        border.color: inputTable.borderColor
-
-                        TextEdit {
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            color: inputTable.textColor
-                            text: inputModel.columns
-
-                            onTextChanged: {
-                                let val = Number(text)
-                                if(inputModel.columns !== val)
-                                    inputModel.columns = val
-                            }
+                        text: inputModel.columns
+                        onTextChanged: {
+                            let val = Number(text)
+                            if(inputModel.columns !== val)
+                                inputModel.columns = val
                         }
                     }
                 }
 
-                TableGridWidget {
-                    id: inputTable
+                SplitView
+                {
+                    orientation: Qt.Vertical
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    TableGridWidget {
+                        id: inputTable
+                        SplitView.fillWidth: true
+                        SplitView.fillHeight: true
+                    }
+
+                    ColumnLayout
+                    {
+                        SplitView.preferredHeight: 250
+                        SplitView.fillWidth: true
+                        spacing: 0
+
+                        Rectangle
+                        {
+                            color: "#404040"
+
+                            Layout.preferredHeight: 28
+                            Layout.fillWidth: true
+                            Label
+                            {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                verticalAlignment: Text.AlignVCenter
+                                text:"Console Output"
+                            }
+                        }
+
+                        Rectangle
+                        {
+                            height: 1
+                            Layout.fillWidth: true
+                            color: "#656565"
+                        }
+
+
+                        POutputConsole
+                        {
+                            id: outputConsole
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+                        }
+                    }
                 }
             }
 
@@ -241,6 +197,7 @@ Window {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                 }
+
             }
         }
 
@@ -249,7 +206,7 @@ Window {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "#454545"
+            color: "#656565"
         }
 
         RowLayout {
@@ -257,54 +214,26 @@ Window {
             Layout.topMargin: 8
             spacing: 8
 
+            PButton {
+                text: "Run"
+                Layout.preferredWidth: 90
+            }
+
+
             Item {
                 Layout.fillWidth: true
             }
 
-            Button {
-                id: controlCancel
+            PButton {
                 text: "Cancel"
-                height: 28
                 Layout.preferredWidth: 90
-                background: Rectangle {
-                    radius: 3
-                    color: controlCancel.down ? Qt.darker(inputTable.bgLight, 1.2)
-                                        : controlCancel.hovered ? inputTable.hoverColor
-                                        : inputTable.bgLight
-                    border.color: inputTable.borderColor
-                }
-
-                contentItem: Text {
-                    text: controlCancel.text
-                    color: inputTable.textColor
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: 13
-                }
                 onClicked: detachedDialog.close()
             }
 
-            Button {
+            PButton {
                 id: okButton
-                text: "OK"
-                height: 28
                 Layout.preferredWidth: 90
-                highlighted: true
-                background: Rectangle {
-                    radius: 3
-                    color: okButton.down ? Qt.darker(inputTable.bgLight, 1.2)
-                                        : okButton.hovered ? inputTable.hoverColor
-                                        : inputTable.bgLight
-                    border.color: inputTable.borderColor
-                }
-
-                contentItem: Text {
-                    text: okButton.text
-                    color: inputTable.textColor
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: 13
-                }
+                text: "OK"
                 onClicked: detachedDialog.close()
             }
         }

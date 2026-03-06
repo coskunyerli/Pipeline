@@ -12,5 +12,9 @@
         <file>EditorRowCombo.qml</file>
         <file>NodeDialog.qml</file>
         <file>TableGridWidget.qml</file>
+        <file>PButton.qml</file>
+        <file>PTextEdit.qml</file>
+        <file>PTabButton.qml</file>
+        <file>POutputConsole.qml</file>
     </qresource>
 </RCC>

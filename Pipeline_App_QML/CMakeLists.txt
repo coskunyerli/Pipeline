@@ -34,6 +34,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         data/pythonnoderesult.cpp
         nodes/pythonprocessactornode.h
         nodes/pythonprocessactornode.cpp
+
     )
 
 
