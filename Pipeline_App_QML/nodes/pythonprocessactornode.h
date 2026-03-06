@@ -32,7 +32,7 @@ namespace Pipeline
             Q_OBJECT
         public:
             PythonDispatcher(PythonProcessActorNode*node);
-            Q_INVOKABLE void run();
+            Q_INVOKABLE void runStandalone();
         private:
             PythonProcessActorNode* m_pythonNode;
         };

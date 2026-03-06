@@ -222,7 +222,7 @@ Window {
                 Layout.preferredWidth: 90
                 onClicked: (mouse) =>
                 {
-                    actionObject.run()
+                    actionObject.runStandalone()
                 }
             }
 

@@ -5,13 +5,6 @@
 #include <QCoreApplication>
 #include <constants.h>
 
-struct Row
-{
-    int id;
-    float value;
-    QString name;
-};
-
 namespace Pipeline
 {
     namespace Runtime
@@ -144,7 +137,7 @@ namespace Pipeline
         {
         }
 
-        void PythonDispatcher::run()
+        void PythonDispatcher::runStandalone()
         {
             m_pythonNode->runStandalone();
         }
