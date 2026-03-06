@@ -20,9 +20,13 @@ namespace Pipeline
                 virtual void onFinished(const QVariant& result) = 0;
                 virtual void onFailed(const QVariant& result) = 0;
                 void run();
+                void runStandalone();
+                QObject* getDispatcher() const;
+                virtual void setDispatcher(QObject*dispatcher);
             private:
-                Thread::Actor* m_actor;
                 QObject* m_dispatcher;
+                Thread::Actor* m_actor;
+
         };
     }
 }

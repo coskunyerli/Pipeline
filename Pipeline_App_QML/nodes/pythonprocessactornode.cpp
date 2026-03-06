@@ -21,6 +21,7 @@ namespace Pipeline
             , m_inputDataTable(new NodeTableModel())
             , m_outputDataTable(new NodeTableModel())
         {
+            this->setDispatcher(new PythonDispatcher(this));
         }
 
         PythonProcessActorNode::~PythonProcessActorNode()
@@ -40,7 +41,7 @@ namespace Pipeline
 
             if (!process.waitForStarted())
             {
-                qDebug() << "Python başlatılamadı";
+                qDebug() << "Python is not started";
                 return false;
             }
 
@@ -52,10 +53,12 @@ namespace Pipeline
             process.write(buffer);
             process.closeWriteChannel();
             process.waitForFinished();
-
             result = process.readAllStandardOutput();
             m_pythonError = process.readAllStandardError();
-
+            if(m_pythonError.isEmpty())
+            {
+                m_pythonError = "Process is finished successfully";
+            }
             return result;
         }
 
@@ -66,6 +69,7 @@ namespace Pipeline
             roles[NodeRoles::InputTableModel] = "inputTableModel";
             roles[NodeRoles::OutputTableModel] = "outputTableModel";
             roles[NodeRoles::PythonError] = "pythonError";
+            roles[NodeRoles::ActorAction] = "actorAction";
             return roles;
         }
 
@@ -92,6 +96,11 @@ namespace Pipeline
             {
                 return m_pythonError;
             }
+            else if (role == NodeRoles::ActorAction)
+            {
+                QVariant v = QVariant::fromValue(static_cast<QObject*>(this->getDispatcher()));
+                return v;
+            }
             else if (role == NodeRoles::InputTableModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
@@ -116,7 +125,6 @@ namespace Pipeline
                 QByteArray output = result.toByteArray();
                 const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
                 size_t size = static_cast<size_t>(output.size());
-
                 auto outputResult = PythonNodeResult::deserialize(outputData, size);
                 m_outputDataTable->setRoot(outputResult);
             }
@@ -124,13 +132,23 @@ namespace Pipeline
             {
                 m_pythonError = error.what();
             }
-
         }
 
         void PythonProcessActorNode::onFailed(const QVariant& result)
         {
-
         }
+
+        PythonDispatcher::PythonDispatcher(PythonProcessActorNode *node)
+            : QObject()
+            , m_pythonNode(node)
+        {
+        }
+
+        void PythonDispatcher::run()
+        {
+            m_pythonNode->runStandalone();
+        }
+
     }
 }
 

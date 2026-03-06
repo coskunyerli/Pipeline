@@ -1,6 +1,8 @@
 #pragma once
 #include "actornode.h"
 #include <models/nodetablemodel.h>
+#include <QObject>
+
 class QSharedMemory;
 namespace Pipeline
 {
@@ -23,6 +25,16 @@ namespace Pipeline
                 NodeTableModel* m_inputDataTable;
                 NodeTableModel* m_outputDataTable;
                 QString m_pythonError;
+        };
+
+        class PythonDispatcher : public QObject
+        {
+            Q_OBJECT
+        public:
+            PythonDispatcher(PythonProcessActorNode*node);
+            Q_INVOKABLE void run();
+        private:
+            PythonProcessActorNode* m_pythonNode;
         };
     }
 }

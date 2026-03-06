@@ -15,7 +15,7 @@ Window {
     color: "#252525"
 
     signal dialogClosed()
-
+    property var actionObject
     property var inputModel
     property var outputModel
     property alias pythonFilename : pythonFilenameTextEdit.text
@@ -220,6 +220,10 @@ Window {
             PButton {
                 text: "Run"
                 Layout.preferredWidth: 90
+                onClicked: (mouse) =>
+                {
+                    actionObject.run()
+                }
             }
 
 

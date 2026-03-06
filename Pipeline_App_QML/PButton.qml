@@ -19,5 +19,4 @@ Button {
         verticalAlignment: Text.AlignVCenter
         font.pixelSize: 13
     }
-    onClicked: fileDialog.open()
 }

@@ -9,22 +9,14 @@ namespace Pipeline
         ActorNode::ActorNode()
             : UI::MNode()
             , m_actor(nullptr)
-            , m_dispatcher(new QObject())
+            , m_dispatcher(nullptr)
         {
             m_actor = new Thread::Actor(QThreadPool::globalInstance(), nullptr);
             m_actor->setBehaviour(Thread::Behaviour([this](const Thread::BehaviourContext & context)
             {
                 return this->behaviour(context);
             }));
-            Thread::Actor::connect(m_actor, &Thread::Actor::failed, m_dispatcher, [this](QVariant res)
-            {
-                qDebug() << res;
-                this->onFailed(res);
-            });
-            Thread::Actor::connect(m_actor, &Thread::Actor::finished, m_dispatcher, [this](QVariant res)
-            {
-                this->onFinished(res);
-            });
+            this->setDispatcher(new QObject());
         }
 
         ActorNode::ActorNode(Thread::Actor *actor)
@@ -76,6 +68,41 @@ namespace Pipeline
             }
 
             m_actor->startRequest();
+        }
+
+        void ActorNode::runStandalone()
+        {
+            if (!m_actor)
+            {
+                return;
+            }
+
+            m_actor->startRequestStandalone();
+        }
+
+        QObject* ActorNode::getDispatcher() const
+        {
+            return m_dispatcher;
+        }
+
+        void ActorNode::setDispatcher(QObject *dispatcher)
+        {
+            if (m_dispatcher)
+            {
+                m_dispatcher->deleteLater();
+                m_dispatcher = nullptr;
+            }
+
+            m_dispatcher = dispatcher;
+            Thread::Actor::connect(m_actor, &Thread::Actor::failed, m_dispatcher, [this](QVariant res)
+            {
+                qDebug() << res;
+                this->onFailed(res);
+            });
+            Thread::Actor::connect(m_actor, &Thread::Actor::finished, m_dispatcher, [this](QVariant res)
+            {
+                this->onFinished(res);
+            });
         }
 
     }

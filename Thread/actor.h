@@ -57,9 +57,11 @@ namespace Pipeline
                     m_behaviour = behaviour;
                 }
                 void startRequest();
+                void startRequestStandalone();
                 void reset();
             signals:
                 void finished(QVariant);
+                void nextActorRequested(QVariant);
                 void failed(QVariant);
                 void started();
             private:

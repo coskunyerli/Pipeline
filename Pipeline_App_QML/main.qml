@@ -20,6 +20,7 @@ Window {
         active: false
         sourceComponent: NodeDialog
         {
+            actionObject :dialogLoader.nodeModel.actorAction
             pythonFilename: dialogLoader.nodeModel.pythonFilename
             pythonError: dialogLoader.nodeModel.pythonError
             onPythonFilenameChanged :

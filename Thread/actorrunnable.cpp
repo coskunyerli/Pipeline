@@ -4,8 +4,9 @@ namespace Pipeline
 {
     namespace Thread
     {
-        ActorRunnable::ActorRunnable(Actor *actor)
+        ActorRunnable::ActorRunnable(Actor *actor, bool triggerNext)
             : m_actor(actor)
+            , m_triggerNext(triggerNext)
         {
         }
 
@@ -21,6 +22,11 @@ namespace Pipeline
                     m_actor->m_value = value;
                     m_actor->m_state = Actor::FINISHED;
                     emit m_actor->finished(value);
+
+                    if (m_triggerNext)
+                    {
+                        emit m_actor->nextActorRequested(value);
+                    }
                 }
                 catch (std::exception &e)
                 {

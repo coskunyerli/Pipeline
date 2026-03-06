@@ -78,6 +78,18 @@ namespace Pipeline
             }
         }
 
+        void Actor::startRequestStandalone()
+        {
+            if (m_semaphore.available() == 0)
+            {
+                if (m_threadPool)
+                {
+                    ActorRunnable *r = new ActorRunnable(this, false);
+                    m_threadPool->start(r, m_priority);
+                }
+            }
+        }
+
         void Actor::reset()
         {
             m_semaphore.release(this->m_dependentActors.size() - m_semaphore.available());
@@ -95,7 +107,7 @@ namespace Pipeline
             {
                 m_dependentActors.push_back(other);
                 m_semaphore.release(1);
-                connect(other, &Actor::finished, this, &Actor::onDependentFinished);
+                connect(other, &Actor::nextActorRequested, this, &Actor::onDependentFinished);
             }
         }
 
@@ -106,7 +118,7 @@ namespace Pipeline
                 int index = m_dependentActors.indexOf(other);
                 m_dependentActors.remove(index);
                 m_semaphore.release(m_dependentActors.size() - m_semaphore.available());
-                disconnect(other, &Actor::finished, this, &Actor::onDependentFinished);
+                disconnect(other, &Actor::nextActorRequested, this, &Actor::onDependentFinished);
             }
         }
 

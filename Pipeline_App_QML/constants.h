@@ -10,6 +10,7 @@ namespace Pipeline
             PythonFileName = UI::Roles::PortConnectionIndexEnd + 100,
             PythonScript,
             PythonError,
+            ActorAction,
             InputTableModel,
             OutputTableModel
         };
