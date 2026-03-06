@@ -16,9 +16,10 @@ Window {
 
     signal dialogClosed()
 
-    property alias inputModel : inputTable.model
-    property alias outputModel : outputTable.model
+    property var inputModel
+    property var outputModel
     property alias pythonFilename : pythonFilenameTextEdit.text
+    property alias pythonError : outputConsole.text
 
     onClosing: dialogClosed()
 
@@ -141,6 +142,7 @@ Window {
                     Layout.fillHeight: true
                     TableGridWidget {
                         id: inputTable
+                        model:inputModel
                         SplitView.fillWidth: true
                         SplitView.fillHeight: true
                     }
@@ -193,6 +195,7 @@ Window {
 
                 TableGridWidget {
                     id: outputTable
+                    model:outputModel
                     Layout.topMargin: 32
                     Layout.fillWidth: true
                     Layout.fillHeight: true

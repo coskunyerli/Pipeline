@@ -9,14 +9,21 @@ namespace Pipeline
         ActorNode::ActorNode()
             : UI::MNode()
             , m_actor(nullptr)
+            , m_dispatcher(new QObject())
         {
             m_actor = new Thread::Actor(QThreadPool::globalInstance(), nullptr);
             m_actor->setBehaviour(Thread::Behaviour([this](const Thread::BehaviourContext & context)
             {
                 return this->behaviour(context);
             }));
-            Thread::Actor::connect(m_actor, &Thread::Actor::failed, [](QVariant res){
+            Thread::Actor::connect(m_actor, &Thread::Actor::failed, m_dispatcher, [this](QVariant res)
+            {
                 qDebug() << res;
+                this->onFailed(res);
+            });
+            Thread::Actor::connect(m_actor, &Thread::Actor::finished, m_dispatcher, [this](QVariant res)
+            {
+                this->onFinished(res);
             });
         }
 
@@ -24,6 +31,11 @@ namespace Pipeline
             : UI::MNode()
             , m_actor(actor)
         {
+        }
+
+        ActorNode::~ActorNode()
+        {
+            this->m_dispatcher->deleteLater();
         }
 
         void ActorNode::setActor(Thread::Actor *actor)

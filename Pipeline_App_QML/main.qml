@@ -21,6 +21,7 @@ Window {
         sourceComponent: NodeDialog
         {
             pythonFilename: dialogLoader.nodeModel.pythonFilename
+            pythonError: dialogLoader.nodeModel.pythonError
             onPythonFilenameChanged :
             {
                 nodeModel.pythonFilename = pythonFilename
@@ -154,8 +155,6 @@ Window {
                                 {
                                     if (!dialogLoader.active)
                                     {
-                                        //dialogLoader.pythonFilename = nodeModel.pythonFilename
-                                        //dialogLoader.model = nodeModel.tableModel;
                                         dialogLoader.nodeModel = nodeModel
                                         dialogLoader.active = true
                                     }

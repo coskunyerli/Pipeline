@@ -2,6 +2,7 @@
 #include <QSharedMemory>
 #include <QProcess>
 #include <QUuid>
+#include <QCoreApplication>
 #include <constants.h>
 
 struct Row
@@ -44,24 +45,17 @@ namespace Pipeline
             }
 
             auto data = m_inputDataTable->getRoot()->serialize();
-
             QByteArray buffer(
                 reinterpret_cast<const char*>(data.data()),
                 static_cast<int>(data.size())
-                );
-
+            );
             process.write(buffer);
-            process.closeWriteChannel(); // stdin kapatılmazsa Python bekler
+            process.closeWriteChannel();
             process.waitForFinished();
-            qDebug() << "Python output:";
-            auto output = process.readAllStandardOutput();
 
-            const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
-            size_t size = static_cast<size_t>(output.size());
+            result = process.readAllStandardOutput();
+            m_pythonError = process.readAllStandardError();
 
-            auto outputResult = PythonNodeResult::deserialize(outputData,size);
-            m_outputDataTable->setRoot(outputResult);
-            //qDebug().noquote() << process.readAllStandardError();
             return result;
         }
 
@@ -71,6 +65,7 @@ namespace Pipeline
             roles[NodeRoles::PythonFileName] = "pythonFilename";
             roles[NodeRoles::InputTableModel] = "inputTableModel";
             roles[NodeRoles::OutputTableModel] = "outputTableModel";
+            roles[NodeRoles::PythonError] = "pythonError";
             return roles;
         }
 
@@ -93,6 +88,10 @@ namespace Pipeline
             {
                 return m_filename;
             }
+            else if (role == NodeRoles::PythonError)
+            {
+                return m_pythonError;
+            }
             else if (role == NodeRoles::InputTableModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
@@ -107,6 +106,30 @@ namespace Pipeline
             {
                 return ActorNode::data(role);
             }
+        }
+
+        void PythonProcessActorNode::onFinished(const QVariant& result)
+        {
+            // this is main thread we need to set root here beacuse of UI update
+            try
+            {
+                QByteArray output = result.toByteArray();
+                const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
+                size_t size = static_cast<size_t>(output.size());
+
+                auto outputResult = PythonNodeResult::deserialize(outputData, size);
+                m_outputDataTable->setRoot(outputResult);
+            }
+            catch (std::runtime_error &error)
+            {
+                m_pythonError = error.what();
+            }
+
+        }
+
+        void PythonProcessActorNode::onFailed(const QVariant& result)
+        {
+
         }
     }
 }

@@ -4,6 +4,7 @@ import QtQuick.Controls as QC
 Rectangle {
 
     color: "#1e1e1e"
+    property alias text : consoleText.text
 
     QC.ScrollView {
         anchors.fill: parent
