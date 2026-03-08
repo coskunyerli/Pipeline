@@ -8,13 +8,13 @@ namespace Pipeline
         NodeTableModel::NodeTableModel(QObject *parent)
         : QAbstractItemModel(parent)
         {
-            m_rootResult = new PythonNodeResult();
+            m_rootResult = QSharedPointer<PythonNodeResult>::create();
             m_rootResult->setSize(10,10);
         }
 
         NodeTableModel::~NodeTableModel()
         {
-             delete m_rootResult;
+
         }
 
         int NodeTableModel::rowCount(const QModelIndex &parent) const
@@ -23,7 +23,7 @@ namespace Pipeline
 
             if (!parent.isValid())
             {
-                nodeResult = this->m_rootResult;
+                nodeResult = this->m_rootResult.get();
             }
             else
             {
@@ -44,7 +44,7 @@ namespace Pipeline
 
             if (!parent.isValid())
             {
-                nodeResult = this->m_rootResult;
+                nodeResult = this->m_rootResult.get();
             }
             else
             {
@@ -61,7 +61,7 @@ namespace Pipeline
 
         QModelIndex NodeTableModel::index(int row, int column, const QModelIndex &parent) const
         {
-            auto* parentNode = m_rootResult;
+            auto* parentNode = m_rootResult.get();
 
             if (parent.isValid())
             {
@@ -166,14 +166,8 @@ namespace Pipeline
             return false;
         }
 
-        void NodeTableModel::setRoot(PythonNodeResult *root)
+        void NodeTableModel::setRoot(const QSharedPointer<PythonNodeResult> &root)
         {
-            if(m_rootResult)
-            {
-                delete m_rootResult;
-                m_rootResult = nullptr;
-            }
-
             this->beginResetModel();
             m_rootResult = root;
             this->endResetModel();
@@ -218,7 +212,7 @@ namespace Pipeline
         {
             if (!index.isValid())
             {
-                return m_rootResult;
+                return m_rootResult.get();
             }
 
             return static_cast<PythonNodeResult*>(index.internalPointer());

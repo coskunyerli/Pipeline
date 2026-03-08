@@ -293,6 +293,13 @@ namespace Pipeline
             return PythonNodeResult::serialize(this);
         }
 
+        PythonNodeResult *PythonNodeResult::copy() const
+        {
+            // TODOJ Bu daha hızlı yapılabilir, şimdilik bu böyle olsun
+            auto data = PythonNodeResult::serialize(this);
+            return PythonNodeResult::deserialize(data);
+        }
+
         std::vector<uint8_t> PythonNodeResult::serialize(const PythonNodeResult *node)
         {
             std::vector<uint8_t> buffer;

@@ -73,6 +73,18 @@ namespace Pipeline
                 this->setFilename(value.toString());
                 return true;
             }
+            else if (role == NodeRoles::InputTableModel)
+            {
+                NodeTableModel* model = value.value<NodeTableModel*>();
+                m_inputDataTable = model;
+                return true;
+            }
+            else if (role == NodeRoles::OutputTableModel)
+            {
+                NodeTableModel* model = value.value<NodeTableModel*>();
+                m_outputDataTable = model;
+                return true;
+            }
             else
             {
                 return ActorNode::setData(value, role);
@@ -119,7 +131,7 @@ namespace Pipeline
                 const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
                 size_t size = static_cast<size_t>(output.size());
                 auto outputResult = PythonNodeResult::deserialize(outputData, size);
-                m_outputDataTable->setRoot(outputResult);
+                m_outputDataTable->setRoot(QSharedPointer<PythonNodeResult>(outputResult));
             }
             catch (std::runtime_error &error)
             {
@@ -131,7 +143,7 @@ namespace Pipeline
         {
         }
 
-        PythonDispatcher::PythonDispatcher(PythonProcessActorNode *node)
+        PythonDispatcher::PythonDispatcher(ActorNode *node)
             : QObject()
             , m_pythonNode(node)
         {

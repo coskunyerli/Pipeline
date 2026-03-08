@@ -53,6 +53,7 @@ namespace Pipeline
                 void setValueType(ValueType vt);
                 std::pair<size_t, size_t> cellIndexOf(PythonNodeResult* child, bool &has) const;
                 std::vector<uint8_t> serialize();
+                PythonNodeResult* copy() const;
                 static std::vector<uint8_t> serialize(const PythonNodeResult* node);
                 static PythonNodeResult* deserialize(const uint8_t* data, size_t size);
                 static PythonNodeResult* deserialize(const std::vector<uint8_t>& buffer);

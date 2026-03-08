@@ -20,16 +20,22 @@ Window {
         active: false
         sourceComponent: NodeDialog
         {
-            actionObject :dialogLoader.nodeModel.actorAction
+            //actionObject :dialogLoader.nodeModel.actorAction
             pythonFilename: dialogLoader.nodeModel.pythonFilename
             pythonError: dialogLoader.nodeModel.pythonError
             onPythonFilenameChanged :
             {
+                if(pythonFilename === nodeModel.pythonFilename)
+                {
+                    return;
+                }
+
                 nodeModel.pythonFilename = pythonFilename
             }
 
             inputModel: dialogLoader.nodeModel.inputTableModel
             outputModel: dialogLoader.nodeModel.outputTableModel
+            actor: dialogLoader.nodeModel.actor
         }
 
         onLoaded: {

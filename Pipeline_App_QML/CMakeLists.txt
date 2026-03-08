@@ -34,6 +34,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         data/pythonnoderesult.cpp
         nodes/pythonprocessactornode.h
         nodes/pythonprocessactornode.cpp
+        models/nodetabledialogmodel.h
+        models/nodetabledialogmodel.cpp
+        nodes/pythonnodedialogactor.h
+        nodes/pythonnodedialogactor.cpp
 
     )
 

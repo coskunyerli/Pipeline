@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Dialogs
+import Pipeline.Models as PM
+import Pipeline.Actors as PA
 
 Window {
     id: detachedDialog
@@ -15,11 +17,21 @@ Window {
     color: "#252525"
 
     signal dialogClosed()
-    property var actionObject
+
+
+    //property var actionObject
     property var inputModel
     property var outputModel
-    property alias pythonFilename : pythonFilenameTextEdit.text
-    property alias pythonError : outputConsole.text
+    property string pythonFilename
+    property string pythonError
+    property var actor : PA.PythonNodeDialogActor
+    {
+        id:actor
+        filename : pythonFilenameTextEdit.text
+        inputData : inputDialogModel
+        outputData: outputDialogModel
+        pythonError: outputConsole.text
+    }
 
     onClosing: dialogClosed()
 
@@ -30,7 +42,7 @@ Window {
         fileMode: FileDialog.OpenFile
 
         onAccepted: {
-            pythonFilename = selectedFile
+            pythonFilenameTextEdit.text = selectedFile
         }
     }
 
@@ -84,6 +96,7 @@ Window {
 
                     PTextEdit {
                         id: pythonFilenameTextEdit
+                        text:pythonFilename
                         Layout.fillWidth: true
                     }
 
@@ -142,7 +155,13 @@ Window {
                     Layout.fillHeight: true
                     TableGridWidget {
                         id: inputTable
-                        model:inputModel
+                        // copy inputModel inside
+                        model:PM.NodeTableDialogModel
+                        {
+                            id: inputDialogModel
+                            referenceModel: inputModel
+                        }
+
                         SplitView.fillWidth: true
                         SplitView.fillHeight: true
                     }
@@ -195,7 +214,13 @@ Window {
 
                 TableGridWidget {
                     id: outputTable
-                    model:outputModel
+                    // copy outputModel inside
+                    model:PM.NodeTableDialogModel
+                    {
+                        id: outputDialogModel
+                        referenceModel:outputModel
+                    }
+
                     Layout.topMargin: 32
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -222,7 +247,7 @@ Window {
                 Layout.preferredWidth: 90
                 onClicked: (mouse) =>
                 {
-                    actionObject.runStandalone()
+                    actor.runStandalone()
                 }
             }
 
@@ -232,16 +257,39 @@ Window {
             }
 
             PButton {
+                text: "Reset"
+                Layout.preferredWidth: 90
+                onClicked:
+                {
+                    inputDialogModel.resetData();
+                    outputDialogModel.resetData();
+                }
+            }
+
+            PButton {
                 text: "Cancel"
                 Layout.preferredWidth: 90
-                onClicked: detachedDialog.close()
+                onClicked:
+                {
+                    inputDialogModel.resetData();
+                    outputDialogModel.resetData();
+                    detachedDialog.close()
+                }
             }
 
             PButton {
                 id: okButton
                 Layout.preferredWidth: 90
                 text: "OK"
-                onClicked: detachedDialog.close()
+                onClicked:
+                {
+                    // copy data into reference model
+                    inputDialogModel.saveData();
+                    outputDialogModel.saveData();
+                    pythonFilename = actor.filename
+                    pythonError = actor.pythonError
+                    detachedDialog.close()
+                }
             }
         }
     }

@@ -1,4 +1,5 @@
 #pragma once
+#include <QSharedPointer>
 #include <QAbstractItemModel>
 #include "data/pythonnoderesult.h"
 namespace Pipeline
@@ -20,19 +21,19 @@ namespace Pipeline
                 QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
                 Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
             public:
-                void setRoot(PythonNodeResult*root);
+                void setRoot(const QSharedPointer<PythonNodeResult>& root);
                 int rows() const;
                 int columns() const;
                 void setRows(int rows);
                 void setColumns(int columns);
-                PythonNodeResult* getRoot() const {return m_rootResult;}
+                QSharedPointer<PythonNodeResult> getRoot() const {return m_rootResult;}
             signals:
                 void rowsChanged();
                 void columnsChanged();
             private:
                 PythonNodeResult* getResultNode(const QModelIndex& index) const;
             private:
-                PythonNodeResult * m_rootResult;
+                QSharedPointer<PythonNodeResult>  m_rootResult;
         };
     }
 }
