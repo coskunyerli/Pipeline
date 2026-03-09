@@ -94,15 +94,29 @@ namespace Pipeline
             }
 
             m_dispatcher = dispatcher;
-            Thread::Actor::connect(m_actor, &Thread::Actor::failed, m_dispatcher, [this](QVariant res)
+            Thread::Actor::connect(m_actor, &Thread::Actor::started, m_dispatcher, [this]()
             {
-                qDebug() << res;
-                this->onFailed(res);
+                this->onStarted();
             });
+            Thread::Actor::connect(m_actor, &Thread::Actor::failed, m_dispatcher, [this](QVariant res)
+                                   {
+                                       qDebug() << res;
+                                       this->onFailed(res);
+                                   });
             Thread::Actor::connect(m_actor, &Thread::Actor::finished, m_dispatcher, [this](QVariant res)
             {
                 this->onFinished(res);
             });
+        }
+
+        Thread::BehaviourContext ActorNode::getContext()
+        {
+            if (!m_actor)
+            {
+                return {};
+            }
+
+            return m_actor->getContext();
         }
 
     }

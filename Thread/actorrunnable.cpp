@@ -17,7 +17,6 @@ namespace Pipeline
                 try
                 {
                     m_actor->m_state = Actor::PROGRASSING;
-                    emit m_actor->started();
                     auto value = m_actor->getBehaviour().run(m_actor->getContext());
                     m_actor->m_value = value;
                     m_actor->m_state = Actor::FINISHED;

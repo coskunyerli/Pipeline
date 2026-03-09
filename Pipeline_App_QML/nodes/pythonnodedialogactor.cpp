@@ -2,6 +2,7 @@
 #include <QProcess>
 #include <models/nodetablemodel.h>
 #include <nodes/pythonprocessactornode.h>
+Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::PythonNodeResult>);
 
 namespace Pipeline::Runtime
 {
@@ -37,7 +38,7 @@ namespace Pipeline::Runtime
         process.write(buffer);
         process.closeWriteChannel();
         process.waitForFinished();
-        result = process.readAllStandardOutput();
+        QByteArray outputData = process.readAllStandardOutput();
         auto error = process.readAllStandardError();
 
         if (!error.isEmpty() && m_pythonError != error)
@@ -50,6 +51,23 @@ namespace Pipeline::Runtime
         if (m_pythonError.isEmpty())
         {
             m_pythonError = "Process is finished successfully";
+            emit this->pythonErrorChanged();
+        }
+
+
+        try
+        {
+            if(!m_pythonThrowError)
+            {
+                const uint8_t* outputDataU8 = reinterpret_cast<const uint8_t*>(outputData.constData());
+                size_t size = static_cast<size_t>(outputData.size());
+                auto* outputResult = PythonNodeResult::deserialize(outputDataU8, size);
+                result = QVariant::fromValue<QSharedPointer<PythonNodeResult>>(QSharedPointer<PythonNodeResult>(outputResult));
+            }
+        }
+        catch (std::runtime_error &error)
+        {
+            m_pythonError = error.what();
             emit this->pythonErrorChanged();
         }
 
@@ -110,24 +128,18 @@ namespace Pipeline::Runtime
         emit this->outputDataChanged();
     }
 
+    void PythonNodeDialogActor::onStarted()
+    {
+
+    }
+
     void PythonNodeDialogActor::onFinished(const QVariant &result)
     {
         // this is main thread we need to set root here beacuse of UI update
-        try
+        if(!m_pythonThrowError)
         {
-            if(!m_pythonThrowError)
-            {
-                QByteArray output = result.toByteArray();
-                const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
-                size_t size = static_cast<size_t>(output.size());
-                auto outputResult = PythonNodeResult::deserialize(outputData, size);
-                m_outputDataTable->setRoot(QSharedPointer<PythonNodeResult>(outputResult));
-            }
-        }
-        catch (std::runtime_error &error)
-        {
-            m_pythonError = error.what();
-            emit this->pythonErrorChanged();
+            auto outputResult = result.value<QSharedPointer<PythonNodeResult>>();
+            m_outputDataTable->setRoot(outputResult);
         }
     }
 

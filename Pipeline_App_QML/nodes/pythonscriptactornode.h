@@ -16,6 +16,7 @@ namespace Pipeline
                 QHash<int, QByteArray> roleNames() const override;
                 bool setData(const QVariant &value, int role) override;
                 virtual QVariant data(int role) const override;
+                void onStarted() override {}
                 void onFinished(const QVariant& result) override {}
                 void onFailed(const QVariant& result) override {}
             private:

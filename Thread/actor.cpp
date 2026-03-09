@@ -73,6 +73,7 @@ namespace Pipeline
                 if (m_threadPool)
                 {
                     ActorRunnable *r = new ActorRunnable(this);
+                    emit this->started();
                     m_threadPool->start(r, m_priority);
                 }
             }
@@ -85,6 +86,7 @@ namespace Pipeline
                 if (m_threadPool)
                 {
                     ActorRunnable *r = new ActorRunnable(this, false);
+                    emit this->started();
                     m_threadPool->start(r, m_priority);
                 }
             }

@@ -38,6 +38,7 @@ namespace Pipeline::Runtime
             void setInputDataTable(NodeTableModel* inputData);
             NodeTableModel* getOutputDataTable() const;
             void setOutputDataTable(NodeTableModel* outputData);
+            void onStarted() override;
             void onFinished(const QVariant& result) override;
             void onFailed(const QVariant& result) override;
         signals:
