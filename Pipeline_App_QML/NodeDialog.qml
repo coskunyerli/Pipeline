@@ -17,20 +17,22 @@ Window {
     color: "#252525"
 
     signal dialogClosed()
+    signal accepted(string filename, string error)
 
-
-    //property var actionObject
     property var inputModel
     property var outputModel
     property string pythonFilename
-    property string pythonError
+    property alias pythonError : outputConsole.text
     property var actor : PA.PythonNodeDialogActor
     {
         id:actor
         filename : pythonFilenameTextEdit.text
         inputData : inputDialogModel
         outputData: outputDialogModel
-        pythonError: outputConsole.text
+        onPythonErrorChanged:
+        {
+            detachedDialog.pythonError = actor.pythonError
+        }
     }
 
     onClosing: dialogClosed()
@@ -263,6 +265,7 @@ Window {
                 {
                     inputDialogModel.resetData();
                     outputDialogModel.resetData();
+                    detachedDialog.pythonError = ""
                 }
             }
 
@@ -286,8 +289,7 @@ Window {
                     // copy data into reference model
                     inputDialogModel.saveData();
                     outputDialogModel.saveData();
-                    pythonFilename = actor.filename
-                    pythonError = actor.pythonError
+                    accepted(actor.filename, actor.pythonError)
                     detachedDialog.close()
                 }
             }

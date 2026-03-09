@@ -51,6 +51,7 @@ namespace Pipeline::Runtime
             NodeTableModel* m_inputDataTable;
             NodeTableModel* m_outputDataTable;
             QString m_pythonError;
+            bool m_pythonThrowError;
 
     };
 }

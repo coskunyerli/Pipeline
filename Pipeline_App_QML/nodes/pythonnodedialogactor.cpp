@@ -17,6 +17,8 @@ namespace Pipeline::Runtime
 
     QVariant PythonNodeDialogActor::behaviour(const Thread::BehaviourContext &behaviour)
     {
+        m_pythonThrowError = false;
+        m_pythonError = "";
         QVariant result;
         QProcess process;
         process.start("C:\\Users\\yerli\\AppData\\Local\\Programs\\Python\\Python39\\python.exe", QStringList() << m_filename);
@@ -36,11 +38,19 @@ namespace Pipeline::Runtime
         process.closeWriteChannel();
         process.waitForFinished();
         result = process.readAllStandardOutput();
-        m_pythonError = process.readAllStandardError();
+        auto error = process.readAllStandardError();
+
+        if (!error.isEmpty() && m_pythonError != error)
+        {
+            m_pythonError = error;
+            m_pythonThrowError = true;
+            emit this->pythonErrorChanged();
+        }
 
         if (m_pythonError.isEmpty())
         {
             m_pythonError = "Process is finished successfully";
+            emit this->pythonErrorChanged();
         }
 
         return result;
@@ -105,15 +115,19 @@ namespace Pipeline::Runtime
         // this is main thread we need to set root here beacuse of UI update
         try
         {
-            QByteArray output = result.toByteArray();
-            const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
-            size_t size = static_cast<size_t>(output.size());
-            auto outputResult = PythonNodeResult::deserialize(outputData, size);
-            m_outputDataTable->setRoot(QSharedPointer<PythonNodeResult>(outputResult));
+            if(!m_pythonThrowError)
+            {
+                QByteArray output = result.toByteArray();
+                const uint8_t* outputData = reinterpret_cast<const uint8_t*>(output.constData());
+                size_t size = static_cast<size_t>(output.size());
+                auto outputResult = PythonNodeResult::deserialize(outputData, size);
+                m_outputDataTable->setRoot(QSharedPointer<PythonNodeResult>(outputResult));
+            }
         }
         catch (std::runtime_error &error)
         {
             m_pythonError = error.what();
+            emit this->pythonErrorChanged();
         }
     }
 

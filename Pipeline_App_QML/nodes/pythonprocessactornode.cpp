@@ -73,6 +73,11 @@ namespace Pipeline
                 this->setFilename(value.toString());
                 return true;
             }
+            else if (role == NodeRoles::PythonError)
+            {
+                this->m_pythonError = value.toString();
+                return true;
+            }
             else if (role == NodeRoles::InputTableModel)
             {
                 NodeTableModel* model = value.value<NodeTableModel*>();
