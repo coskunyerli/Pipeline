@@ -125,11 +125,11 @@ Window {
 
                     PTextEdit {
                         Layout.preferredWidth: 120
-                        text: inputModel.rows
+                        text: inputDialogModel.rows
                         onTextChanged: {
                             let val = Number(text)
-                            if(inputModel.rows !== val)
-                                inputModel.rows = val
+                            if(inputDialogModel.rows !== val)
+                                inputDialogModel.rows = val
                         }
                     }
 
@@ -141,11 +141,11 @@ Window {
 
                     PTextEdit {
                         Layout.preferredWidth: 120
-                        text: inputModel.columns
+                        text: inputDialogModel.columns
                         onTextChanged: {
                             let val = Number(text)
-                            if(inputModel.columns !== val)
-                                inputModel.columns = val
+                            if(inputDialogModel.columns !== val)
+                                inputDialogModel.columns = val
                         }
                     }
                 }
