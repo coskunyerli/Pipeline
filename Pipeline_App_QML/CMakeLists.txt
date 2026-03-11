@@ -28,10 +28,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         constants.h
         nodes/pythonfileactornode.h
         nodes/pythonfileactornode.cpp
-        data/pythonnoderesult.h
+        data/hierarchicaltabledata.h
         models/nodetablemodel.h
         models/nodetablemodel.cpp
-        data/pythonnoderesult.cpp
+        data/hierarchicaltabledata.cpp
         nodes/pythonprocessactornode.h
         nodes/pythonprocessactornode.cpp
         models/nodetabledialogmodel.h
@@ -50,17 +50,19 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     )
 
 
-# pybind11_add_module(PythonNodeResult
-#     bindings/pythonnoderesult_python.cpp
-#     data/pythonnoderesult.h data/pythonnoderesult.cpp
-# )
+pybind11_add_module(HierarchicalTableData
+    bindings/hierarchicaltabledata_python.cpp
+    helpers/stringhelper.h
+    helpers/stringhelper.cpp
+    data/hierarchicaltabledata.h data/hierarchicaltabledata.cpp
+)
 
-# target_include_directories(PythonNodeResult PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(HierarchicalTableData PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # Define target properties for Android with Qt 6 as:
-#    set_property(TARGET Pipeline_App_QML APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+   # set_property(TARGET Pipeline_App_QML APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+   #              ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)

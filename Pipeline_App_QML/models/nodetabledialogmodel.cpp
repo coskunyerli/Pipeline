@@ -3,12 +3,12 @@ namespace Pipeline::Runtime
 {
     void NodeTableDialogModel::resetData()
     {
-        this->setRoot(QSharedPointer<PythonNodeResult>(m_referenceModel->getRoot()->copy()));
+        this->setRoot(QSharedPointer<HierarchicalTableData>(m_referenceModel->getRoot()->copy()));
     }
 
     void NodeTableDialogModel::saveData()
     {
-        m_referenceModel->setRoot(QSharedPointer<PythonNodeResult>(this->getRoot()->copy()));
+        m_referenceModel->setRoot(QSharedPointer<HierarchicalTableData>(this->getRoot()->copy()));
     }
 
     NodeTableDialogModel::NodeTableDialogModel(QObject *parent)
@@ -24,7 +24,7 @@ namespace Pipeline::Runtime
         }
 
         m_referenceModel = referenceModel;
-        this->setRoot(QSharedPointer<PythonNodeResult>(m_referenceModel->getRoot()->copy()));
+        this->setRoot(QSharedPointer<HierarchicalTableData>(m_referenceModel->getRoot()->copy()));
         emit referenceModelChanged();
     }
 }

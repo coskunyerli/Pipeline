@@ -5,7 +5,7 @@
 #include <QCoreApplication>
 #include <constants.h>
 
-Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::PythonNodeResult>);
+Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::HierarchicalTableData>);
 
 
 namespace Pipeline
@@ -72,8 +72,8 @@ namespace Pipeline
                 {
                     const uint8_t* outputDataU8 = reinterpret_cast<const uint8_t*>(outputData.constData());
                     size_t size = static_cast<size_t>(outputData.size());
-                    auto* outputResult = PythonNodeResult::deserialize(outputDataU8, size);
-                    result = QVariant::fromValue<QSharedPointer<PythonNodeResult>>(QSharedPointer<PythonNodeResult>(outputResult));
+                    auto* outputResult = HierarchicalTableData::deserialize(outputDataU8, size);
+                    result = QVariant::fromValue<QSharedPointer<HierarchicalTableData>>(QSharedPointer<HierarchicalTableData>(outputResult));
                     return result;
                 }
             }
@@ -164,9 +164,9 @@ namespace Pipeline
                 auto behaviourContext = this->getContext();
                 if (!behaviourContext.m_variants.isEmpty())
                 {
-                    if (behaviourContext.m_variants[0].canConvert<QSharedPointer<PythonNodeResult>>())
+                    if (behaviourContext.m_variants[0].canConvert<QSharedPointer<HierarchicalTableData>>())
                     {
-                        auto inputData = behaviourContext.m_variants[0].value<QSharedPointer<PythonNodeResult>>();
+                        auto inputData = behaviourContext.m_variants[0].value<QSharedPointer<HierarchicalTableData>>();
 
                         if (inputData)
                         {
@@ -183,7 +183,7 @@ namespace Pipeline
             // this is main thread we need to set root here beacuse of UI update
             if (!m_pythonThrowError)
             {
-                auto outputResult = result.value<QSharedPointer<PythonNodeResult>>();
+                auto outputResult = result.value<QSharedPointer<HierarchicalTableData>>();
                 m_outputDataTable->setRoot(outputResult);
             }
         }

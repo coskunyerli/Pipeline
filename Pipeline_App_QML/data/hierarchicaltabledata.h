@@ -6,7 +6,7 @@ namespace Pipeline
 {
     namespace Runtime
     {
-        class PythonNodeResult
+        class HierarchicalTableData
         {
             public:
                 enum ValueType : int
@@ -17,8 +17,8 @@ namespace Pipeline
                     All = Value | Matrix
                 };
 
-                explicit PythonNodeResult(PythonNodeResult* parent = nullptr);
-                virtual ~PythonNodeResult();
+                explicit HierarchicalTableData(HierarchicalTableData* parent = nullptr);
+                virtual ~HierarchicalTableData();
                 void setSize(size_t row, size_t col);
                 size_t getColumnCount() const
                 {
@@ -43,36 +43,36 @@ namespace Pipeline
                 }
                 std::string getHeaderData(int section) const;
                 void setHeaderData(int section, const std::string& value);
-                PythonNodeResult* getCell(size_t row, size_t column);
-                PythonNodeResult* getOrCreateCell(size_t row, size_t column);
+                HierarchicalTableData* getCell(size_t row, size_t column);
+                HierarchicalTableData* getOrCreateCell(size_t row, size_t column);
                 void deleteCell(size_t row, size_t column);
-                PythonNodeResult* removeCell(size_t row, size_t column);
-                PythonNodeResult* getParent()
+                HierarchicalTableData* removeCell(size_t row, size_t column);
+                HierarchicalTableData* getParent()
                 {
                     return m_parent;
                 }
-                void setCell(size_t row, size_t column, PythonNodeResult* child);
+                void setCell(size_t row, size_t column, HierarchicalTableData* child);
                 void setValueType(ValueType vt);
-                std::pair<size_t, size_t> cellIndexOf(PythonNodeResult* child, bool &has) const;
+                std::pair<size_t, size_t> cellIndexOf(HierarchicalTableData* child, bool &has) const;
                 std::vector<uint8_t> serialize();
-                PythonNodeResult* copy() const;
-                static std::vector<uint8_t> serialize(const PythonNodeResult* node);
-                static PythonNodeResult* deserialize(const uint8_t* data, size_t size);
-                static PythonNodeResult* deserialize(const std::vector<uint8_t>& buffer);
+                HierarchicalTableData* copy() const;
+                static std::vector<uint8_t> serialize(const HierarchicalTableData* node);
+                static HierarchicalTableData* deserialize(const uint8_t* data, size_t size);
+                static HierarchicalTableData* deserialize(const std::vector<uint8_t>& buffer);
             private:
                 std::pair<size_t, size_t> mapToCellIndex(size_t index) const;
                 size_t mapFromCellIndex(size_t row, size_t column) const;
-                static void serializeNode(std::vector<uint8_t>& buf, const PythonNodeResult* node);
-                static PythonNodeResult* deserializeNode(const uint8_t* data, size_t size,
-                        size_t& offset, PythonNodeResult* parent);
+                static void serializeNode(std::vector<uint8_t>& buf, const HierarchicalTableData* node);
+                static HierarchicalTableData* deserializeNode(const uint8_t* data, size_t size,
+                        size_t& offset, HierarchicalTableData* parent);
             private:
                 std::string m_value;
                 std::unordered_map<int, std::string> m_headerData;
-                std::vector<PythonNodeResult*> m_data;
+                std::vector<HierarchicalTableData*> m_data;
                 size_t m_columnCount;
                 size_t m_rowCount;
                 ValueType m_valueType;
-                PythonNodeResult* m_parent;
+                HierarchicalTableData* m_parent;
         };
     }
 }

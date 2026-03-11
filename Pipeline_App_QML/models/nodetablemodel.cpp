@@ -8,7 +8,7 @@ namespace Pipeline
         NodeTableModel::NodeTableModel(QObject *parent)
             : QAbstractItemModel(parent)
         {
-            m_rootResult = QSharedPointer<PythonNodeResult>::create();
+            m_rootResult = QSharedPointer<HierarchicalTableData>::create();
             m_rootResult->setSize(10, 10);
         }
 
@@ -18,7 +18,7 @@ namespace Pipeline
 
         int NodeTableModel::rowCount(const QModelIndex &parent) const
         {
-            PythonNodeResult* nodeResult;
+            HierarchicalTableData* nodeResult;
 
             if (!parent.isValid())
             {
@@ -39,7 +39,7 @@ namespace Pipeline
 
         int NodeTableModel::columnCount(const QModelIndex &parent) const
         {
-            PythonNodeResult* nodeResult;
+            HierarchicalTableData* nodeResult;
 
             if (!parent.isValid())
             {
@@ -119,7 +119,7 @@ namespace Pipeline
                 return {};
             }
 
-            PythonNodeResult* resultNode = getResultNode(index);
+            HierarchicalTableData* resultNode = getResultNode(index);
 
             if (!resultNode)
             {
@@ -211,7 +211,7 @@ namespace Pipeline
             return QVariant();
         }
 
-        void NodeTableModel::setRoot(const QSharedPointer<PythonNodeResult>& root)
+        void NodeTableModel::setRoot(const QSharedPointer<HierarchicalTableData>& root)
         {
             this->beginResetModel();
             m_rootResult = root;
@@ -254,14 +254,14 @@ namespace Pipeline
             emit this->columnsChanged();
         }
 
-        PythonNodeResult* NodeTableModel::getResultNode(const QModelIndex &index) const
+        HierarchicalTableData* NodeTableModel::getResultNode(const QModelIndex &index) const
         {
             if (!index.isValid())
             {
                 return m_rootResult.get();
             }
 
-            return static_cast<PythonNodeResult*>(index.internalPointer());
+            return static_cast<HierarchicalTableData*>(index.internalPointer());
         }
 
     };

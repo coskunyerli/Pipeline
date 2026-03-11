@@ -2,7 +2,7 @@
 #include <QProcess>
 #include <models/nodetablemodel.h>
 #include <nodes/pythonprocessactornode.h>
-Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::PythonNodeResult>);
+Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::HierarchicalTableData>);
 
 namespace Pipeline::Runtime
 {
@@ -61,8 +61,8 @@ namespace Pipeline::Runtime
             {
                 const uint8_t* outputDataU8 = reinterpret_cast<const uint8_t*>(outputData.constData());
                 size_t size = static_cast<size_t>(outputData.size());
-                auto* outputResult = PythonNodeResult::deserialize(outputDataU8, size);
-                result = QVariant::fromValue<QSharedPointer<PythonNodeResult>>(QSharedPointer<PythonNodeResult>(outputResult));
+                auto* outputResult = HierarchicalTableData::deserialize(outputDataU8, size);
+                result = QVariant::fromValue<QSharedPointer<HierarchicalTableData>>(QSharedPointer<HierarchicalTableData>(outputResult));
             }
         }
         catch (std::runtime_error &error)
@@ -138,7 +138,7 @@ namespace Pipeline::Runtime
         // this is main thread we need to set root here beacuse of UI update
         if(!m_pythonThrowError)
         {
-            auto outputResult = result.value<QSharedPointer<PythonNodeResult>>();
+            auto outputResult = result.value<QSharedPointer<HierarchicalTableData>>();
             m_outputDataTable->setRoot(outputResult);
         }
     }

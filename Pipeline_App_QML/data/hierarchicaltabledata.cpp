@@ -1,4 +1,4 @@
-#include "pythonnoderesult.h"
+#include "hierarchicaltabledata.h"
 
 #include <stdexcept>
 
@@ -109,7 +109,7 @@ namespace Pipeline
         } // anonymous namespace
 
 
-        PythonNodeResult::PythonNodeResult(PythonNodeResult* parent)
+        HierarchicalTableData::HierarchicalTableData(HierarchicalTableData* parent)
             : m_columnCount(0)
             , m_rowCount(0)
             , m_valueType(ValueType::None)
@@ -117,7 +117,7 @@ namespace Pipeline
         {
         }
 
-        PythonNodeResult::~PythonNodeResult()
+        HierarchicalTableData::~HierarchicalTableData()
         {
             bool has;
 
@@ -139,20 +139,20 @@ namespace Pipeline
             m_data.clear();
         }
 
-        void PythonNodeResult::setSize(size_t row, size_t col)
+        void HierarchicalTableData::setSize(size_t row, size_t col)
         {
             m_columnCount = col;
             m_rowCount = row;
             this->m_data.resize(row * col);
         }
 
-        void PythonNodeResult::setValue(const std::string value)
+        void HierarchicalTableData::setValue(const std::string value)
         {
             this->m_value = value;
             this->m_valueType = static_cast<ValueType>(m_valueType | ValueType::Value);
         }
 
-        std::string PythonNodeResult::getHeaderData(int section) const
+        std::string HierarchicalTableData::getHeaderData(int section) const
         {
             auto it = m_headerData.find(section);
 
@@ -164,12 +164,12 @@ namespace Pipeline
             return StringHelper::indexToString(section);
         }
 
-        void PythonNodeResult::setHeaderData(int section, const std::string& value)
+        void HierarchicalTableData::setHeaderData(int section, const std::string& value)
         {
             m_headerData[section] = value;
         }
 
-        PythonNodeResult* PythonNodeResult::getCell(size_t row, size_t column)
+        HierarchicalTableData* HierarchicalTableData::getCell(size_t row, size_t column)
         {
             if (row >= this->m_rowCount || column >= this->m_columnCount)
             {
@@ -179,7 +179,7 @@ namespace Pipeline
             return m_data.at(this->mapFromCellIndex(row, column));
         }
 
-        PythonNodeResult* PythonNodeResult::getOrCreateCell(size_t row, size_t column)
+        HierarchicalTableData* HierarchicalTableData::getOrCreateCell(size_t row, size_t column)
         {
             size_t index = this->mapFromCellIndex(row, column);
 
@@ -192,14 +192,14 @@ namespace Pipeline
 
             if (!cell)
             {
-                cell = new PythonNodeResult();
+                cell = new HierarchicalTableData();
                 this->m_data[index] = cell;
             }
 
             return cell;
         }
 
-        void PythonNodeResult::deleteCell(size_t row, size_t column)
+        void HierarchicalTableData::deleteCell(size_t row, size_t column)
         {
             auto * child = this->getCell(row, column);
             m_data.erase(m_data.begin() + this->mapFromCellIndex(row, column));
@@ -210,14 +210,14 @@ namespace Pipeline
             }
         }
 
-        PythonNodeResult* PythonNodeResult::removeCell(size_t row, size_t column)
+        HierarchicalTableData* HierarchicalTableData::removeCell(size_t row, size_t column)
         {
             auto * child = this->getCell(row, column);
             m_data.erase(m_data.begin() + this->mapFromCellIndex(row, column));
             return child;
         }
 
-        std::pair<size_t, size_t> PythonNodeResult::cellIndexOf(PythonNodeResult *child, bool &has) const
+        std::pair<size_t, size_t> HierarchicalTableData::cellIndexOf(HierarchicalTableData *child, bool &has) const
         {
             if (!child)
             {
@@ -238,19 +238,19 @@ namespace Pipeline
             return std::make_pair(0, 0);
         }
 
-        std::vector<uint8_t> PythonNodeResult::serialize()
+        std::vector<uint8_t> HierarchicalTableData::serialize()
         {
-            return PythonNodeResult::serialize(this);
+            return HierarchicalTableData::serialize(this);
         }
 
-        PythonNodeResult* PythonNodeResult::copy() const
+        HierarchicalTableData* HierarchicalTableData::copy() const
         {
             // TODOJ Bu daha hızlı yapılabilir, şimdilik bu böyle olsun
-            auto data = PythonNodeResult::serialize(this);
-            return PythonNodeResult::deserialize(data);
+            auto data = HierarchicalTableData::serialize(this);
+            return HierarchicalTableData::deserialize(data);
         }
 
-        std::vector<uint8_t> PythonNodeResult::serialize(const PythonNodeResult *node)
+        std::vector<uint8_t> HierarchicalTableData::serialize(const HierarchicalTableData *node)
         {
             std::vector<uint8_t> buffer;
             buffer.reserve(4096);
@@ -261,7 +261,7 @@ namespace Pipeline
             return buffer;
         }
 
-        PythonNodeResult* PythonNodeResult::deserialize(const uint8_t* data, size_t size)
+        HierarchicalTableData* HierarchicalTableData::deserialize(const uint8_t* data, size_t size)
         {
             size_t offset = 0;
             uint32_t magic = readU32(data, size, offset);
@@ -277,24 +277,24 @@ namespace Pipeline
             return deserializeNode(data, size, offset, nullptr);
         }
 
-        PythonNodeResult* PythonNodeResult::deserialize(const std::vector<uint8_t>& buffer)
+        HierarchicalTableData* HierarchicalTableData::deserialize(const std::vector<uint8_t>& buffer)
         {
             return deserialize(buffer.data(), buffer.size());
         }
 
-        std::pair<size_t, size_t> PythonNodeResult::mapToCellIndex(size_t index) const
+        std::pair<size_t, size_t> HierarchicalTableData::mapToCellIndex(size_t index) const
         {
             size_t row = index / m_columnCount;
             size_t column = index % m_columnCount;
             return std::make_pair(row, column);
         }
 
-        size_t PythonNodeResult::mapFromCellIndex(size_t row, size_t column) const
+        size_t HierarchicalTableData::mapFromCellIndex(size_t row, size_t column) const
         {
             return row * this->m_columnCount + column;
         }
 
-        void PythonNodeResult::serializeNode(std::vector<uint8_t>& buf, const PythonNodeResult *node)
+        void HierarchicalTableData::serializeNode(std::vector<uint8_t>& buf, const HierarchicalTableData *node)
         {
             if (!node)
             {
@@ -320,7 +320,7 @@ namespace Pipeline
             size_t childCount = rows * cols;
             writeU64(buf, childCount);
             // Serialize each slot in row-major order
-            auto* mutableNode = const_cast<PythonNodeResult*>(node);
+            auto* mutableNode = const_cast<HierarchicalTableData*>(node);
 
             for (size_t r = 0; r < rows; r++)
             {
@@ -331,17 +331,17 @@ namespace Pipeline
             }
         }
 
-        PythonNodeResult* PythonNodeResult::deserializeNode(const uint8_t* data, size_t size, size_t& offset, PythonNodeResult *parent)
+        HierarchicalTableData* HierarchicalTableData::deserializeNode(const uint8_t* data, size_t size, size_t& offset, HierarchicalTableData *parent)
         {
             uint8_t marker = readU8(data, size, offset);
 
             if (marker == 0)
                 return nullptr;
 
-            auto* node = new PythonNodeResult(parent);
+            auto* node = new HierarchicalTableData(parent);
             uint64_t rows = readU64(data, size, offset);
             uint64_t cols = readU64(data, size, offset);
-            auto valueType = static_cast<PythonNodeResult::ValueType>(readU32(data, size, offset));
+            auto valueType = static_cast<HierarchicalTableData::ValueType>(readU32(data, size, offset));
             std::string value = readString(data, size, offset);
             node->setSize(static_cast<size_t>(rows), static_cast<size_t>(cols));
             node->setValueType(valueType);
@@ -362,7 +362,7 @@ namespace Pipeline
 
             for (uint64_t i = 0; i < childCount; i++)
             {
-                PythonNodeResult* child = deserializeNode(data, size, offset, node);
+                HierarchicalTableData* child = deserializeNode(data, size, offset, node);
 
                 if (child)
                 {
@@ -375,7 +375,7 @@ namespace Pipeline
             return node;
         }
 
-        void PythonNodeResult::setCell(size_t row, size_t column, PythonNodeResult *child)
+        void HierarchicalTableData::setCell(size_t row, size_t column, HierarchicalTableData *child)
         {
             size_t index = mapFromCellIndex(row, column);
 
@@ -396,7 +396,7 @@ namespace Pipeline
                 child->m_parent = this;
         }
 
-        void PythonNodeResult::setValueType(ValueType vt)
+        void HierarchicalTableData::setValueType(ValueType vt)
         {
             m_valueType = vt;
         }

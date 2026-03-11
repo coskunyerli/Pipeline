@@ -2,7 +2,7 @@
 #include <QSharedPointer>
 #include <QHash>
 #include <QAbstractItemModel>
-#include <data/pythonnoderesult.h>
+#include <data/hierarchicaltabledata.h>
 
 namespace Pipeline
 {
@@ -30,19 +30,19 @@ namespace Pipeline
 
 
             public:
-                void setRoot(const QSharedPointer<PythonNodeResult>& root);
+                void setRoot(const QSharedPointer<HierarchicalTableData>& root);
                 int rows() const;
                 int columns() const;
                 void setRows(int rows);
                 void setColumns(int columns);
-                QSharedPointer<PythonNodeResult> getRoot() const {return m_rootResult;}
+                QSharedPointer<HierarchicalTableData> getRoot() const {return m_rootResult;}
             signals:
                 void rowsChanged();
                 void columnsChanged();
             private:
-                PythonNodeResult* getResultNode(const QModelIndex& index) const;
+                HierarchicalTableData* getResultNode(const QModelIndex& index) const;
             private:
-                QSharedPointer<PythonNodeResult>  m_rootResult;
+                QSharedPointer<HierarchicalTableData>  m_rootResult;
 
         };
     }
