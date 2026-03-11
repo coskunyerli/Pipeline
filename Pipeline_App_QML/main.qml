@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Window 2.12
 import Pipeline.Models 1.0 as PM
 import QtQml.Models 2.12 as QM
-import QtQuick.Controls  2.15
+import QtQuick.Controls  2.15 as QC
 import Pipeline.Services 1.0 as PS
 import Pipeline.Managers 1.0 as PMan
 
@@ -22,8 +22,8 @@ Window {
         {
             pythonFilename: dialogLoader.nodeModel.pythonFilename
             pythonError: dialogLoader.nodeModel.pythonError
-
-            onAccepted : (filename, error) =>
+            name:dialogLoader.nodeModel.name
+            onAccepted : (name, filename, error) =>
             {
                 if(filename !== nodeModel.pythonFilename)
                 {
@@ -34,14 +34,23 @@ Window {
                 {
                    nodeModel.pythonError = error;
                 }
+
+                if(name !== nodeModel.name)
+                {
+                    nodeModel.name = name;
+                }
             }
+            onSaveRequested :
+            {
+
+            }
+
             inputModel: dialogLoader.nodeModel.inputTableModel
             outputModel: dialogLoader.nodeModel.outputTableModel
             actor: dialogLoader.nodeModel.actor
         }
 
         onLoaded: {
-                    // Yüklenen pencere kapandığında Loader'ı sıfırla
                     item.dialogClosed.connect(() => {
                         dialogLoader.active = false
                     })
@@ -111,7 +120,7 @@ Window {
     {
         spacing: 0
         anchors.fill: parent
-        Button
+        QC.Button
         {
             text:"Run"
             onClicked:
@@ -127,6 +136,19 @@ Window {
                 Layout.preferredWidth:200
                 Layout.fillHeight: true
                 color:"#202020"
+                ListView
+                {
+                    anchors.fill:parent
+                    model: PM.NodeModel
+                    {
+
+                    }
+
+                    delegate: QC.Label
+                    {
+                        text : "Test"
+                    }
+                }
             }
             Item
             {
@@ -211,9 +233,9 @@ Window {
                             contextMenu.popup()
                     }
 
-                    Menu {
+                    QC.Menu {
                         id: contextMenu
-                        MenuItem
+                        QC.MenuItem
                         {
                             text: "Add Node"
                             onTriggered:
@@ -222,7 +244,7 @@ Window {
                             }
 
                         }
-                        MenuItem
+                        QC.MenuItem
                         {
                             text: "Add Node2"
                             onTriggered:

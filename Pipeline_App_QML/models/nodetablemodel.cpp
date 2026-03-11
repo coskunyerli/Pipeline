@@ -1,20 +1,19 @@
 #include "models/nodetablemodel.h"
-
+#include <helpers/stringhelper.h>
 namespace Pipeline
 {
     namespace Runtime
     {
 
         NodeTableModel::NodeTableModel(QObject *parent)
-        : QAbstractItemModel(parent)
+            : QAbstractItemModel(parent)
         {
             m_rootResult = QSharedPointer<PythonNodeResult>::create();
-            m_rootResult->setSize(10,10);
+            m_rootResult->setSize(10, 10);
         }
 
         NodeTableModel::~NodeTableModel()
         {
-
         }
 
         int NodeTableModel::rowCount(const QModelIndex &parent) const
@@ -73,7 +72,7 @@ namespace Pipeline
                 return QModelIndex();
             }
 
-            return createIndex(row, column, parentNode->getCell(row,column));
+            return createIndex(row, column, parentNode->getCell(row, column));
         }
 
         QModelIndex NodeTableModel::parent(const QModelIndex &child) const
@@ -82,8 +81,10 @@ namespace Pipeline
             {
                 return QModelIndex();
             }
+
             auto* childNode = getResultNode(child);
-            if(!childNode)
+
+            if (!childNode)
             {
                 return QModelIndex();
             }
@@ -101,7 +102,7 @@ namespace Pipeline
             }
 
             bool has;
-            std::pair<size_t,size_t> parentCellIndex = parentNode->getParent()->cellIndexOf(parentNode, has);
+            std::pair<size_t, size_t> parentCellIndex = parentNode->getParent()->cellIndexOf(parentNode, has);
 
             if (has)
             {
@@ -113,18 +114,19 @@ namespace Pipeline
 
         QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         {
-            if(!index.isValid())
+            if (!index.isValid())
             {
                 return {};
             }
 
             PythonNodeResult* resultNode = getResultNode(index);
-            if(!resultNode)
+
+            if (!resultNode)
             {
                 return {};
             }
 
-            if(role == Qt::DisplayRole)
+            if (role == Qt::DisplayRole)
             {
                 return QString::fromStdString(resultNode->getValue());
             }
@@ -132,41 +134,84 @@ namespace Pipeline
             return {};
         }
 
+        bool NodeTableModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+        {
+            if (role == Qt::EditRole)
+            {
+                role = Qt::DisplayRole;
+            }
+
+            if (orientation == Qt::Horizontal)
+            {
+                switch (role)
+                {
+                    case Qt::DisplayRole:
+                        {
+                            m_rootResult->setHeaderData(section, value.toString().toStdString());
+                            emit this->headerDataChanged(orientation, section, section + 1);
+                            return true;
+                        }
+                }
+            }
+
+            return false;
+        }
+
         bool NodeTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
         {
-            if(!index.isValid())
+            if (!index.isValid())
             {
                 return false;
             }
 
             auto *resultNode = this->getResultNode(index.parent());
-            if(!resultNode)
+
+            if (!resultNode)
             {
                 return false;
             }
 
-            if(role == Qt::EditRole)
+            if (role == Qt::EditRole)
             {
                 role = Qt::DisplayRole;
             }
 
-            switch (role) {
-            case Qt::DisplayRole:
+            switch (role)
             {
-                auto *cellResultNode = resultNode->getOrCreateCell(index.row(),index.column());
-                if(cellResultNode != nullptr)
-                {
-                    cellResultNode->setValue(value.toString().toStdString());
-                }
-                return true;
+                case Qt::DisplayRole:
+                    {
+                        auto *cellResultNode = resultNode->getOrCreateCell(index.row(), index.column());
+
+                        if (cellResultNode != nullptr)
+                        {
+                            cellResultNode->setValue(value.toString().toStdString());
+                        }
+
+                        return true;
+                    }
+
+                default:
+                    break;
             }
-            default:
-                break;
-            }
+
             return false;
         }
 
-        void NodeTableModel::setRoot(const QSharedPointer<PythonNodeResult> &root)
+        QVariant NodeTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+        {
+            if (orientation == Qt::Vertical)
+            {
+                return section;
+            }
+            else if (orientation == Qt::Horizontal)
+            {
+                return QString::fromStdString(m_rootResult->getHeaderData(section));
+            }
+
+            return QVariant();
+        }
+
+        void NodeTableModel::setRoot(const QSharedPointer<PythonNodeResult>& root)
         {
             this->beginResetModel();
             m_rootResult = root;
@@ -185,30 +230,31 @@ namespace Pipeline
 
         void NodeTableModel::setRows(int rows)
         {
-            if(rows == rowCount())
+            if (rows == rowCount())
             {
                 return;
             }
 
             this->beginResetModel();
-            this->m_rootResult->setSize(rows,this->columnCount());
+            this->m_rootResult->setSize(rows, this->columnCount());
             this->endResetModel();
             emit this->rowsChanged();
         }
 
         void NodeTableModel::setColumns(int columns)
         {
-            if(columns == columnCount())
+            if (columns == columnCount())
             {
                 return;
             }
+
             this->beginResetModel();
             this->m_rootResult->setSize(this->rowCount(), columns);
             this->endResetModel();
             emit this->columnsChanged();
         }
 
-        PythonNodeResult *NodeTableModel::getResultNode(const QModelIndex &index) const
+        PythonNodeResult* NodeTableModel::getResultNode(const QModelIndex &index) const
         {
             if (!index.isValid())
             {

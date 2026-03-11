@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include <helpers/stringhelper.h>
+
 // -------------------------------------------------------
 // Binary format layout:
 //
@@ -104,75 +106,6 @@ namespace Pipeline
                 return str;
             }
 
-            // --- Recursive serialize ---
-
-            void serializeNode(std::vector<uint8_t>& buf, const PythonNodeResult* node)
-            {
-                if (!node)
-                {
-                    writeU8(buf, 0);
-                    return;
-                }
-
-                writeU8(buf, 1);
-                size_t rows = node->getRowCount();
-                size_t cols = node->getColumnCount();
-                writeU64(buf, rows);
-                writeU64(buf, cols);
-                writeU32(buf, static_cast<uint32_t>(node->getValueType()));
-                writeString(buf, node->getValue());
-                size_t childCount = rows * cols;
-                writeU64(buf, childCount);
-                // Serialize each slot in row-major order
-                auto* mutableNode = const_cast<PythonNodeResult*>(node);
-
-                for (size_t r = 0; r < rows; r++)
-                {
-                    for (size_t c = 0; c < cols; c++)
-                    {
-                        serializeNode(buf, mutableNode->getCell(r, c));
-                    }
-                }
-            }
-
-            // --- Recursive deserialize ---
-
-            PythonNodeResult* deserializeNode(const uint8_t* data, size_t size,
-                                              size_t& offset, PythonNodeResult* parent)
-            {
-                uint8_t marker = readU8(data, size, offset);
-
-                if (marker == 0)
-                    return nullptr;
-
-                auto* node = new PythonNodeResult(parent);
-                uint64_t rows = readU64(data, size, offset);
-                uint64_t cols = readU64(data, size, offset);
-                auto valueType = static_cast<PythonNodeResult::ValueType>(readU32(data, size, offset));
-                std::string value = readString(data, size, offset);
-                node->setSize(static_cast<size_t>(rows), static_cast<size_t>(cols));
-                node->setValueType(valueType);
-
-                if (!value.empty())
-                    node->setValue(value);
-
-                uint64_t childCount = readU64(data, size, offset);
-
-                for (uint64_t i = 0; i < childCount; i++)
-                {
-                    PythonNodeResult* child = deserializeNode(data, size, offset, node);
-
-                    if (child)
-                    {
-                        size_t r = static_cast<size_t>(i / cols);
-                        size_t c = static_cast<size_t>(i % cols);
-                        node->setCell(r, c, child);
-                    }
-                }
-
-                return node;
-            }
-
         } // anonymous namespace
 
 
@@ -217,6 +150,23 @@ namespace Pipeline
         {
             this->m_value = value;
             this->m_valueType = static_cast<ValueType>(m_valueType | ValueType::Value);
+        }
+
+        std::string PythonNodeResult::getHeaderData(int section) const
+        {
+            auto it = m_headerData.find(section);
+
+            if (it != m_headerData.end())
+            {
+                return it->second;
+            }
+
+            return StringHelper::indexToString(section);
+        }
+
+        void PythonNodeResult::setHeaderData(int section, const std::string& value)
+        {
+            m_headerData[section] = value;
         }
 
         PythonNodeResult* PythonNodeResult::getCell(size_t row, size_t column)
@@ -293,7 +243,7 @@ namespace Pipeline
             return PythonNodeResult::serialize(this);
         }
 
-        PythonNodeResult *PythonNodeResult::copy() const
+        PythonNodeResult* PythonNodeResult::copy() const
         {
             // TODOJ Bu daha hızlı yapılabilir, şimdilik bu böyle olsun
             auto data = PythonNodeResult::serialize(this);
@@ -342,6 +292,87 @@ namespace Pipeline
         size_t PythonNodeResult::mapFromCellIndex(size_t row, size_t column) const
         {
             return row * this->m_columnCount + column;
+        }
+
+        void PythonNodeResult::serializeNode(std::vector<uint8_t>& buf, const PythonNodeResult *node)
+        {
+            if (!node)
+            {
+                writeU8(buf, 0);
+                return;
+            }
+
+            writeU8(buf, 1);
+            size_t rows = node->getRowCount();
+            size_t cols = node->getColumnCount();
+            writeU64(buf, rows);
+            writeU64(buf, cols);
+            writeU32(buf, static_cast<uint32_t>(node->getValueType()));
+            writeString(buf, node->getValue());
+            writeU32(buf, static_cast<uint32_t>(node->m_headerData.size()));
+
+            for (const auto& [key, value] : node->m_headerData)
+            {
+                writeU32(buf, static_cast<uint32_t>(key));
+                writeString(buf, value);
+            }
+
+            size_t childCount = rows * cols;
+            writeU64(buf, childCount);
+            // Serialize each slot in row-major order
+            auto* mutableNode = const_cast<PythonNodeResult*>(node);
+
+            for (size_t r = 0; r < rows; r++)
+            {
+                for (size_t c = 0; c < cols; c++)
+                {
+                    serializeNode(buf, mutableNode->getCell(r, c));
+                }
+            }
+        }
+
+        PythonNodeResult* PythonNodeResult::deserializeNode(const uint8_t* data, size_t size, size_t& offset, PythonNodeResult *parent)
+        {
+            uint8_t marker = readU8(data, size, offset);
+
+            if (marker == 0)
+                return nullptr;
+
+            auto* node = new PythonNodeResult(parent);
+            uint64_t rows = readU64(data, size, offset);
+            uint64_t cols = readU64(data, size, offset);
+            auto valueType = static_cast<PythonNodeResult::ValueType>(readU32(data, size, offset));
+            std::string value = readString(data, size, offset);
+            node->setSize(static_cast<size_t>(rows), static_cast<size_t>(cols));
+            node->setValueType(valueType);
+
+            if (!value.empty())
+                node->setValue(value);
+
+            uint32_t headerCount = readU32(data, size, offset);
+
+            for (uint32_t i = 0; i < headerCount; i++)
+            {
+                int key = static_cast<int>(readU32(data, size, offset));
+                std::string value = readString(data, size, offset);
+                node->setHeaderData(key, value);
+            }
+
+            uint64_t childCount = readU64(data, size, offset);
+
+            for (uint64_t i = 0; i < childCount; i++)
+            {
+                PythonNodeResult* child = deserializeNode(data, size, offset, node);
+
+                if (child)
+                {
+                    size_t r = static_cast<size_t>(i / cols);
+                    size_t c = static_cast<size_t>(i % cols);
+                    node->setCell(r, c, child);
+                }
+            }
+
+            return node;
         }
 
         void PythonNodeResult::setCell(size_t row, size_t column, PythonNodeResult *child)

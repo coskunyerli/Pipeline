@@ -49,6 +49,11 @@ namespace Pipeline
             return m_privateData->m_name;
         }
 
+        void Node::setName(const std::string &name)
+        {
+            m_privateData->m_name = name;
+        }
+
         float Node::getX() const
         {
             return m_x;

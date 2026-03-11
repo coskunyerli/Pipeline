@@ -46,20 +46,52 @@ Rectangle {
         syncView: tableView
         clip: true
 
-        delegate: Label {
+        delegate: Rectangle {
             required property var index
             required property string display
 
-            text: display
-            color: textColor
-            font.bold: true
-            padding: 8
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+            color: bgMid
+            border.color: borderColor
 
-            background: Rectangle {
-                color: bgMid
-                border.color: borderColor
+            implicitHeight: 32
+
+            TextField {
+                id: editor
+                anchors.fill: parent
+                text: display
+                readOnly: !editing
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font.bold: true
+                padding: 6
+                background: null
+            }
+
+            property bool editing: false
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton
+                onDoubleClicked: {
+                    editing = true
+                    editor.forceActiveFocus()
+                    editor.selectAll()
+                }
+            }
+
+            Connections {
+                target: editor
+                function onEditingFinished() {
+                    editing = false
+
+                    // modeli güncelle
+                    tableView.model.setHeaderData(
+                        index,
+                        Qt.Horizontal,
+                        editor.text,
+                        Qt.EditRole
+                    )
+                }
             }
         }
     }

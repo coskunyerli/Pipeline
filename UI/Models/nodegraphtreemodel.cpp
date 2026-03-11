@@ -680,6 +680,12 @@ namespace Pipeline
                         this->setY(posY);
                         return true;
                     }
+                case Roles::Name:
+                {
+                    QString name = value.toString();
+                    this->setName(name.toStdString());
+                    return true;
+                }
             }
 
             return false;

@@ -6,15 +6,20 @@
 #include <Models/connectiongraphmodel.h>
 #include <Models/connectiongraphviewmodel.h>
 #include <Models/nodeuimanager.h>
-#include "graphmodelservice.h"
+#include <services/graphmodelservice.h>
+#include <services/appdataservice.h>
+#include <services/nodemodelservice.h>
 #include <models/nodetabledialogmodel.h>
-#include "Models/portgraphviewmodel.h"
+#include <models/nodemodel.h>
+#include <Models/portgraphviewmodel.h>
 #include <nodes/pythonnodedialogactor.h>
 #include <nodes/pythonprocessactornode.h>
 #include <QQuickStyle>
 
 int main(int argc, char* argv[])
 {
+    QCoreApplication::setOrganizationName("Erythra Dynamics");
+    QCoreApplication::setApplicationName("Pipeline");
     QQuickStyle::setStyle("Fusion");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -22,6 +27,7 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
     qmlRegisterType<Pipeline::UI::NodeGraphTreeModel>("Pipeline.Models", 1, 0, "NodeGraphTreeModel");
+    qmlRegisterType<Pipeline::Runtime::NodeModel>("Pipeline.Models", 1, 0, "NodeModel");
     qmlRegisterType<Pipeline::UI::NodeGraphModel>("Pipeline.Models", 1, 0, "NodeGraphModel");
     qmlRegisterType<Pipeline::UI::NodeGraphViewModel>("Pipeline.Models", 1, 0, "NodeGraphViewModel");
     qmlRegisterType<Pipeline::UI::ConnectionGraphModel>("Pipeline.Models", 1, 0, "ConnectionGraphModel");
@@ -33,11 +39,20 @@ int main(int argc, char* argv[])
     qmlRegisterType<Pipeline::UI::NodeIUManager>("Pipeline.Managers", 1, 0, "NodeUIManager");
     qRegisterMetaType<Pipeline::UI::NodeGraphTreeModel*>("UI::NodeGraphTreeModel*");
     qRegisterMetaType<Pipeline::UI::ConnectionGraphModel*>("UI::ConnectionGraphModel*");
-
     // reach from qml but not created form qml
     qmlRegisterUncreatableType<Pipeline::Runtime::NodeTableModel>("Pipeline.Models", 1, 0, "NodeTableModel", "NodeTableModel cannot be created from QML");
     qmlRegisterUncreatableType<Pipeline::Runtime::PythonProcessActorNode>("Pipeline.Actors", 1, 0, "PythonProcessActorNode", "PythonProcessActorNode cannot be created from QML");
-
+    // qmlRegisterSingletonType<Pipeline::Runtime::AppDataService>(
+    //     "Pipeline.Services", 1, 0, "AppDataService",
+    //     &Pipeline::Runtime::AppDataService::instance
+    // );
+    qmlRegisterSingletonType<Pipeline::Runtime::NodeModelService>(
+        "Pipeline.Services",
+        1,
+        0,
+        "NodeModelService",
+        &Pipeline::Runtime::NodeModelService::instance
+        );
     //qmlRegisterSingletonType<Pipeline::Runtime::GraphModelService>("Pipeline.Services", 1, 0, "GraphModelService", Pipeline::Runtime::GraphModelService::createSingletonInstance);
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(

@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-
+#include <unordered_map>
 namespace Pipeline
 {
     namespace Runtime
@@ -41,6 +41,8 @@ namespace Pipeline
                 {
                     return m_data.size();
                 }
+                std::string getHeaderData(int section) const;
+                void setHeaderData(int section, const std::string& value);
                 PythonNodeResult* getCell(size_t row, size_t column);
                 PythonNodeResult* getOrCreateCell(size_t row, size_t column);
                 void deleteCell(size_t row, size_t column);
@@ -60,8 +62,12 @@ namespace Pipeline
             private:
                 std::pair<size_t, size_t> mapToCellIndex(size_t index) const;
                 size_t mapFromCellIndex(size_t row, size_t column) const;
+                static void serializeNode(std::vector<uint8_t>& buf, const PythonNodeResult* node);
+                static PythonNodeResult* deserializeNode(const uint8_t* data, size_t size,
+                        size_t& offset, PythonNodeResult* parent);
             private:
                 std::string m_value;
+                std::unordered_map<int, std::string> m_headerData;
                 std::vector<PythonNodeResult*> m_data;
                 size_t m_columnCount;
                 size_t m_rowCount;

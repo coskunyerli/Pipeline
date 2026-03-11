@@ -19,8 +19,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Pipeline_App_QML
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        graphmodelservice.h
-        graphmodelservice.cpp
+        services/graphmodelservice.h
+        services/graphmodelservice.cpp
         nodes/actornode.h
         nodes/actornode.cpp
         nodes/pythonscriptactornode.h
@@ -38,6 +38,14 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         models/nodetabledialogmodel.cpp
         nodes/pythonnodedialogactor.h
         nodes/pythonnodedialogactor.cpp
+        helpers/stringhelper.h
+        helpers/stringhelper.cpp
+        services/appdataservice.h
+        services/appdataservice.cpp
+        models/nodemodel.h
+        models/nodemodel.cpp
+        services/nodemodelservice.h
+        services/nodemodelservice.cpp
 
     )
 

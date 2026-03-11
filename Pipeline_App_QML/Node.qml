@@ -51,7 +51,7 @@ Item
         Text
         {
             id: title
-            text: "Node"
+            text: nodeModel.name
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent

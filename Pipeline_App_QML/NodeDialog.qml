@@ -5,6 +5,7 @@ import QtQuick.Window
 import QtQuick.Dialogs
 import Pipeline.Models as PM
 import Pipeline.Actors as PA
+import Pipeline.Services as PS
 
 Window {
     id: detachedDialog
@@ -17,11 +18,13 @@ Window {
     color: "#252525"
 
     signal dialogClosed()
-    signal accepted(string filename, string error)
+    signal accepted(string name, string filename, string error)
+    signal saveRequested()
 
     property var inputModel
     property var outputModel
     property string pythonFilename
+    property string name
     property alias pythonError : outputConsole.text
     property var actor : PA.PythonNodeDialogActor
     {
@@ -86,10 +89,22 @@ Window {
                     height: 1
                     color: inputTable.borderColor
                 }
-
-                RowLayout {
-                    spacing: 10
+                GridLayout {
+                    columns: 3
+                    columnSpacing: 10
                     Layout.fillWidth: true
+
+                    Label {
+                        text: "Name:"
+                        color: inputTable.textColor
+                    }
+
+                    PTextEdit {
+                        id: nameTextEdit
+                        text:name
+                        Layout.fillWidth: true
+                        Layout.columnSpan: 2
+                    }
 
                     Label {
                         text: "Python File:"
@@ -108,8 +123,8 @@ Window {
                         text: "Browse"
                         onClicked: fileDialog.open()
                     }
-                }
 
+                }
                 GridLayout {
                     columns: 4
                     columnSpacing: 10
@@ -259,6 +274,15 @@ Window {
             }
 
             PButton {
+                text: "Save"
+                Layout.preferredWidth: 90
+                onClicked:
+                {
+                    saveRequested()
+                }
+            }
+
+            PButton {
                 text: "Reset"
                 Layout.preferredWidth: 90
                 onClicked:
@@ -289,7 +313,7 @@ Window {
                     // copy data into reference model
                     inputDialogModel.saveData();
                     outputDialogModel.saveData();
-                    accepted(actor.filename, actor.pythonError)
+                    accepted(nameTextEdit.text, actor.filename, actor.pythonError)
                     detachedDialog.close()
                 }
             }
