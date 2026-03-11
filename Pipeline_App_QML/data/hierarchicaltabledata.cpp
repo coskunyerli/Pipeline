@@ -18,6 +18,9 @@
 //     8 bytes  columnCount (uint64, big-endian)
 //     4 bytes  valueType   (uint32, big-endian)
 //     4 bytes  value string length
+//     4 bytes  header size length
+//     4 bytes  header column number
+//     N bytes  header string data (UTF-8)
 //     N bytes  value string data (UTF-8)
 //     8 bytes  childCount  (uint64, big-endian)
 //     [childCount × Node]  recursive children
