@@ -48,6 +48,7 @@ Rectangle {
         clip: true
 
         delegate: Rectangle {
+            implicitWidth: 90
             required property var index
             required property string display
 
@@ -188,7 +189,6 @@ Rectangle {
                 }
                 onDoubleClicked:
                 {
-                    console.log(191)
                     root.cellDClicked(row, column)
                 }
             }
