@@ -1,5 +1,4 @@
 #pragma once
-#include <QSharedPointer>
 #include <QHash>
 #include <QAbstractItemModel>
 #include <data/hierarchicaltabledata.h>
@@ -31,20 +30,20 @@ namespace Pipeline
                 virtual QHash<int, QByteArray> roleNames() const;
 
             public:
-                void setRoot(const QSharedPointer<HierarchicalTableData>& root);
+                void setRoot(const std::shared_ptr<HierarchicalTableData>& root);
                 int rows() const;
                 int columns() const;
                 void setRows(int rows);
                 void setColumns(int columns);
-                QSharedPointer<HierarchicalTableData> getRoot() const {return m_rootResult;}
+                 std::shared_ptr<HierarchicalTableData> getRoot() const {return m_rootResult;}
             signals:
                 void rowsChanged();
                 void columnsChanged();
             private:
-                HierarchicalTableData* getResultNode(const QModelIndex& index) const;
-                HierarchicalTableData* accessResultNode(const QModelIndex& index);
+                HierarchicalTableData* getParentTableData(const QModelIndex& index) const;
+                HierarchicalTableData* accessParentTableData(const QModelIndex& index);
             private:
-                QSharedPointer<HierarchicalTableData>  m_rootResult;
+                std::shared_ptr<HierarchicalTableData>  m_rootResult;
 
         };
     }

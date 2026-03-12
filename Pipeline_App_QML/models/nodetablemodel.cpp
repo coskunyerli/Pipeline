@@ -9,7 +9,7 @@ namespace Pipeline
         NodeTableModel::NodeTableModel(QObject *parent)
             : QAbstractItemModel(parent)
         {
-            m_rootResult = QSharedPointer<HierarchicalTableData>::create();
+            m_rootResult = std::make_shared<HierarchicalTableData>();
             m_rootResult->setSize(10, 10);
         }
 
@@ -19,20 +19,21 @@ namespace Pipeline
 
         int NodeTableModel::rowCount(const QModelIndex &parent) const
         {
-            HierarchicalTableData* nodeResult;
+            HierarchicalTableData* parentTableData;
 
             if (!parent.isValid())
             {
-                nodeResult = this->m_rootResult.get();
+                parentTableData = this->m_rootResult.get();
             }
             else
             {
-                nodeResult = getResultNode(parent);
+                parentTableData = getParentTableData(parent);
+                parentTableData = parentTableData->getCell(parent.row(),parent.column()).get();
             }
 
-            if (nodeResult)
+            if (parentTableData)
             {
-                return static_cast<int>(nodeResult->getRowCount());
+                return static_cast<int>(parentTableData->getRowCount());
             }
 
             return 0;
@@ -40,20 +41,21 @@ namespace Pipeline
 
         int NodeTableModel::columnCount(const QModelIndex &parent) const
         {
-            HierarchicalTableData* nodeResult;
+            HierarchicalTableData* parentTableData;
 
             if (!parent.isValid())
             {
-                nodeResult = this->m_rootResult.get();
+                parentTableData = this->m_rootResult.get();
             }
             else
             {
-                nodeResult = getResultNode(parent);
+                parentTableData = getParentTableData(parent);
+                parentTableData = parentTableData->getCell(parent.row(),parent.column()).get();
             }
 
-            if (nodeResult)
+            if (parentTableData)
             {
-                return static_cast<int>(nodeResult->getColumnCount());
+                return static_cast<int>(parentTableData->getColumnCount());
             }
 
             return 0;
@@ -61,15 +63,18 @@ namespace Pipeline
 
         QModelIndex NodeTableModel::index(int row, int column, const QModelIndex &parent) const
         {
-            HierarchicalTableData* parentNode = m_rootResult.get();
+            HierarchicalTableData* parentTableData = m_rootResult.get();
 
             if (parent.isValid())
-                parentNode = getResultNode(parent);
+            {
+                parentTableData = getParentTableData(parent);
+                parentTableData = parentTableData->getCell(parent.row(),parent.column()).get();
+            }
 
-            if (!parentNode)
+            if (!parentTableData)
                 return QModelIndex();
 
-            return createIndex(row, column, parentNode);
+            return createIndex(row, column, parentTableData);
         }
 
         QModelIndex NodeTableModel::parent(const QModelIndex &child) const
@@ -77,28 +82,18 @@ namespace Pipeline
             if (!child.isValid())
                 return QModelIndex();
 
-            auto* table = getResultNode(child);
+            auto* parentTableData = getParentTableData(child);
 
-            if (!table)
+            if (!parentTableData)
                 return QModelIndex();
 
-            auto* childNode = table->getCell(child.row(), child.column());
+            auto* grandParentTableData = parentTableData->getParent();
 
-            if (!childNode)
-                return QModelIndex();
-
-            auto* parentNode = childNode->getParent();
-
-            if (!parentNode)
+            if (!grandParentTableData)
                 return QModelIndex();
 
             bool has;
-            if(!parentNode->getParent())
-            {
-                return QModelIndex();
-            }
-
-            auto pos = parentNode->getParent()->cellIndexOf(parentNode, has);
+            auto pos = grandParentTableData->cellIndexOf(parentTableData, has);
 
             if (!has)
                 return QModelIndex();
@@ -106,7 +101,7 @@ namespace Pipeline
             return createIndex(
                 static_cast<int>(pos.first),
                 static_cast<int>(pos.second),
-                parentNode->getParent()
+                grandParentTableData
                 );
         }
 
@@ -117,20 +112,20 @@ namespace Pipeline
                 return {};
             }
 
-            HierarchicalTableData* tableData = getResultNode(index);
+            HierarchicalTableData* parentTableData = getParentTableData(index);
 
-            if (!tableData)
+            if (!parentTableData)
             {
                 return {};
             }
 
             if (role == Qt::DisplayRole)
             {
-                return QString::fromStdString(tableData->getCellValue(index.row(), index.column()));
+                return QString::fromStdString(parentTableData->getCellValue(index.row(), index.column()));
             }
             else if (role == NodeTableRoles::HasTable)
             {
-                return static_cast<HierarchicalTableData::ValueType>(tableData->getCellValueType(index.row(),
+                return static_cast<HierarchicalTableData::ValueType>(parentTableData->getCellValueType(index.row(),
                         index.column()) & HierarchicalTableData::ValueType::Matrix) != HierarchicalTableData::ValueType::None;
             }
 
@@ -167,9 +162,9 @@ namespace Pipeline
                 return false;
             }
 
-            auto *tableData = this->getResultNode(index);
+            auto *parentTableData = this->getParentTableData(index);
 
-            if (!tableData)
+            if (!parentTableData)
             {
                 return false;
             }
@@ -183,7 +178,7 @@ namespace Pipeline
             {
                 case Qt::DisplayRole:
                     {
-                        tableData->setCellValue(index.row(), index.column(), value.toString().toStdString());
+                        parentTableData->setCellValue(index.row(), index.column(), value.toString().toStdString());
                         emit dataChanged(index, index, {role});
                         return true;
                     }
@@ -216,13 +211,13 @@ namespace Pipeline
                 return QModelIndex();
             }
 
-            auto* tableData = accessResultNode(index);
-            if (!tableData)
+            auto* parentTableData = accessParentTableData(index);
+            if (!parentTableData)
             {
                 return QModelIndex();
             }
 
-            auto child = tableData->getOrCreateCell(index.row(), index.column());
+            auto child = parentTableData->getOrCreateCell(index.row(), index.column());
             child->setSize(10, 10);
             emit dataChanged(index, index, {NodeTableRoles::ChildCell, NodeTableRoles::HasTable});
             return this->index(index.row(), index.column(), index.parent());
@@ -235,7 +230,7 @@ namespace Pipeline
             return roleNames;
         }
 
-        void NodeTableModel::setRoot(const QSharedPointer<HierarchicalTableData>& root)
+        void NodeTableModel::setRoot(const std::shared_ptr<HierarchicalTableData>& root)
         {
             this->beginResetModel();
             m_rootResult = root;
@@ -290,7 +285,7 @@ namespace Pipeline
             emit this->columnsChanged();
         }
 
-        HierarchicalTableData* NodeTableModel::getResultNode(const QModelIndex &index) const
+        HierarchicalTableData* NodeTableModel::getParentTableData(const QModelIndex &index) const
         {
             if (!index.isValid())
             {
@@ -300,7 +295,7 @@ namespace Pipeline
             return static_cast<HierarchicalTableData*>(index.internalPointer());
         }
 
-        HierarchicalTableData* NodeTableModel::accessResultNode(const QModelIndex &index)
+        HierarchicalTableData* NodeTableModel::accessParentTableData(const QModelIndex &index)
         {
             if (!index.isValid())
             {

@@ -73,7 +73,7 @@ namespace Pipeline
                     const uint8_t* outputDataU8 = reinterpret_cast<const uint8_t*>(outputData.constData());
                     size_t size = static_cast<size_t>(outputData.size());
                     auto* outputResult = HierarchicalTableData::deserialize(outputDataU8, size);
-                    result = QVariant::fromValue<QSharedPointer<HierarchicalTableData>>(QSharedPointer<HierarchicalTableData>(outputResult));
+                    result = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(std::shared_ptr<HierarchicalTableData>(outputResult));
                     return result;
                 }
             }
@@ -164,9 +164,9 @@ namespace Pipeline
                 auto behaviourContext = this->getContext();
                 if (!behaviourContext.m_variants.isEmpty())
                 {
-                    if (behaviourContext.m_variants[0].canConvert<QSharedPointer<HierarchicalTableData>>())
+                    if (behaviourContext.m_variants[0].canConvert<std::shared_ptr<HierarchicalTableData>>())
                     {
-                        auto inputData = behaviourContext.m_variants[0].value<QSharedPointer<HierarchicalTableData>>();
+                        auto inputData = behaviourContext.m_variants[0].value<std::shared_ptr<HierarchicalTableData>>();
 
                         if (inputData)
                         {
@@ -183,7 +183,7 @@ namespace Pipeline
             // this is main thread we need to set root here beacuse of UI update
             if (!m_pythonThrowError)
             {
-                auto outputResult = result.value<QSharedPointer<HierarchicalTableData>>();
+                auto outputResult = result.value<std::shared_ptr<HierarchicalTableData>>();
                 m_outputDataTable->setRoot(outputResult);
             }
         }

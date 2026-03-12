@@ -122,6 +122,11 @@ namespace Pipeline
         {
             bool has;
 
+            for(auto childTable : m_tables)
+            {
+                childTable.second->m_parent = nullptr;
+            }
+
             if (m_parent)
             {
                 std::pair<size_t, size_t> cellIndex = m_parent->cellIndexOf(this, has);
@@ -130,11 +135,6 @@ namespace Pipeline
                 {
                     m_parent->removeCell(cellIndex.first, cellIndex.second);
                 }
-            }
-
-            for (auto &pair : m_tables)
-            {
-                delete pair.second;
             }
 
             m_tables.clear();
@@ -218,7 +218,7 @@ namespace Pipeline
             m_headerData[section] = value;
         }
 
-        HierarchicalTableData* HierarchicalTableData::getCell(size_t row, size_t column) const
+        std::shared_ptr<HierarchicalTableData> HierarchicalTableData::getCell(size_t row, size_t column) const
         {
             CellKey key = {row, column};
             auto it = m_tables.find(key);
@@ -253,7 +253,7 @@ namespace Pipeline
                 type =  static_cast<ValueType>(type | ValueType::Value);
             }
 
-            auto *cell = this->getCell(row, column);
+            auto cell = this->getCell(row, column);
 
             if (cell)
             {
@@ -263,30 +263,20 @@ namespace Pipeline
             return type;
         }
 
-        HierarchicalTableData* HierarchicalTableData::getOrCreateCell(size_t row, size_t column)
+        std::shared_ptr<HierarchicalTableData> HierarchicalTableData::getOrCreateCell(size_t row, size_t column)
         {
-            auto *cell = this->getCell(row, column);
+            auto cell = this->getCell(row, column);
 
             if (!cell)
             {
-                cell = new HierarchicalTableData();
-                this->setCell(row, column, cell);
+                this->setCell(row, column, new HierarchicalTableData());
+                cell = this->getCell(row, column);
             }
 
             return cell;
         }
 
-        void HierarchicalTableData::deleteCell(size_t row, size_t column)
-        {
-            auto child = this->removeCell(row, column);
-
-            if (child)
-            {
-                delete child;
-            }
-        }
-
-        HierarchicalTableData* HierarchicalTableData::removeCell(size_t row, size_t column)
+        std::shared_ptr<HierarchicalTableData> HierarchicalTableData::removeCell(size_t row, size_t column)
         {
             CellKey key = {row, column};
             auto it = m_tables.find(key);
@@ -296,29 +286,14 @@ namespace Pipeline
                 return nullptr;
             }
 
+            auto removedCell = it->second;
             m_tables.erase(key);
-            return it->second;
+            return removedCell;
         }
 
-        std::pair<size_t, size_t> HierarchicalTableData::cellIndexOf(const HierarchicalTableData *child, bool &has) const
+        std::pair<size_t, size_t> HierarchicalTableData::cellIndexOf(const std::shared_ptr<HierarchicalTableData>& child, bool &has) const
         {
-            if (!child)
-            {
-                has = false;
-                return std::make_pair(0, 0);
-            }
-
-            for (auto &pair : m_tables)
-            {
-                if (pair.second == child)
-                {
-                    has = true;
-                    return std::make_pair(pair.first.row, pair.first.column);
-                }
-            }
-
-            has = false;
-            return std::make_pair(0, 0);
+            return this->cellIndexOf(child.get(), has);
         }
 
         std::vector<uint8_t> HierarchicalTableData::serialize()
@@ -363,6 +338,27 @@ namespace Pipeline
         HierarchicalTableData* HierarchicalTableData::deserialize(const std::vector<uint8_t>& buffer)
         {
             return deserialize(buffer.data(), buffer.size());
+        }
+
+        std::pair<size_t, size_t> HierarchicalTableData::cellIndexOf(const HierarchicalTableData *child, bool &has) const
+        {
+            if (!child)
+            {
+                has = false;
+                return std::make_pair(0, 0);
+            }
+
+            for (auto &pair : m_tables)
+            {
+                if (pair.second.get() == child)
+                {
+                    has = true;
+                    return std::make_pair(pair.first.row, pair.first.column);
+                }
+            }
+
+            has = false;
+            return std::make_pair(0, 0);
         }
 
         std::pair<size_t, size_t> HierarchicalTableData::mapToCellIndex(size_t index) const
@@ -421,7 +417,7 @@ namespace Pipeline
             {
                 writeU64(buf, pair.first.row);
                 writeU64(buf, pair.first.column);
-                serializeNode(buf, pair.second);
+                serializeNode(buf, pair.second.get());
             }
         }
 
@@ -478,10 +474,9 @@ namespace Pipeline
             if (it != m_tables.end())
             {
                 it->second->m_parent = nullptr;
-                delete it->second;
             }
 
-            m_tables[key] = child;
+            m_tables[key] = std::shared_ptr<HierarchicalTableData>(child);
 
             if (child)
                 child->m_parent = this;
