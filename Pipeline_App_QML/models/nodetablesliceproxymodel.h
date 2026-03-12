@@ -7,6 +7,7 @@ namespace Pipeline::Runtime
     class NodeTableSliceProxyModel : public QAbstractProxyModel
     {
             Q_OBJECT
+            Q_PROPERTY(QModelIndex currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
 
         public:
             explicit NodeTableSliceProxyModel(QObject* parent = nullptr);
@@ -48,7 +49,8 @@ namespace Pipeline::Runtime
 
 
             void setSourceModel(QAbstractItemModel* model) override;
-
+        signals:
+            void currentIndexChanged();
         private:
             QPersistentModelIndex m_currentIndex;
     };

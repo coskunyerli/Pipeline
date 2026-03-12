@@ -3,17 +3,56 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Rectangle {
+    id:root
     width: 600
     color: "#252525"
     implicitHeight: breadcrumbRow.implicitHeight + 8
+    signal clicked(var index);
+    property var index
 
-    ListModel {
-        id: breadcrumbModel
-        ListElement { title: "Home" }
-        ListElement { title: "Projects" }
-        ListElement { title: "Pipeline" }
-        ListElement { title: "Nodes" }
+    onIndexChanged:
+    {
+        getList(index)
     }
+
+    function getList(index)
+    {
+        breadcrumbModel.clear()
+
+        if(!index)
+        {
+            return [];
+        }
+
+        let list = [];
+        let temp = index;
+        while(temp.valid)
+        {
+            let enable = true;
+            if(temp === index)
+            {
+                enable = false;
+            }
+
+            list.push({display:temp.data(Qt.UserRole + 3), modelIndex:temp, enable:enable});
+            temp = temp.parent;
+        }
+
+
+        list.push({display:"/", modelIndex:temp, enable: list.length > 0});
+
+
+        list.reverse();
+
+        for(let i=0; i<list.length; i++)
+            breadcrumbModel.append(list[i])
+    }
+
+    ListModel
+    {
+        id:breadcrumbModel
+    }
+
     ColumnLayout
     {
         anchors.fill: parent
@@ -22,6 +61,7 @@ Rectangle {
             spacing: 6
             Layout.leftMargin: 4
             Repeater {
+                id:repeater
                 model: breadcrumbModel
 
                 RowLayout {
@@ -29,10 +69,26 @@ Rectangle {
 
                     Button {
                         id :button
-                        text: model.title
+                        enabled: model.enable
+                        text: model.display
 
                         background: Rectangle {
-                            color: button.hovered ? "#3a3a3a" : "#252525"
+                            color:
+                            {
+                                if(button.hovered)
+                                {
+                                    return "#3a3a3a";
+                                }
+                                else if(button.enabled)
+                                {
+                                    return "#252525";
+                                }
+                                else
+                                {
+                                    return "#404040";
+                                }
+                            }
+
                             radius: 4
                         }
 
@@ -44,13 +100,13 @@ Rectangle {
                         }
 
                         onClicked: {
-                            console.log("Clicked:", model.title, "index:", index)
+                            root.clicked(model.modelIndex)
                         }
                     }
 
                     Text {
                         Layout.alignment: Text.AlignVCenter
-                        visible: index < breadcrumbModel.count - 1
+                        visible: index < repeater.count - 1
                         text: ">"
                         color: "#888888"
                         font.pixelSize: 14

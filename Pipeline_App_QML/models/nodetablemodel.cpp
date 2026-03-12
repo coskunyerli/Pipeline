@@ -128,6 +128,11 @@ namespace Pipeline
                 return static_cast<HierarchicalTableData::ValueType>(parentTableData->getCellValueType(index.row(),
                         index.column()) & HierarchicalTableData::ValueType::Matrix) != HierarchicalTableData::ValueType::None;
             }
+            else if (role == NodeTableRoles::CellKey)
+            {
+                auto keyString = QString("(") + QString::number(index.row()) + ", " + QString::number(index.column()) + ")";
+                return keyString;
+            }
 
             return {};
         }

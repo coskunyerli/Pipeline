@@ -145,13 +145,27 @@ Rectangle {
             color: {
                         if (selectedRow === row && selectedCol === column)
                             return selectionColor
+
                         if (selectedRow === row || selectedCol === column)
                             return hoverColor
+
+
                         return bgDark
                     }
 
-            border.color: (selectedRow === row && selectedCol === column)
-                                     ? selectionColor : borderColor
+            border.color:
+            {
+                if (model.hasTable)
+                {
+                    return "#3daee9";
+                }
+                else
+                {
+                    return (selectedRow === row && selectedCol === column)
+                            ? selectionColor : borderColor;
+                }
+            }
+
             border.width: (selectedRow === row && selectedCol === column) ? 2 : 1
 
             TextInput {

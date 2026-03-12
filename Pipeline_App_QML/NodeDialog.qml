@@ -151,9 +151,15 @@ Window {
                             spacing: 6
                             PBreadCrumb
                             {
+                                Layout.preferredHeight: 32
                                 id : breadcrumb
                                 color: "transparent"
                                 Layout.fillWidth: true
+                                index: inputDialogProxyModel.currentIndex
+                                onClicked: (modelIndex) =>
+                                           {
+                                               inputDialogProxyModel.currentIndex = inputDialogModel.index(modelIndex.row,modelIndex.column,modelIndex.parent)
+                                           }
                             }
 
                             Rectangle
@@ -225,12 +231,12 @@ Window {
 
                             onCellDClicked:(row,column) =>
                             {
-                                let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex());
+                                let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
                                 if(!modelIndex.data(Qt.UserRole + 1))
                                 {
-                                    modelIndex = inputDialogModel.createCell(modelIndex);
-                                    inputDialogProxyModel.setCurrentIndex(modelIndex)
+                                    modelIndex = inputDialogModel.createCell(modelIndex); 
                                 }
+                                inputDialogProxyModel.currentIndex = modelIndex
                             }
                         }
 

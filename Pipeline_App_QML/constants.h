@@ -18,7 +18,8 @@ namespace Pipeline
         enum NodeTableRoles
         {
             HasTable = Qt::UserRole + 1,
-            ChildCell
+            ChildCell,
+            CellKey
         };
     }
 }

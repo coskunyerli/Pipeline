@@ -14,6 +14,7 @@ namespace Pipeline::Runtime
 
         beginResetModel();
         m_currentIndex = index;
+        emit this->currentIndexChanged();
         endResetModel();
     }
 
