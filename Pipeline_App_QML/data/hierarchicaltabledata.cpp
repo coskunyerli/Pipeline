@@ -122,7 +122,7 @@ namespace Pipeline
         {
             bool has;
 
-            for(auto childTable : m_tables)
+            for(auto& childTable : m_tables)
             {
                 childTable.second->m_parent = nullptr;
             }
