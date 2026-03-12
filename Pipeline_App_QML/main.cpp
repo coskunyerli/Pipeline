@@ -11,6 +11,7 @@
 #include <services/nodemodelservice.h>
 #include <models/nodetabledialogmodel.h>
 #include <models/nodemodel.h>
+#include <models/nodetablesliceproxymodel.h>>
 #include <Models/portgraphviewmodel.h>
 #include <nodes/pythonnodedialogactor.h>
 #include <nodes/pythonprocessactornode.h>
@@ -28,6 +29,7 @@ int main(int argc, char* argv[])
     QQmlApplicationEngine engine;
     qmlRegisterType<Pipeline::UI::NodeGraphTreeModel>("Pipeline.Models", 1, 0, "NodeGraphTreeModel");
     qmlRegisterType<Pipeline::Runtime::NodeModel>("Pipeline.Models", 1, 0, "NodeModel");
+    qmlRegisterType<Pipeline::Runtime::NodeTableSliceProxyModel>("Pipeline.Models", 1, 0, "NodeTableSliceProxyModel");
     qmlRegisterType<Pipeline::UI::NodeGraphModel>("Pipeline.Models", 1, 0, "NodeGraphModel");
     qmlRegisterType<Pipeline::UI::NodeGraphViewModel>("Pipeline.Models", 1, 0, "NodeGraphViewModel");
     qmlRegisterType<Pipeline::UI::ConnectionGraphModel>("Pipeline.Models", 1, 0, "ConnectionGraphModel");

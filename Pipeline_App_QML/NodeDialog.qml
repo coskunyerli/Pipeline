@@ -125,62 +125,115 @@ Window {
                     }
 
                 }
-                GridLayout {
-                    columns: 4
-                    columnSpacing: 10
-                    rowSpacing: 6
-                    Layout.fillWidth: true
-
-                    Label {
-                        text: "Row Count:"
-                        color: inputTable.textColor
-                    }
-
-
-
-                    PTextEdit {
-                        Layout.preferredWidth: 120
-                        text: inputDialogModel.rows
-                        onTextChanged: {
-                            let val = Number(text)
-                            if(inputDialogModel.rows !== val)
-                                inputDialogModel.rows = val
-                        }
-                    }
-
-
-                    Label {
-                        text: "Column Count:"
-                        color: inputTable.textColor
-                    }
-
-                    PTextEdit {
-                        Layout.preferredWidth: 120
-                        text: inputDialogModel.columns
-                        onTextChanged: {
-                            let val = Number(text)
-                            if(inputDialogModel.columns !== val)
-                                inputDialogModel.columns = val
-                        }
-                    }
-                }
 
                 SplitView
                 {
-                    orientation: Qt.Vertical
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    TableGridWidget {
-                        id: inputTable
-                        // copy inputModel inside
-                        model:PM.NodeTableDialogModel
-                        {
-                            id: inputDialogModel
-                            referenceModel: inputModel
-                        }
-
+                    Layout.topMargin: 12
+                    orientation: Qt.Vertical
+                    ColumnLayout
+                    {
                         SplitView.fillWidth: true
                         SplitView.fillHeight: true
+                        spacing: 0
+
+                        Rectangle
+                        {
+                            color: "#404040"
+                            height: 1
+                            Layout.fillWidth: true
+                        }
+
+                        RowLayout
+                        {
+                            Layout.fillWidth: true
+                            spacing: 6
+                            PBreadCrumb
+                            {
+                                id : breadcrumb
+                                color: "transparent"
+                                Layout.fillWidth: true
+                            }
+
+                            Rectangle
+                            {
+                                width: 2
+                                color:"#303030"
+                                Layout.preferredHeight:breadcrumb.implicitHeight - 8
+                            }
+
+                            RowLayout {
+                                spacing: 6
+                                Layout.rightMargin: 8
+                                Label {
+                                    text: "Row Count:"
+                                    color: inputTable.textColor
+                                }
+
+
+
+                                PTextEdit {
+                                    Layout.preferredHeight: 24
+                                    Layout.preferredWidth: 60
+                                    bottomPadding: 4
+                                    topPadding: 4
+                                    text: inputDialogModel.rows
+                                    onTextChanged: {
+                                        let val = Number(text)
+                                        if(inputDialogModel.rows !== val)
+                                            inputDialogModel.rows = val
+                                    }
+                                }
+
+
+                                Label {
+                                    text: "Column Count:"
+                                    color: inputTable.textColor
+                                }
+
+                                PTextEdit {
+                                    Layout.preferredHeight: 24
+                                    Layout.preferredWidth: 60
+                                    bottomPadding: 4
+                                    topPadding: 4
+                                    text: inputDialogModel.columns
+                                    onTextChanged: {
+                                        let val = Number(text)
+                                        if(inputDialogModel.columns !== val)
+                                            inputDialogModel.columns = val
+                                    }
+                                }
+                            }
+                        }
+
+
+                        TableGridWidget {
+                            id: inputTable
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            // copy inputModel inside
+                            model:PM.NodeTableSliceProxyModel
+                            {
+                                id: inputDialogProxyModel
+                                sourceModel:PM.NodeTableDialogModel
+                                {
+                                    id: inputDialogModel
+                                    referenceModel: inputModel
+                                }
+                            }
+
+                            onCellDClicked:(row,column) =>
+                            {
+                                let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex());
+                                if(!modelIndex.data(Qt.UserRole + 1))
+                                {
+                                    modelIndex = inputDialogModel.createCell(modelIndex);
+                                    inputDialogProxyModel.setCurrentIndex(modelIndex)
+                                }
+                            }
+                        }
+
                     }
 
                     ColumnLayout
@@ -226,19 +279,93 @@ Window {
 
             ColumnLayout {
 
+                spacing: 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+
+                Rectangle
+                {
+                    color: "#404040"
+                    height: 1
+                    Layout.fillWidth: true
+                    Layout.topMargin: 32
+                }
+
+                RowLayout
+                {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    PBreadCrumb
+                    {
+                        id : outputBreadcrumb
+                        color: "transparent"
+                        Layout.fillWidth: true
+                    }
+
+                    Rectangle
+                    {
+                        width: 2
+                        color:"#303030"
+                        Layout.preferredHeight:outputBreadcrumb.implicitHeight - 8
+                    }
+
+                    RowLayout {
+                        spacing: 6
+                        Layout.rightMargin: 8
+                        Label {
+                            text: "Row Count:"
+                            color: outputTable.textColor
+                        }
+
+
+
+                        PTextEdit {
+                            Layout.preferredHeight: 24
+                            Layout.preferredWidth: 60
+                            bottomPadding: 4
+                            topPadding: 4
+                            text: outputDialogModel.rows
+                            onTextChanged: {
+                                let val = Number(text)
+                                if(outputDialogModel.rows !== val)
+                                    outputDialogModel.rows = val
+                            }
+                        }
+
+
+                        Label {
+                            text: "Column Count:"
+                            color: inputTable.textColor
+                        }
+
+                        PTextEdit {
+                            Layout.preferredHeight: 24
+                            Layout.preferredWidth: 60
+                            bottomPadding: 4
+                            topPadding: 4
+                            text: outputDialogModel.columns
+                            onTextChanged: {
+                                let val = Number(text)
+                                if(outputDialogModel.columns !== val)
+                                    outputDialogModel.columns = val
+                            }
+                        }
+                    }
+                }
 
                 TableGridWidget {
                     id: outputTable
                     // copy outputModel inside
-                    model:PM.NodeTableDialogModel
+                    model:PM.NodeTableSliceProxyModel
                     {
-                        id: outputDialogModel
-                        referenceModel:outputModel
+                        id: outputDialogProxyModel
+                        sourceModel:PM.NodeTableDialogModel
+                        {
+                            id: outputDialogModel
+                            referenceModel:outputModel
+                        }
                     }
 
-                    Layout.topMargin: 32
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                 }

@@ -25,6 +25,7 @@ PYBIND11_MODULE(HierarchicalTableData, m) {
                       &HierarchicalTableData::getValue,
                       &HierarchicalTableData::setValue)
         .def_property_readonly("value_type", &HierarchicalTableData::getValueType)
+        .def_property_readonly("get_cell_value_type", &HierarchicalTableData::getCellValueType)
         .def_property_readonly("child_count", &HierarchicalTableData::getChildCount)
         .def("get_cell", &HierarchicalTableData::getCell,
              py::return_value_policy::reference_internal)
@@ -32,11 +33,10 @@ PYBIND11_MODULE(HierarchicalTableData, m) {
              py::return_value_policy::reference_internal)
         .def("delete_cell", &HierarchicalTableData::deleteCell)
         .def("__getitem__", [](HierarchicalTableData& self, std::pair<size_t, size_t> idx) {
-                return self.getCell(idx.first, idx.second);
+                return self.getCellValue(idx.first, idx.second);
             }, py::return_value_policy::reference_internal)
         .def("__setitem__", [](HierarchicalTableData& self, std::pair<size_t, size_t> idx, const std::string& val) {
-            auto* cell = self.getOrCreateCell(idx.first, idx.second);
-            if (cell) cell->setValue(val);
+            self.setCellValue(idx.first, idx.second, val);
         });
 
     // --- Serialization ---

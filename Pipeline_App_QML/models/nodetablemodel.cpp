@@ -1,5 +1,6 @@
 #include "models/nodetablemodel.h"
 #include <helpers/stringhelper.h>
+#include <constants.h>
 namespace Pipeline
 {
     namespace Runtime
@@ -119,7 +120,7 @@ namespace Pipeline
                 return {};
             }
 
-            HierarchicalTableData* resultNode = getResultNode(index);
+            HierarchicalTableData* resultNode = getResultNode(index.parent());
 
             if (!resultNode)
             {
@@ -128,7 +129,12 @@ namespace Pipeline
 
             if (role == Qt::DisplayRole)
             {
-                return QString::fromStdString(resultNode->getValue());
+                return QString::fromStdString(resultNode->getCellValue(index.row(), index.column()));
+            }
+            else if (role == NodeTableRoles::HasTable)
+            {
+                return static_cast<HierarchicalTableData::ValueType>(resultNode->getCellValueType(index.row(),
+                        index.column()) & HierarchicalTableData::ValueType::Matrix) != HierarchicalTableData::ValueType::None;
             }
 
             return {};
@@ -180,13 +186,8 @@ namespace Pipeline
             {
                 case Qt::DisplayRole:
                     {
-                        auto *cellResultNode = resultNode->getOrCreateCell(index.row(), index.column());
-
-                        if (cellResultNode != nullptr)
-                        {
-                            cellResultNode->setValue(value.toString().toStdString());
-                        }
-
+                        resultNode->setCellValue(index.row(), index.column(), value.toString().toStdString());
+                        emit dataChanged(index, index, {role});
                         return true;
                     }
 
@@ -211,10 +212,40 @@ namespace Pipeline
             return QVariant();
         }
 
+        QModelIndex NodeTableModel::createCell(const QModelIndex &index)
+        {
+            if (!index.isValid())
+            {
+                return QModelIndex();
+            }
+
+            auto parent = index.parent();
+            auto* tableData = accessResultNode(parent);
+
+            if (!tableData)
+            {
+                return QModelIndex();
+            }
+
+            auto child = tableData->getOrCreateCell(index.row(), index.column());
+            child->setSize(10,10);
+            emit dataChanged(index, index, {NodeTableRoles::ChildCell, NodeTableRoles::HasTable});
+            return this->index(index.row(),index.column(), parent);
+        }
+
+        QHash<int, QByteArray> NodeTableModel::roleNames() const
+        {
+            auto roleNames = QAbstractItemModel::roleNames();
+            roleNames[NodeTableRoles::HasTable] = "hasTable";
+            return roleNames;
+        }
+
         void NodeTableModel::setRoot(const QSharedPointer<HierarchicalTableData>& root)
         {
             this->beginResetModel();
             m_rootResult = root;
+            emit this->columnsChanged();
+            emit this->rowsChanged();
             this->endResetModel();
         }
 
@@ -255,6 +286,16 @@ namespace Pipeline
         }
 
         HierarchicalTableData* NodeTableModel::getResultNode(const QModelIndex &index) const
+        {
+            if (!index.isValid())
+            {
+                return m_rootResult.get();
+            }
+
+            return static_cast<HierarchicalTableData*>(index.internalPointer());
+        }
+
+        HierarchicalTableData* NodeTableModel::accessResultNode(const QModelIndex &index)
         {
             if (!index.isValid())
             {

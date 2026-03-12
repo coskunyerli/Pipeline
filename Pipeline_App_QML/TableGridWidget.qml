@@ -26,6 +26,7 @@ Rectangle {
 
     // Signals
     signal cellClicked(int row, int column)
+    signal cellDClicked(int row, int column)
     signal cellEdited(int row, int column, string value)
     color : bgDark
 
@@ -184,6 +185,11 @@ Rectangle {
                     cellInput.forceActiveFocus()
                     root.cellClicked(row, column)
                     mouse.accepted = false
+                }
+                onDoubleClicked:
+                {
+                    console.log(191)
+                    root.cellDClicked(row, column)
                 }
             }
         }

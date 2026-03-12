@@ -27,7 +27,8 @@ namespace Pipeline
                 Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
                 Q_INVOKABLE QVariant headerData(int section, Qt::Orientation orientation,
                                                         int role = Qt::DisplayRole) const override;
-
+                Q_INVOKABLE QModelIndex createCell(const QModelIndex&index);
+                virtual QHash<int, QByteArray> roleNames() const;
 
             public:
                 void setRoot(const QSharedPointer<HierarchicalTableData>& root);
@@ -41,6 +42,7 @@ namespace Pipeline
                 void columnsChanged();
             private:
                 HierarchicalTableData* getResultNode(const QModelIndex& index) const;
+                HierarchicalTableData* accessResultNode(const QModelIndex& index);
             private:
                 QSharedPointer<HierarchicalTableData>  m_rootResult;
 

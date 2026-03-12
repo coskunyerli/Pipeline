@@ -12,7 +12,13 @@ namespace Pipeline
             PythonError,
             ActorAction,
             InputTableModel,
-            OutputTableModel
+            OutputTableModel,
+        };
+
+        enum NodeTableRoles
+        {
+            HasTable = Qt::UserRole + 1,
+            ChildCell
         };
     }
 }

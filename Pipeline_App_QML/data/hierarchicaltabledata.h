@@ -29,21 +29,17 @@ namespace Pipeline
                     return m_rowCount;
                 }
                 void setValue(const std::string value);
-                std::string getValue() const
-                {
-                    return m_value;
-                }
-                ValueType getValueType() const
-                {
-                    return m_valueType;
-                }
+                std::string getValue() const;
+                ValueType getValueType() const;
                 size_t getChildCount() const
                 {
-                    return m_data.size();
+                    return m_values.size();
                 }
                 std::string getHeaderData(int section) const;
                 void setHeaderData(int section, const std::string& value);
-                HierarchicalTableData* getCell(size_t row, size_t column);
+                HierarchicalTableData* getCell(size_t row, size_t column) const;
+                std::string getCellValue(size_t row, size_t column) const;
+                ValueType getCellValueType(size_t row, size_t column) const;
                 HierarchicalTableData* getOrCreateCell(size_t row, size_t column);
                 void deleteCell(size_t row, size_t column);
                 HierarchicalTableData* removeCell(size_t row, size_t column);
@@ -52,8 +48,8 @@ namespace Pipeline
                     return m_parent;
                 }
                 void setCell(size_t row, size_t column, HierarchicalTableData* child);
-                void setValueType(ValueType vt);
-                std::pair<size_t, size_t> cellIndexOf(HierarchicalTableData* child, bool &has) const;
+                void setCellValue(size_t row, size_t col, const std::string& v);
+                std::pair<size_t, size_t> cellIndexOf(const HierarchicalTableData* child, bool &has) const;
                 std::vector<uint8_t> serialize();
                 HierarchicalTableData* copy() const;
                 static std::vector<uint8_t> serialize(const HierarchicalTableData* node);
@@ -66,12 +62,34 @@ namespace Pipeline
                 static HierarchicalTableData* deserializeNode(const uint8_t* data, size_t size,
                         size_t& offset, HierarchicalTableData* parent);
             private:
-                std::string m_value;
+
+
+                struct CellKey
+                {
+                    size_t row;
+                    size_t column;
+
+                    bool operator==(const CellKey& other) const
+                    {
+                        return row == other.row && column == other.column;
+                    }
+                };
+
+                struct CellKeyHash
+                {
+                    std::size_t operator()(const CellKey& k) const noexcept
+                    {
+                        return std::hash<size_t>()(k.row) ^ (std::hash<size_t>()(k.column) << 1);
+                    }
+                };
+
+            private:
                 std::unordered_map<int, std::string> m_headerData;
-                std::vector<HierarchicalTableData*> m_data;
+
+                std::vector<std::string> m_values;
+                std::unordered_map<CellKey, HierarchicalTableData*, CellKeyHash> m_tables;
                 size_t m_columnCount;
                 size_t m_rowCount;
-                ValueType m_valueType;
                 HierarchicalTableData* m_parent;
         };
     }
