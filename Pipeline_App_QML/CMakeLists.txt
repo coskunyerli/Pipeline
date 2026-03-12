@@ -48,10 +48,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         models/nodetablesliceproxymodel.cpp
         services/nodemodelservice.h
         services/nodemodelservice.cpp
-
     )
 
-
+    qt_add_resources(APP_RESOURCES
+        resources.qrc
+    )
 # pybind11_add_module(HierarchicalTableData
 #     bindings/hierarchicaltabledata_python.cpp
 #     helpers/stringhelper.h
@@ -80,6 +81,9 @@ else()
     endif()
 endif()
 
+target_sources(Pipeline_App_QML PRIVATE
+    ${APP_RESOURCES}
+)
 target_include_directories(Pipeline_App_QML PRIVATE ${Python3_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Pipeline_App_QML
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::QuickControls2 Actor NodeCore NodeGraph ${Python3_LIBRARIES})

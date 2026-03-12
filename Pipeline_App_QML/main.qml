@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Window 2.12
 import Pipeline.Models 1.0 as PM
 import QtQml.Models 2.12 as QM
-import QtQuick.Controls  2.15 as QC
+import QtQuick.Controls  2.12 as QC
 import Pipeline.Services 1.0 as PS
 import Pipeline.Managers 1.0 as PMan
 
@@ -12,7 +12,7 @@ Window {
     width: 1280
     height: 800
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("Pipeline App")
 
     Loader {
         id: dialogLoader
@@ -120,20 +120,49 @@ Window {
     {
         spacing: 0
         anchors.fill: parent
-        QC.Button
+        Rectangle
         {
-            text:"Run"
-            onClicked:
+            Layout.fillWidth: true
+            height: 1
+            color:"#404040"
+        }
+        Rectangle
+        {
+            color:"#202020"
+            Layout.preferredHeight: 32
+            Layout.fillWidth: true
+            RowLayout
             {
-                graphModelService.start()
+                anchors.fill: parent
+                Item {
+                    Layout.fillWidth: true
+                }
+                QC.Button
+                {
+                    icon.source: "qrc:/icons/play_arrow.svg"
+                    onClicked:
+                    {
+                        graphModelService.start()
+                    }
+                }
+                Item {
+                    Layout.fillWidth: true
+                }
             }
         }
+        Rectangle
+        {
+            Layout.fillWidth: true
+            height: 1
+            color:"#404040"
+        }
+
         RowLayout
         {
             spacing: 0
             Rectangle
             {
-                Layout.preferredWidth:200
+                Layout.preferredWidth:240
                 Layout.fillHeight: true
                 color:"#202020"
                 ListView
