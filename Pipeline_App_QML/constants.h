@@ -13,13 +13,16 @@ namespace Pipeline
             ActorAction,
             InputTableModel,
             OutputTableModel,
+            NodeRunningState,
         };
 
         enum NodeTableRoles
         {
             HasTable = Qt::UserRole + 1,
             ChildCell,
-            CellKey
+            CellName,
+            HeaderData = Qt::UserRole + 1000,
+            HeaderDataEnd = HeaderData + 1000,
         };
     }
 }

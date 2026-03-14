@@ -453,12 +453,12 @@ namespace Pipeline
 
             for (uint64_t i = 0; i < childCount; i++)
             {
+                uint64_t row = readU64(data, size, offset);
+                uint64_t column = readU64(data, size, offset);
                 HierarchicalTableData* child = deserializeNode(data, size, offset, node);
 
                 if (child)
                 {
-                    uint64_t row = readU64(data, size, offset);
-                    uint64_t column = readU64(data, size, offset);
                     node->setCell(row, column, child);
                 }
             }

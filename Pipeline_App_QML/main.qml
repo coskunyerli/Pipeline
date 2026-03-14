@@ -45,7 +45,7 @@ Window {
 
             }
 
-            inputModel: dialogLoader.nodeModel.inputTableModel
+            inputModel: dialogLoader.nodeModel.inputTableModels
             outputModel: dialogLoader.nodeModel.outputTableModel
             actor: dialogLoader.nodeModel.actor
         }

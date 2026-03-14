@@ -61,6 +61,8 @@ namespace Pipeline
                         {Roles::HasConnection, "hasConnection"},
                     };
                 }
+                std::function<void(int role)> notifyChanged;
+
                 virtual bool setData(const QVariant &value, int role);
                 virtual QVariant data(int role) const;
 

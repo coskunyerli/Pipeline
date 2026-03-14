@@ -23,6 +23,7 @@ namespace Pipeline
                 virtual void onFailed(const QVariant& result) = 0;
                 virtual void run();
                 virtual void runStandalone();
+                Thread::Actor::ProgressState getState() const;
                 QObject* getDispatcher() const;
                 virtual void setDispatcher(QObject*dispatcher);
                 Thread::BehaviourContext getContext();

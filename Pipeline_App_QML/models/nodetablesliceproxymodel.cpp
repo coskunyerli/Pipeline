@@ -1,4 +1,5 @@
 #include "nodetablesliceproxymodel.h"
+#include <constants.h>
 namespace Pipeline::Runtime
 {
 
@@ -99,7 +100,14 @@ namespace Pipeline::Runtime
         if (!sourceModel())
             return QVariant();
 
-        return sourceModel()->headerData(section, orientation, role);
+        if (orientation == Qt::Horizontal)
+        {
+            return this->sourceModel()->data(this->m_currentIndex, NodeTableRoles::HeaderData + section).toString();
+        }
+        else
+        {
+            return this->sourceModel()->headerData(section, orientation, role);
+        }
     }
 
     bool NodeTableSliceProxyModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -107,7 +115,14 @@ namespace Pipeline::Runtime
         if (!sourceModel())
             return false;
 
-        return sourceModel()->setHeaderData(section, orientation, value, role);
+        if (orientation == Qt::Horizontal)
+        {
+            return this->sourceModel()->setData(this->m_currentIndex, value, NodeTableRoles::HeaderData + section);
+        }
+        else
+        {
+            return sourceModel()->setHeaderData(section, orientation, value, role);
+        }
     }
 
     void NodeTableSliceProxyModel::setSourceModel(QAbstractItemModel *model)
@@ -142,7 +157,6 @@ namespace Pipeline::Runtime
         connect(model, &QAbstractItemModel::headerDataChanged,
                 this,
                 &QAbstractItemModel::headerDataChanged);
-
         connect(model, &QAbstractItemModel::modelAboutToBeReset,
                 this,
                 [this]()
@@ -152,8 +166,8 @@ namespace Pipeline::Runtime
         connect(model, &QAbstractItemModel::modelReset,
                 this,
                 [this]()
-                {
-                    this->endResetModel();
-                });
+        {
+            this->endResetModel();
+        });
     }
 }

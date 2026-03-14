@@ -15,7 +15,7 @@ namespace Pipeline
                 friend class ActorRunnable;
                 enum ProgressState
                 {
-                    READY,
+                    READY = 0,
                     PROGRASSING,
                     STOPPED,
                     FINISHED,

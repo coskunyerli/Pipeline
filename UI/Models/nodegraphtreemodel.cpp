@@ -664,27 +664,27 @@ namespace Pipeline
         bool MNode::setData(const QVariant &value, int role)
         {
             bool res;
-
+            bool result = false;
             switch (role)
             {
                 case Roles::PosX:
                     {
                         int posX = value.toInt(&res);
                         this->setX(posX);
-                        return true;
+                        result = true;
                     }
 
                 case Roles::PosY:
                     {
                         int posY = value.toInt(&res);
                         this->setY(posY);
-                        return true;
+                        result = true;
                     }
                 case Roles::Name:
                 {
                     QString name = value.toString();
                     this->setName(name.toStdString());
-                    return true;
+                    result = true;
                 }
             }
 

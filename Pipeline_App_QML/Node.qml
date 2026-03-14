@@ -44,7 +44,21 @@ Item
         anchors.fill: parent
         radius: 6
         color: "#404040"
-        border.color: isSelected ? "#808080" : "#505050"
+        border.color:
+        {
+            if(isSelected)
+            {
+                return "#808080";
+            } else if(nodeModel.runningState === 3)
+            {
+                return "red"
+            }
+            else
+            {
+                return "#505050";
+            }
+        }
+
         border.width: 1
 
         // Başlık (sürüklenebilir alan)

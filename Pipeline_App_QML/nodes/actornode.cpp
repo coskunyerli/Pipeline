@@ -80,6 +80,11 @@ namespace Pipeline
             m_actor->startRequestStandalone();
         }
 
+        Thread::Actor::ProgressState ActorNode::getState() const
+        {
+            return m_actor->getState();
+        }
+
         QObject* ActorNode::getDispatcher() const
         {
             return m_dispatcher;
@@ -99,10 +104,10 @@ namespace Pipeline
                 this->onStarted();
             });
             Thread::Actor::connect(m_actor, &Thread::Actor::failed, m_dispatcher, [this](QVariant res)
-                                   {
-                                       qDebug() << res;
-                                       this->onFailed(res);
-                                   });
+            {
+                qDebug() << res;
+                this->onFailed(res);
+            });
             Thread::Actor::connect(m_actor, &Thread::Actor::finished, m_dispatcher, [this](QVariant res)
             {
                 this->onFinished(res);
