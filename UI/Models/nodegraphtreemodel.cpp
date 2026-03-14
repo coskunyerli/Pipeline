@@ -582,6 +582,16 @@ namespace Pipeline
                 int count = static_cast<int>(flowNode->getChildNodeCount());
                 this->beginInsertRows(parent, count, count);
                 flowNode->addNode(node);
+                node->notifyChanged =
+                    [node, this](int role)
+                {
+                    QModelIndex idx = getIndexFromItem(node);
+
+                    if (idx.isValid())
+                    {
+                        emit dataChanged(idx, idx, {role});
+                    }
+                };
                 this->endInsertRows();
                 return true;
             }
@@ -648,6 +658,20 @@ namespace Pipeline
             return static_cast<ModelItemInterface*>(index.internalPointer());
         }
 
+        QModelIndex NodeGraphTreeModel::getIndexFromItem(MNode *node)
+        {
+            if (MFlowNode* flowNode = dynamic_cast<MFlowNode*>(node->parent()))
+            {
+                bool has;
+                int row = flowNode->indexOf(node, has);
+
+                if (has && row < flowNode->getChildNodeCount())
+                    return createIndex(row, 0, node);
+            }
+
+            return QModelIndex();
+        }
+
         Core::Connection* MPort::connect(Port *other)
         {
             if (hasConnection(other))
@@ -665,6 +689,7 @@ namespace Pipeline
         {
             bool res;
             bool result = false;
+
             switch (role)
             {
                 case Roles::PosX:
@@ -672,6 +697,7 @@ namespace Pipeline
                         int posX = value.toInt(&res);
                         this->setX(posX);
                         result = true;
+                        break;
                     }
 
                 case Roles::PosY:
@@ -679,16 +705,24 @@ namespace Pipeline
                         int posY = value.toInt(&res);
                         this->setY(posY);
                         result = true;
+                        break;
                     }
+
                 case Roles::Name:
-                {
-                    QString name = value.toString();
-                    this->setName(name.toStdString());
-                    result = true;
-                }
+                    {
+                        QString name = value.toString();
+                        this->setName(name.toStdString());
+                        result = true;
+                        break;
+                    }
             }
 
-            return false;
+            if (result)
+            {
+                notifyChanged(role);
+            }
+
+            return result;
         }
 
         QVariant MNode::data(int role) const

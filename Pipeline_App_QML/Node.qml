@@ -51,7 +51,7 @@ Item
                 return "#808080";
             } else if(nodeModel.runningState === 3)
             {
-                return "red"
+                return "#3FAF7A"
             }
             else
             {

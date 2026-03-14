@@ -190,6 +190,7 @@ namespace Pipeline
             {
                 auto outputResult = result.value<std::shared_ptr<HierarchicalTableData>>();
                 m_outputDataTable->setRoot(outputResult);
+                notifyChanged(NodeRoles::NodeRunningState);
             }
         }
 

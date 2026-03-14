@@ -157,6 +157,7 @@ namespace Pipeline
                 }
 
                 ModelItemInterface* getData(const QModelIndex &index) const;
+                QModelIndex getIndexFromItem(MNode* node);
 
             private:
                 MFlowNode* m_rootNode;
