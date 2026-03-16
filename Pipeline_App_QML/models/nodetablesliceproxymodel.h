@@ -8,15 +8,18 @@ namespace Pipeline::Runtime
     {
             Q_OBJECT
             Q_PROPERTY(QModelIndex currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
+            Q_PROPERTY(QString currentIndexValue READ currentIndexValue WRITE setCurrentIndexValue NOTIFY currentIndexValueChanged)
 
         public:
             explicit NodeTableSliceProxyModel(QObject* parent = nullptr);
             Q_INVOKABLE void setCurrentIndex(const QModelIndex& index);
 
-            Q_INVOKABLE QModelIndex currentIndex() const
+            QModelIndex currentIndex() const
             {
                 return m_currentIndex;
             }
+            QString currentIndexValue() const;
+            void setCurrentIndexValue(const QString &value);
             Q_INVOKABLE bool setHeaderData(int section,
                                            Qt::Orientation orientation,
                                            const QVariant& value,
@@ -51,6 +54,7 @@ namespace Pipeline::Runtime
             void setSourceModel(QAbstractItemModel* model) override;
         signals:
             void currentIndexChanged();
+            void currentIndexValueChanged();
         private:
             QPersistentModelIndex m_currentIndex;
     };

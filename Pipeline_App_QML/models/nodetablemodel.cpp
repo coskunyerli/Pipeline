@@ -109,7 +109,11 @@ namespace Pipeline
         {
             if (!index.isValid())
             {
-                if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
+                if(role == Qt::DisplayRole)
+                {
+                    return QString::fromStdString(this->m_rootResult->getValue());
+                }
+                else if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
                 {
                     int headerDataIndex = role - NodeTableRoles::HeaderData;
                     return QString::fromStdString(m_rootResult->getHeaderData(headerDataIndex));
@@ -178,9 +182,19 @@ namespace Pipeline
 
         bool NodeTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
         {
+            if (role == Qt::EditRole)
+            {
+                role = Qt::DisplayRole;
+            }
+
             if (!index.isValid())
             {
-                if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
+                if(role == Qt::DisplayRole)
+                {
+                    this->m_rootResult->setValue(value.toString().toStdString());
+                    this->dataChanged(QModelIndex(),QModelIndex(), {role});
+                }
+                else if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
                 {
                     int headerDataIndex = role - NodeTableRoles::HeaderData;
                     m_rootResult->setHeaderData(headerDataIndex, value.toString().toStdString());
@@ -196,11 +210,6 @@ namespace Pipeline
             if (!parentTableData)
             {
                 return false;
-            }
-
-            if (role == Qt::EditRole)
-            {
-                role = Qt::DisplayRole;
             }
 
             switch (role)

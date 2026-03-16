@@ -47,7 +47,8 @@ namespace Pipeline
                 {
                     return m_parent;
                 }
-                void setCell(size_t row, size_t column, HierarchicalTableData* child);
+                void setCell(size_t row, size_t column,  std::shared_ptr<HierarchicalTableData> child);
+                void setCell(size_t index,  std::shared_ptr<HierarchicalTableData> child);
                 void setCellValue(size_t row, size_t col, const std::string& v);
                 std::pair<size_t, size_t> cellIndexOf(const std::shared_ptr<HierarchicalTableData>& child, bool &has) const;
                 std::pair<size_t, size_t> cellIndexOf(const HierarchicalTableData* child, bool &has) const;
@@ -87,7 +88,7 @@ namespace Pipeline
 
             private:
                 std::unordered_map<int, std::string> m_headerData;
-
+                std::string m_value;
                 std::vector<std::string> m_values;
                 std::unordered_map<CellKey, std::shared_ptr<HierarchicalTableData>, CellKeyHash> m_tables;
                 size_t m_columnCount;

@@ -17,7 +17,7 @@ namespace Pipeline
                 void setFilename(const QString &filename);
                 QVariant behaviour(const Thread::BehaviourContext& behaviour) override;
                 QHash<int, QByteArray> roleNames() const override;
-                bool setData(const QVariant &value, int role) override;
+                //bool setData(const QVariant &value, int role) override;
                 virtual QVariant data(int role) const override;
                 void onStarted() override {}
                 void onFinished(const QVariant& result) override {}

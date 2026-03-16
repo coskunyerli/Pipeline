@@ -4,6 +4,7 @@
 #include <QUuid>
 #include <QCoreApplication>
 #include <constants.h>
+#include <iostream>
 
 Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::HierarchicalTableData>);
 
@@ -97,34 +98,43 @@ namespace Pipeline
             return roles;
         }
 
-        bool PythonProcessActorNode::setData(const QVariant &value, int role)
+        bool PythonProcessActorNode::setData(const QVariant &value, int role, bool emitSignal)
         {
+            bool result = false;
+
             if (role == NodeRoles::PythonFileName)
             {
                 this->setFilename(value.toString());
-                return true;
+                result = true;
             }
             else if (role == NodeRoles::PythonError)
             {
                 this->m_pythonError = value.toString();
-                return true;
+                result = true;
             }
             else if (role == NodeRoles::InputTableModel)
             {
                 NodeTableModel* model = value.value<NodeTableModel*>();
                 m_inputDataTable = model;
-                return true;
+                result = true;
             }
             else if (role == NodeRoles::OutputTableModel)
             {
                 NodeTableModel* model = value.value<NodeTableModel*>();
                 m_outputDataTable = model;
-                return true;
+                result = true;
             }
             else
             {
-                return ActorNode::setData(value, role);
+                result = ActorNode::setData(value, role, false);
             }
+
+            if (result && emitSignal)
+            {
+                notifyChanged(role);
+            }
+
+            return result;
         }
 
         QVariant PythonProcessActorNode::data(int role) const
@@ -152,7 +162,7 @@ namespace Pipeline
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_outputDataTable));
                 return v;
             }
-            else if(role == NodeRoles::NodeRunningState)
+            else if (role == NodeRoles::NodeRunningState)
             {
                 return this->getState();
             }
@@ -164,23 +174,16 @@ namespace Pipeline
 
         void PythonProcessActorNode::onStarted()
         {
-            if(!m_useInputTable)
+            if (!m_useInputTable)
             {
                 auto behaviourContext = this->getContext();
-                if (!behaviourContext.m_variants.isEmpty())
-                {
-                    if (behaviourContext.m_variants[0].canConvert<std::shared_ptr<HierarchicalTableData>>())
-                    {
-                        auto inputData = behaviourContext.m_variants[0].value<std::shared_ptr<HierarchicalTableData>>();
+                auto inputData = this->createInputDataFromContext(behaviourContext.m_variants);
 
-                        if (inputData)
-                        {
-                            this->m_inputDataTable->setRoot(inputData);
-                        }
-                    }
+                if (inputData)
+                {
+                    this->m_inputDataTable->setRoot(inputData);
                 }
             }
-
         }
 
         void PythonProcessActorNode::onFinished(const QVariant& result)
@@ -195,6 +198,39 @@ namespace Pipeline
         }
 
         void PythonProcessActorNode::onFailed(const QVariant& result)
+        {
+        }
+
+        void PythonProcessActorNode::inConnectionChanged(UI::MPort *inPort, UI::MPort* /*outPort*/)
+        {
+            QList<QVariant> dependentDataList;
+
+            for (size_t i = 0; i < inPort->getConnectionCount(); i++)
+            {
+                auto connection = inPort->getConnection(i);
+                auto *dependentNode = dynamic_cast<PythonProcessActorNode*>(connection->getOutPort()->getOwnerNode());
+
+                if (dependentNode)
+                {
+                    auto outputTable = dependentNode->data(NodeRoles::OutputTableModel).value<NodeTableModel*>();
+                    if(outputTable)
+                    {
+                        QVariant v = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(outputTable->getRoot());
+                        dependentDataList.append(v);
+                    }
+
+                }
+            }
+
+            auto inputData = this->createInputDataFromContext(dependentDataList);
+
+            if (inputData)
+            {
+                this->m_inputDataTable->setRoot(inputData);
+            }
+        }
+
+        void PythonProcessActorNode::outConnectionChanged(UI::MPort *outPort, UI::MPort *inPort)
         {
         }
 

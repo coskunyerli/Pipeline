@@ -58,18 +58,18 @@ namespace Pipeline
             return roles;
         }
 
-        bool PythonFileActorNode::setData(const QVariant &value, int role)
-        {
-            if (role == NodeRoles::PythonFileName)
-            {
-                this->setFilename(value.toString());
-                return true;
-            }
-            else
-            {
-                return ActorNode::setData(value, role);
-            }
-        }
+        // bool PythonFileActorNode::setData(const QVariant &value, int role)
+        // {
+        //     if (role == NodeRoles::PythonFileName)
+        //     {
+        //         this->setFilename(value.toString());
+        //         return true;
+        //     }
+        //     else
+        //     {
+        //         return ActorNode::setData(value, role);
+        //     }
+        // }
 
         QVariant PythonFileActorNode::data(int role) const
         {

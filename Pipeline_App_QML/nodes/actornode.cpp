@@ -1,6 +1,8 @@
 #include "actornode.h"
 #include "actor.h"
 #include <QDebug>
+#include <data/hierarchicaltabledata.h>
+
 namespace Pipeline
 {
     namespace Runtime
@@ -122,6 +124,41 @@ namespace Pipeline
             }
 
             return m_actor->getContext();
+        }
+
+        std::shared_ptr<HierarchicalTableData> ActorNode::createInputDataFromContext(const QList<QVariant>& inputDataList)
+        {
+            auto parentInputData = std::make_shared<HierarchicalTableData>();
+            parentInputData->setSize(10, 10);
+            int count = 0;
+
+            for (auto &variant : inputDataList)
+            {
+                if (variant.canConvert<std::shared_ptr<HierarchicalTableData>>())
+                {
+                    auto inputData = variant.value<std::shared_ptr<HierarchicalTableData>>();
+
+                    if (inputData)
+                    {
+                        parentInputData->setCell(count, inputData);
+                        count++;
+                    }
+                }
+            }
+
+            if (count == 0)
+            {
+                return nullptr;
+            }
+
+            if (count == 1)
+            {
+                // if just one cell, dont put in parent node, not necessary
+                auto childCell = parentInputData->removeCell(0, 0);
+                return childCell;
+            }
+
+            return parentInputData;
         }
 
     }

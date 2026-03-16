@@ -105,18 +105,18 @@ namespace Pipeline
             return roles;
         }
 
-        bool PythonScriptActorNode::setData(const QVariant &value, int role)
-        {
-            if (role == NodeRoles::PythonScript)
-            {
-                this->setScript(value.toString());
-                return true;
-            }
-            else
-            {
-                return ActorNode::setData(value, role);
-            }
-        }
+        // bool PythonScriptActorNode::setData(const QVariant &value, int role)
+        // {
+        //     if (role == NodeRoles::PythonScript)
+        //     {
+        //         this->setScript(value.toString());
+        //         return true;
+        //     }
+        //     else
+        //     {
+        //         return ActorNode::setData(value, role);
+        //     }
+        // }
 
         QVariant PythonScriptActorNode::data(int role) const
         {

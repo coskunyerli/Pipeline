@@ -9,6 +9,7 @@ namespace Pipeline
 {
     namespace UI
     {
+        class MPort;
         class ModelItemInterface
         {
             public:
@@ -63,8 +64,10 @@ namespace Pipeline
                 }
                 std::function<void(int role)> notifyChanged;
 
-                virtual bool setData(const QVariant &value, int role);
+                virtual bool setData(const QVariant &value, int role, bool emitSignal = false);
                 virtual QVariant data(int role) const;
+                virtual void inConnectionChanged(MPort *inPort, MPort* outPort) {}
+                virtual void outConnectionChanged(MPort *outPort, MPort* inPort) {}
 
         };
 

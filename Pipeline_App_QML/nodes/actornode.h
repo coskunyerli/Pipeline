@@ -7,6 +7,7 @@ namespace Pipeline
 {
     namespace Runtime
     {
+        class HierarchicalTableData;
         class ActorNode: public UI::MNode
         {
             public:
@@ -27,6 +28,7 @@ namespace Pipeline
                 QObject* getDispatcher() const;
                 virtual void setDispatcher(QObject*dispatcher);
                 Thread::BehaviourContext getContext();
+                std::shared_ptr<HierarchicalTableData> createInputDataFromContext(const QList<QVariant> &inputDataList);
             private:
                 QObject* m_dispatcher;
                 Thread::Actor* m_actor;

@@ -565,8 +565,26 @@ namespace Pipeline
             this->beginInsertRows(outPortIndex, outPortIndex.data(Roles::ConnectionCount).toInt(), outPortIndex.data(Roles::ConnectionCount).toInt());
             outPort->connect(inPort);
             this->endInsertRows();
+
+            auto inPortRelatedNode = inPortIndex.data(Roles::RelatedNode).toModelIndex();
+            auto outPortRelatedNode = outPortIndex.data(Roles::RelatedNode).toModelIndex();
+
+            auto* inPortNode = getData<MNode>(inPortRelatedNode);
+            auto* outPortNode = getData<MNode>(outPortRelatedNode);
+            if(inPortNode)
+            {
+                inPortNode->inConnectionChanged(inPort, outPort);
+            }
+
+            if(outPortNode)
+            {
+                outPortNode->outConnectionChanged(outPort, inPort);
+            }
+
             emit dataChanged(inPortIndex, inPortIndex, {Roles::HasConnection});
             emit dataChanged(outPortIndex, outPortIndex, {Roles::HasConnection});
+            emit dataChanged(inPortRelatedNode, inPortRelatedNode, {Roles::InConnectionCount, Roles::ChildConnectionCount});
+            emit dataChanged(outPortRelatedNode, outPortRelatedNode, {Roles::OutConnectionCount, Roles::ChildConnectionCount});
             return true;
         }
 
@@ -663,10 +681,10 @@ namespace Pipeline
             if (MFlowNode* flowNode = dynamic_cast<MFlowNode*>(node->parent()))
             {
                 bool has;
-                int row = flowNode->indexOf(node, has);
+                size_t row = flowNode->indexOf(node, has);
 
                 if (has && row < flowNode->getChildNodeCount())
-                    return createIndex(row, 0, node);
+                    return createIndex(static_cast<int>(row), 0, node);
             }
 
             return QModelIndex();
@@ -685,7 +703,7 @@ namespace Pipeline
             return connection;
         }
 
-        bool MNode::setData(const QVariant &value, int role)
+        bool MNode::setData(const QVariant &value, int role, bool emitSignal)
         {
             bool res;
             bool result = false;
@@ -717,7 +735,7 @@ namespace Pipeline
                     }
             }
 
-            if (result)
+            if (result && emitSignal)
             {
                 notifyChanged(role);
             }

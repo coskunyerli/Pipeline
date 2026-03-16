@@ -44,7 +44,6 @@ namespace Pipeline
                 HierarchicalTableData* accessParentTableData(const QModelIndex& index);
             private:
                 std::shared_ptr<HierarchicalTableData>  m_rootResult;
-
         };
     }
 }

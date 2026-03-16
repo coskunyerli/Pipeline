@@ -16,7 +16,34 @@ namespace Pipeline::Runtime
         beginResetModel();
         m_currentIndex = index;
         emit this->currentIndexChanged();
+        this->currentIndexValueChanged();
         endResetModel();
+    }
+
+    QString NodeTableSliceProxyModel::currentIndexValue() const
+    {
+        if (!this->sourceModel())
+        {
+            return "";
+        }
+
+        return this->sourceModel()->data(this->m_currentIndex).toString();
+    }
+
+    void NodeTableSliceProxyModel::setCurrentIndexValue(const QString &value)
+    {
+        if (!this->sourceModel())
+        {
+            return;
+        }
+
+        if (this->currentIndexValue() == value)
+        {
+            return;
+        }
+
+        this->sourceModel()->setData(this->m_currentIndex, value);
+        this->currentIndexValueChanged();
     }
 
     QModelIndex NodeTableSliceProxyModel::mapToSource(const QModelIndex &proxyIndex) const

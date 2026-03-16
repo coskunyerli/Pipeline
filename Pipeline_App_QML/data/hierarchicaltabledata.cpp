@@ -151,6 +151,7 @@ namespace Pipeline
         {
             if (!m_parent)
             {
+                m_value = value;
                 return;
             }
 
@@ -169,7 +170,7 @@ namespace Pipeline
         {
             if (!m_parent)
             {
-                return "";
+                return m_value;
             }
 
             bool has = false;
@@ -269,7 +270,7 @@ namespace Pipeline
 
             if (!cell)
             {
-                this->setCell(row, column, new HierarchicalTableData());
+                this->setCell(row, column, std::make_shared<HierarchicalTableData>());
                 cell = this->getCell(row, column);
             }
 
@@ -287,6 +288,7 @@ namespace Pipeline
             }
 
             auto removedCell = it->second;
+            removedCell->m_parent = nullptr;
             m_tables.erase(key);
             return removedCell;
         }
@@ -386,6 +388,12 @@ namespace Pipeline
             size_t cols = node->getColumnCount();
             writeU64(buf, rows);
             writeU64(buf, cols);
+            writeU8(buf, !!node->m_parent);
+            if(!node->m_parent)
+            {
+                writeString(buf, node->getValue());
+            }
+
             writeU32(buf, static_cast<uint32_t>(node->m_headerData.size()));
 
             for (const auto& pair : node->m_headerData)
@@ -429,6 +437,12 @@ namespace Pipeline
             auto* node = new HierarchicalTableData(parent);
             uint64_t rows = readU64(data, size, offset);
             uint64_t cols = readU64(data, size, offset);
+            bool hasParent = readU8(data,size,offset);
+            if(!hasParent)
+            {
+                std::string value = readString(data, size, offset);
+                node->setValue(value);
+            }
             node->setSize(static_cast<size_t>(rows), static_cast<size_t>(cols));
             uint32_t headerCount = readU32(data, size, offset);
 
@@ -459,14 +473,14 @@ namespace Pipeline
 
                 if (child)
                 {
-                    node->setCell(row, column, child);
+                    node->setCell(row, column, std::shared_ptr<HierarchicalTableData>(child));
                 }
             }
 
             return node;
         }
 
-        void HierarchicalTableData::setCell(size_t row, size_t column, HierarchicalTableData *child)
+        void HierarchicalTableData::setCell(size_t row, size_t column, std::shared_ptr<HierarchicalTableData> child)
         {
             CellKey key = {row, column};
             auto it = m_tables.find(key);
@@ -476,10 +490,16 @@ namespace Pipeline
                 it->second->m_parent = nullptr;
             }
 
-            m_tables[key] = std::shared_ptr<HierarchicalTableData>(child);
+            m_tables[key] = child;
 
             if (child)
                 child->m_parent = this;
+        }
+
+        void HierarchicalTableData::setCell(size_t index,  std::shared_ptr<HierarchicalTableData> child)
+        {
+            auto pair = this->mapToCellIndex(index);
+            this->setCell(pair.first,pair.second,child);
         }
 
         void HierarchicalTableData::setCellValue(size_t row, size_t col, const std::string &v)
