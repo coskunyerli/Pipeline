@@ -338,6 +338,25 @@ Window {
                         spacing: 6
                         Layout.rightMargin: 8
                         Label {
+                            text: "Value"
+                            color: inputTable.textColor
+                        }
+
+                        PTextEdit {
+                            Layout.preferredHeight: 24
+                            Layout.preferredWidth: 60
+                            bottomPadding: 4
+                            topPadding: 4
+                            text: outputDialogProxyModel.currentIndexValue
+                            onTextChanged: {
+                                if(outputDialogProxyModel.currentIndexValue !== text)
+                                {
+                                    outputDialogProxyModel.currentIndexValue = text
+                                }
+                            }
+                        }
+
+                        Label {
                             text: "Row Count:"
                             color: outputTable.textColor
                         }

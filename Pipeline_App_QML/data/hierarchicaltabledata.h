@@ -50,6 +50,7 @@ namespace Pipeline
                 void setCell(size_t row, size_t column,  std::shared_ptr<HierarchicalTableData> child);
                 void setCell(size_t index,  std::shared_ptr<HierarchicalTableData> child);
                 void setCellValue(size_t row, size_t col, const std::string& v);
+                void setCellValue(size_t index, const std::string& v);
                 std::pair<size_t, size_t> cellIndexOf(const std::shared_ptr<HierarchicalTableData>& child, bool &has) const;
                 std::pair<size_t, size_t> cellIndexOf(const HierarchicalTableData* child, bool &has) const;
                 std::vector<uint8_t> serialize();

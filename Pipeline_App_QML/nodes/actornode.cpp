@@ -140,6 +140,7 @@ namespace Pipeline
 
                     if (inputData)
                     {
+                        parentInputData->setCellValue(count, inputData->getValue());
                         parentInputData->setCell(count, inputData);
                         count++;
                     }

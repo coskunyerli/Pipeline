@@ -31,7 +31,6 @@ PYBIND11_MODULE(HierarchicalTableData, m) {
              py::return_value_policy::reference_internal)
         .def("get_or_create_cell", &HierarchicalTableData::getOrCreateCell,
              py::return_value_policy::reference_internal)
-        .def("delete_cell", &HierarchicalTableData::deleteCell)
         .def("__getitem__", [](HierarchicalTableData& self, std::pair<size_t, size_t> idx) {
                 return self.getCellValue(idx.first, idx.second);
             }, py::return_value_policy::reference_internal)

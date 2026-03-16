@@ -195,6 +195,8 @@ namespace Pipeline::Runtime
                 [this]()
         {
             this->endResetModel();
+            emit currentIndexValueChanged();
         });
+        emit currentIndexValueChanged();
     }
 }

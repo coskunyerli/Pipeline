@@ -122,7 +122,7 @@ namespace Pipeline
         {
             bool has;
 
-            for(auto& childTable : m_tables)
+            for (auto& childTable : m_tables)
             {
                 childTable.second->m_parent = nullptr;
             }
@@ -389,7 +389,8 @@ namespace Pipeline
             writeU64(buf, rows);
             writeU64(buf, cols);
             writeU8(buf, !!node->m_parent);
-            if(!node->m_parent)
+
+            if (!node->m_parent)
             {
                 writeString(buf, node->getValue());
             }
@@ -437,7 +438,7 @@ namespace Pipeline
             auto* node = new HierarchicalTableData(parent);
             uint64_t rows = readU64(data, size, offset);
             uint64_t cols = readU64(data, size, offset);
-            bool hasParent = readU8(data,size,offset);
+            bool hasParent = readU8(data, size, offset);
             if(!hasParent)
             {
                 std::string value = readString(data, size, offset);
@@ -499,17 +500,21 @@ namespace Pipeline
         void HierarchicalTableData::setCell(size_t index,  std::shared_ptr<HierarchicalTableData> child)
         {
             auto pair = this->mapToCellIndex(index);
-            this->setCell(pair.first,pair.second,child);
+            this->setCell(pair.first, pair.second, child);
         }
 
         void HierarchicalTableData::setCellValue(size_t row, size_t col, const std::string &v)
         {
             size_t idx = mapFromCellIndex(row, col);
+            this->setCellValue(idx, v);
+        }
 
-            if (idx >= this->getChildCount())
+        void HierarchicalTableData::setCellValue(size_t index, const std::string &v)
+        {
+            if (index >= this->getChildCount())
                 return;
 
-            m_values[idx] = v;
+            m_values[index] = v;
         }
 
     }

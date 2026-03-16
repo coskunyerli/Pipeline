@@ -53,14 +53,14 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_resources(APP_RESOURCES
         resources.qrc
     )
-pybind11_add_module(HierarchicalTableData
-    bindings/hierarchicaltabledata_python.cpp
-    helpers/stringhelper.h
-    helpers/stringhelper.cpp
-    data/hierarchicaltabledata.h data/hierarchicaltabledata.cpp
-)
+# pybind11_add_module(HierarchicalTableData
+#     bindings/hierarchicaltabledata_python.cpp
+#     helpers/stringhelper.h
+#     helpers/stringhelper.cpp
+#     data/hierarchicaltabledata.h data/hierarchicaltabledata.cpp
+# )
 
-target_include_directories(HierarchicalTableData PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+# target_include_directories(HierarchicalTableData PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # Define target properties for Android with Qt 6 as:
