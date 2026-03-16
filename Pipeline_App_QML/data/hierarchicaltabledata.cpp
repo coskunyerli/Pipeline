@@ -4,26 +4,6 @@
 
 #include <helpers/stringhelper.h>
 
-// -------------------------------------------------------
-// Binary format layout:
-//
-//   [Header]
-//     4 bytes  magic   "PNR1" = 0x504E5231
-//     1 byte   version = 1
-//
-//   [Node]  (recursive)
-//     1 byte   marker: 0=null, 1=present
-//     --- if present ---
-//     8 bytes  rowCount    (uint64, big-endian)
-//     8 bytes  columnCount (uint64, big-endian)
-//     4 bytes  value string length
-//     4 bytes  header size length
-//     4 bytes  header column number
-//     N bytes  header string data (UTF-8)
-//     N bytes  value string data (UTF-8)
-//     8 bytes  childCount  (uint64, big-endian)
-//     [childCount × Node]  recursive children
-// -------------------------------------------------------
 
 namespace Pipeline
 {
@@ -138,6 +118,58 @@ namespace Pipeline
             }
 
             m_tables.clear();
+        }
+
+        bool Pipeline::Runtime::HierarchicalTableData::HierarchicalTableData::operator==(const HierarchicalTableData &other) const
+        {
+            // size control
+            if (m_rowCount != other.m_rowCount)
+                return false;
+
+            if (m_columnCount != other.m_columnCount)
+                return false;
+
+            // root value
+            if (m_value != other.m_value)
+                return false;
+
+            // header data
+            if (m_headerData != other.m_headerData)
+                return false;
+
+            // cell values
+            if (m_values != other.m_values)
+                return false;
+
+            // child table count
+            if (m_tables.size() != other.m_tables.size())
+                return false;
+
+            // child tables recursive compare
+            for (const auto& pair : m_tables)
+            {
+                const CellKey& key = pair.first;
+                const auto& child = pair.second;
+
+                auto it = other.m_tables.find(key);
+
+                if (it == other.m_tables.end())
+                    return false;
+
+                const auto& otherChild = it->second;
+
+                if (child && otherChild)
+                {
+                    if (!(*child == *otherChild))
+                        return false;
+                }
+                else if (child || otherChild)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         void HierarchicalTableData::setSize(size_t row, size_t col)

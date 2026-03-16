@@ -20,6 +20,7 @@ namespace Pipeline
 
                 explicit HierarchicalTableData(HierarchicalTableData* parent = nullptr);
                 virtual ~HierarchicalTableData();
+                bool operator==(const HierarchicalTableData& other) const;
                 void setSize(size_t row, size_t col);
                 size_t getColumnCount() const
                 {

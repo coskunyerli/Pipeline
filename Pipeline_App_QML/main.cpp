@@ -15,6 +15,7 @@
 #include <Models/portgraphviewmodel.h>
 #include <nodes/pythonnodedialogactor.h>
 #include <nodes/pythonprocessactornode.h>
+#include <contexts/pythonprocessdatacontext.h>
 #include <QQuickStyle>
 
 int main(int argc, char* argv[])
@@ -38,6 +39,7 @@ int main(int argc, char* argv[])
     qmlRegisterType<Pipeline::Runtime::GraphModelService>("Pipeline.Services", 1, 0, "GraphModelService");
     qmlRegisterType<Pipeline::Runtime::NodeTableDialogModel>("Pipeline.Models", 1, 0, "NodeTableDialogModel");
     qmlRegisterType<Pipeline::Runtime::PythonNodeDialogActor>("Pipeline.Actors", 1, 0, "PythonNodeDialogActor");
+    qmlRegisterType<Pipeline::Runtime::PythonProcessDataContext>("Pipeline.Contexts", 1, 0, "PythonProcessDataContext");
     qmlRegisterType<Pipeline::UI::NodeIUManager>("Pipeline.Managers", 1, 0, "NodeUIManager");
     qRegisterMetaType<Pipeline::UI::NodeGraphTreeModel*>("UI::NodeGraphTreeModel*");
     qRegisterMetaType<Pipeline::UI::ConnectionGraphModel*>("UI::ConnectionGraphModel*");

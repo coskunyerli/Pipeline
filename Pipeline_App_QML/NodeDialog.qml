@@ -6,6 +6,7 @@ import QtQuick.Dialogs
 import Pipeline.Models as PM
 import Pipeline.Actors as PA
 import Pipeline.Services as PS
+import Pipeline.Contexts as PC
 
 Window {
     id: detachedDialog
@@ -18,14 +19,9 @@ Window {
     color: "#252525"
 
     signal dialogClosed()
-    signal accepted(string name, string filename, string error)
+    signal accepted(var context)
     signal saveRequested()
-
-    property var inputModel
-    property var outputModel
-    property string pythonFilename
-    property string name
-    property alias pythonError : outputConsole.text
+    property var context;
     property var actor : PA.PythonNodeDialogActor
     {
         id:actor
@@ -34,8 +30,13 @@ Window {
         outputData: outputDialogModel
         onPythonErrorChanged:
         {
-            detachedDialog.pythonError = actor.pythonError
+            context.pythonError = actor.pythonError
         }
+    }
+
+    PC.PythonProcessDataContext
+    {
+        id:resultContext
     }
 
     onClosing: dialogClosed()
@@ -101,7 +102,7 @@ Window {
 
                     PTextEdit {
                         id: nameTextEdit
-                        text:name
+                        text:context.name
                         Layout.fillWidth: true
                         Layout.columnSpan: 2
                     }
@@ -113,7 +114,7 @@ Window {
 
                     PTextEdit {
                         id: pythonFilenameTextEdit
-                        text:pythonFilename
+                        text:context.filename
                         Layout.fillWidth: true
                     }
 
@@ -244,7 +245,7 @@ Window {
                                 sourceModel:PM.NodeTableDialogModel
                                 {
                                     id: inputDialogModel
-                                    referenceModel: inputModel
+                                    referenceModel: context.inputModel
                                 }
                             }
 
@@ -293,6 +294,7 @@ Window {
                         POutputConsole
                         {
                             id: outputConsole
+                            text: context.pythonError
                             Layout.fillHeight: true
                             Layout.fillWidth: true
                         }
@@ -406,7 +408,7 @@ Window {
                         sourceModel:PM.NodeTableDialogModel
                         {
                             id: outputDialogModel
-                            referenceModel:outputModel
+                            referenceModel:context.outputModel
                         }
                     }
 
@@ -460,7 +462,7 @@ Window {
                 {
                     inputDialogModel.resetData();
                     outputDialogModel.resetData();
-                    detachedDialog.pythonError = ""
+                    context.pythonError = ""
                 }
             }
 
@@ -482,9 +484,12 @@ Window {
                 onClicked:
                 {
                     // copy data into reference model
-                    inputDialogModel.saveData();
-                    outputDialogModel.saveData();
-                    accepted(nameTextEdit.text, actor.filename, actor.pythonError)
+                    resultContext.filename = actor.filename;
+                    resultContext.name = nameTextEdit.text;
+                    resultContext.pythonError = context.pythonError;
+                    resultContext.inputModel = inputDialogModel;
+                    resultContext.outputModel = outputDialogModel;
+                    accepted(resultContext)
                     detachedDialog.close()
                 }
             }

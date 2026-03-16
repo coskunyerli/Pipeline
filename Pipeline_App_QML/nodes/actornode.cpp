@@ -2,6 +2,8 @@
 #include "actor.h"
 #include <QDebug>
 #include <data/hierarchicaltabledata.h>
+#include <dispatchers/baseactornodedispatcher.h>
+#include <constants.h>
 
 namespace Pipeline
 {
@@ -10,15 +12,17 @@ namespace Pipeline
 
         ActorNode::ActorNode()
             : UI::MNode()
-            , m_actor(nullptr)
             , m_dispatcher(nullptr)
+            , m_actor(nullptr)
+
         {
             m_actor = new Thread::Actor(QThreadPool::globalInstance(), nullptr);
             m_actor->setBehaviour(Thread::Behaviour([this](const Thread::BehaviourContext & context)
             {
                 return this->behaviour(context);
             }));
-            this->setDispatcher(new QObject());
+            // here could be a problem about virtual function
+            this->setDispatcher(new BaseActorNodeDispatcher(this));
         }
 
         ActorNode::ActorNode(Thread::Actor *actor)
@@ -62,6 +66,24 @@ namespace Pipeline
             m_actor->removeNextActor(other->m_actor);
         }
 
+        QHash<int, QByteArray> ActorNode::roleNames() const
+        {
+            auto roles = UI::MNode::roleNames();
+            roles[NodeRoles::ActorAction] = "actorAction";
+            return roles;
+        }
+
+        QVariant ActorNode::data(int role) const
+        {
+            if (role == NodeRoles::ActorAction)
+            {
+                QVariant v = QVariant::fromValue(static_cast<QObject*>(this->getDispatcher()));
+                return v;
+            }
+
+            return UI::MNode::data(role);
+        }
+
         void ActorNode::run()
         {
             if (!m_actor)
@@ -87,12 +109,12 @@ namespace Pipeline
             return m_actor->getState();
         }
 
-        QObject* ActorNode::getDispatcher() const
+        BaseActorNodeDispatcher* ActorNode::getDispatcher() const
         {
             return m_dispatcher;
         }
 
-        void ActorNode::setDispatcher(QObject *dispatcher)
+        void ActorNode::setDispatcher(BaseActorNodeDispatcher *dispatcher)
         {
             if (m_dispatcher)
             {

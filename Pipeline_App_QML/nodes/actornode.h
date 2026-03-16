@@ -8,6 +8,8 @@ namespace Pipeline
     namespace Runtime
     {
         class HierarchicalTableData;
+    class BaseActorNodeDispatcher;
+        class BaseDataContext;
         class ActorNode: public UI::MNode
         {
             public:
@@ -17,6 +19,8 @@ namespace Pipeline
                 void setActor(Thread::Actor* actor);
                 void addNextNode(ActorNode* other);
                 void removeNextNode(ActorNode* other);
+                QHash<int, QByteArray> roleNames() const override;
+                QVariant data(int role) const override;
                 virtual QVariant behaviour(const Thread::BehaviourContext& behaviour) = 0;
                 // onStarted is working before starting execution
                 virtual void onStarted() = 0;
@@ -25,12 +29,14 @@ namespace Pipeline
                 virtual void run();
                 virtual void runStandalone();
                 Thread::Actor::ProgressState getState() const;
-                QObject* getDispatcher() const;
-                virtual void setDispatcher(QObject*dispatcher);
+                BaseActorNodeDispatcher* getDispatcher() const;
+                virtual void setDispatcher(BaseActorNodeDispatcher*dispatcher);
                 Thread::BehaviourContext getContext();
-                std::shared_ptr<HierarchicalTableData> createInputDataFromContext(const QList<QVariant> &inputDataList);
+                std::shared_ptr<HierarchicalTableData> createInputDataFromContext(const QList<QVariant>& inputDataList);
+                virtual BaseDataContext* createDataContext(QObject *parent = nullptr) = 0;
+                virtual void saveContext(BaseDataContext* dataContext) = 0;
             private:
-                QObject* m_dispatcher;
+                BaseActorNodeDispatcher* m_dispatcher;
                 Thread::Actor* m_actor;
 
         };

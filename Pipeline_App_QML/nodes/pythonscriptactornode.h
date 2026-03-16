@@ -19,6 +19,8 @@ namespace Pipeline
                 void onStarted() override {}
                 void onFinished(const QVariant& result) override {}
                 void onFailed(const QVariant& result) override {}
+                virtual BaseDataContext* createDataContext(QObject *parent = nullptr) override {return nullptr;}
+                virtual void saveContext(BaseDataContext* dataContext) override {}
             private:
                 QString m_pythonScript;
         };

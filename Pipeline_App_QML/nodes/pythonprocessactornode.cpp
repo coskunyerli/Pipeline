@@ -4,6 +4,8 @@
 #include <QUuid>
 #include <QCoreApplication>
 #include <constants.h>
+#include <contexts/pythonprocessdatacontext.h>
+#include <models/nodetabledialogmodel.h>
 #include <iostream>
 
 Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::HierarchicalTableData>);
@@ -19,7 +21,6 @@ namespace Pipeline
             , m_outputDataTable(new NodeTableModel())
             , m_useInputTable(false)
         {
-            this->setDispatcher(new PythonDispatcher(this));
         }
 
         PythonProcessActorNode::~PythonProcessActorNode()
@@ -93,7 +94,6 @@ namespace Pipeline
             roles[NodeRoles::InputTableModel] = "inputTableModels";
             roles[NodeRoles::OutputTableModel] = "outputTableModel";
             roles[NodeRoles::PythonError] = "pythonError";
-            roles[NodeRoles::ActorAction] = "actorAction";
             roles[NodeRoles::NodeRunningState] = "runningState";
             return roles;
         }
@@ -131,7 +131,7 @@ namespace Pipeline
 
             if (result && emitSignal)
             {
-                notifyChanged(role);
+                notifyChanged({role});
             }
 
             return result;
@@ -146,11 +146,6 @@ namespace Pipeline
             else if (role == NodeRoles::PythonError)
             {
                 return m_pythonError;
-            }
-            else if (role == NodeRoles::ActorAction)
-            {
-                QVariant v = QVariant::fromValue(static_cast<QObject*>(this->getDispatcher()));
-                return v;
             }
             else if (role == NodeRoles::InputTableModel)
             {
@@ -170,6 +165,40 @@ namespace Pipeline
             {
                 return ActorNode::data(role);
             }
+        }
+
+        BaseDataContext* PythonProcessActorNode::createDataContext(QObject *parent)
+        {
+            auto *context = new PythonProcessDataContext(parent);
+            context->setFilename(m_filename);
+            context->setPythonError(m_pythonError);
+            context->setInputDataTable(m_inputDataTable);
+            context->setOutputDataTable(m_outputDataTable);
+            context->setName(this->data(UI::Roles::Name).toString());
+            return context;
+        }
+
+        void PythonProcessActorNode::saveContext(BaseDataContext *dataContext)
+        {
+            auto *pythonContext = dynamic_cast<PythonProcessDataContext*>(dataContext);
+
+            if (!pythonContext)
+            {
+                return;
+            }
+            this->setFilename(pythonContext->getFilename());
+            this->m_pythonError = pythonContext->getPythonError();
+            this->setName(pythonContext->getName().toStdString());
+            if(auto *inputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputDataTable()))
+            {
+                inputDialogModel->saveData();
+            }
+            if(auto *outputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getOutputDataTable()))
+            {
+                outputDialogModel->saveData();
+            }
+
+            notifyChanged({UI::Roles::Name, NodeRoles::PythonFileName, NodeRoles::PythonFileName});
         }
 
         void PythonProcessActorNode::onStarted()
@@ -193,7 +222,7 @@ namespace Pipeline
             {
                 auto outputResult = result.value<std::shared_ptr<HierarchicalTableData>>();
                 m_outputDataTable->setRoot(outputResult);
-                notifyChanged(NodeRoles::NodeRunningState);
+                notifyChanged({NodeRoles::NodeRunningState});
             }
         }
 
@@ -213,17 +242,16 @@ namespace Pipeline
                 if (dependentNode)
                 {
                     auto outputTable = dependentNode->data(NodeRoles::OutputTableModel).value<NodeTableModel*>();
-                    if(outputTable)
+
+                    if (outputTable)
                     {
                         QVariant v = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(outputTable->getRoot());
                         dependentDataList.append(v);
                     }
-
                 }
             }
 
             auto inputData = this->createInputDataFromContext(dependentDataList);
-
             if (inputData)
             {
                 this->m_inputDataTable->setRoot(inputData);
@@ -232,17 +260,6 @@ namespace Pipeline
 
         void PythonProcessActorNode::outConnectionChanged(UI::MPort *outPort, UI::MPort *inPort)
         {
-        }
-
-        PythonDispatcher::PythonDispatcher(ActorNode *node)
-            : QObject()
-            , m_pythonNode(node)
-        {
-        }
-
-        void PythonDispatcher::runStandalone()
-        {
-            m_pythonNode->runStandalone();
         }
 
     }

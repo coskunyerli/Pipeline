@@ -11,7 +11,7 @@ namespace Pipeline::Runtime
             Q_PROPERTY(NodeTableModel* inputData READ getInputDataTable WRITE setInputDataTable NOTIFY inputDataChanged)
             Q_PROPERTY(NodeTableModel* outputData READ getOutputDataTable WRITE setOutputDataTable NOTIFY outputDataChanged)
         public:
-            Q_INVOKABLE void runStandalone();
+            Q_INVOKABLE void runStandalone() override;
 
         public:
             explicit PythonNodeDialogActor();
@@ -41,6 +41,9 @@ namespace Pipeline::Runtime
             void onStarted() override;
             void onFinished(const QVariant& result) override;
             void onFailed(const QVariant& result) override;
+            virtual BaseDataContext* createDataContext(QObject *parent = nullptr) override {return nullptr;}
+            virtual void saveContext(BaseDataContext* dataContext) override {}
+
         signals:
             void filenameChanged();
             void pythonErrorChanged();

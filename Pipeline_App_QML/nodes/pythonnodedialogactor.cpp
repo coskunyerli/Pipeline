@@ -14,7 +14,6 @@ namespace Pipeline::Runtime
 
     PythonNodeDialogActor::PythonNodeDialogActor()
     {
-        this->setDispatcher(new PythonDispatcher(this));
     }
 
     QVariant PythonNodeDialogActor::behaviour(const Thread::BehaviourContext &behaviour)

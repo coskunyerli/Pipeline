@@ -8,6 +8,7 @@ namespace Pipeline
 {
     namespace Runtime
     {
+        class BaseDataContext;
         class PythonProcessActorNode : public ActorNode
         {
             public:
@@ -16,8 +17,10 @@ namespace Pipeline
                 void setFilename(const QString &filename);
                 QVariant behaviour(const Thread::BehaviourContext& behaviour) override;
                 QHash<int, QByteArray> roleNames() const override;
-                bool setData(const QVariant &value, int role, bool emitSignal=false) override;
-                virtual QVariant data(int role) const override;
+                bool setData(const QVariant &value, int role, bool emitSignal = false) override;
+                QVariant data(int role) const override;
+                BaseDataContext* createDataContext(QObject*parent=nullptr) override;
+                void saveContext(BaseDataContext* dataContext) override;
                 void onStarted() override;
                 void onFinished(const QVariant& result) override;
                 void onFailed(const QVariant& result) override;
@@ -30,18 +33,6 @@ namespace Pipeline
                 QString m_pythonError;
                 bool m_pythonThrowError;
                 bool m_useInputTable;
-        };
-
-        class PythonDispatcher : public QObject
-        {
-                Q_OBJECT
-            public:
-                PythonDispatcher(ActorNode*node);
-                Q_INVOKABLE void runStandalone();
-            private:
-                ActorNode* m_pythonNode;
-
-
         };
     }
 }

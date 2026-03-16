@@ -48,6 +48,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         models/nodetablesliceproxymodel.cpp
         services/nodemodelservice.h
         services/nodemodelservice.cpp
+        contexts/basedatacontext.h
+        contexts/basedatacontext.cpp
+
+        dispatchers/baseactornodedispatcher.cpp
+        contexts/pythonprocessdatacontext.h
+        contexts/pythonprocessdatacontext.cpp
+        dispatchers/baseactornodedispatcher.h
     )
 
     qt_add_resources(APP_RESOURCES

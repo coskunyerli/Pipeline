@@ -601,13 +601,13 @@ namespace Pipeline
                 this->beginInsertRows(parent, count, count);
                 flowNode->addNode(node);
                 node->notifyChanged =
-                    [node, this](int role)
+                    [node, this](QList<int> roles)
                 {
                     QModelIndex idx = getIndexFromItem(node);
 
                     if (idx.isValid())
                     {
-                        emit dataChanged(idx, idx, {role});
+                        emit dataChanged(idx, idx, roles);
                     }
                 };
                 this->endInsertRows();
@@ -737,7 +737,7 @@ namespace Pipeline
 
             if (result && emitSignal)
             {
-                notifyChanged(role);
+                notifyChanged({role});
             }
 
             return result;

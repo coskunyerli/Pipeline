@@ -20,37 +20,21 @@ Window {
         active: false
         sourceComponent: NodeDialog
         {
-            pythonFilename: dialogLoader.nodeModel.pythonFilename
-            pythonError: dialogLoader.nodeModel.pythonError
-            name:dialogLoader.nodeModel.name
-            onAccepted : (name, filename, error) =>
+            id:nodeDialog
+            context:dialogLoader.nodeModel.actorAction.createDataContext(nodeDialog)
+            onAccepted : (resultContext) =>
             {
-                if(filename !== nodeModel.pythonFilename)
-                {
-                    nodeModel.pythonFilename = filename
-                }
-
-                if(error !== nodeModel.pythonError)
-                {
-                   nodeModel.pythonError = error;
-                }
-
-                if(name !== nodeModel.name)
-                {
-                    nodeModel.name = name;
-                }
+                dialogLoader.nodeModel.actorAction.saveContext(resultContext);
             }
             onSaveRequested :
             {
 
             }
-
-            inputModel: dialogLoader.nodeModel.inputTableModels
-            outputModel: dialogLoader.nodeModel.outputTableModel
             actor: dialogLoader.nodeModel.actor
         }
 
         onLoaded: {
+                    //nodeDialog.context = ;
                     item.dialogClosed.connect(() => {
                         dialogLoader.active = false
                     })
