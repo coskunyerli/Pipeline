@@ -19,6 +19,8 @@ PYBIND11_MODULE(HierarchicalTableData, m) {
     py::class_<HierarchicalTableData>(m, "HierarchicalTableData")
         .def(py::init<>())
         .def("set_size", &HierarchicalTableData::setSize)
+        .def("set_header_data", &HierarchicalTableData::setHeaderData)
+        .def("get_header_data", &HierarchicalTableData::getHeaderData)
         .def_property_readonly("column_count", &HierarchicalTableData::getColumnCount)
         .def_property_readonly("row_count", &HierarchicalTableData::getRowCount)
         .def_property("value",

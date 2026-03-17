@@ -14,5 +14,7 @@
         <file>PTabButton.qml</file>
         <file>POutputConsole.qml</file>
         <file>PBreadCrumb.qml</file>
+        <file>WidgetTitleHeader.qml</file>
+        <file>HierarchicalTableWidget.qml</file>
     </qresource>
 </RCC>

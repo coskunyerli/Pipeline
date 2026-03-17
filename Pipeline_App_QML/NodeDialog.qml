@@ -11,7 +11,7 @@ import Pipeline.Contexts as PC
 Window {
     id: detachedDialog
     width: 1100
-    height: 750
+    height: 850
     title: "Python Node Dialog"
     flags: Qt.Dialog | Qt.WindowCloseButtonHint | Qt.WindowTitleHint
     modality: Qt.NonModal
@@ -27,6 +27,7 @@ Window {
         id:actor
         filename : pythonFilenameTextEdit.text
         inputData : inputDialogModel
+        inputParameterData:parameterDialogModel
         outputData: outputDialogModel
         onPythonErrorChanged:
         {
@@ -88,7 +89,7 @@ Window {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
-                    color: inputTable.borderColor
+                    color: "#505050"
                 }
                 GridLayout {
                     columns: 3
@@ -97,7 +98,7 @@ Window {
 
                     Label {
                         text: "Name:"
-                        color: inputTable.textColor
+                        color: "#e0e0e0"
                     }
 
                     PTextEdit {
@@ -109,7 +110,7 @@ Window {
 
                     Label {
                         text: "Python File:"
-                        color: inputTable.textColor
+                        color: "#e0e0e0"
                     }
 
                     PTextEdit {
@@ -133,112 +134,60 @@ Window {
                     Layout.fillHeight: true
                     Layout.topMargin: 12
                     orientation: Qt.Vertical
+
+                    ColumnLayout
+                    {
+                        spacing: 0
+                        SplitView.preferredHeight: 200
+                        SplitView.fillWidth: true
+                        WidgetTitleHeader
+                        {
+                            Layout.fillWidth: true
+                            text:"Parameters"
+                        }
+
+                        HierarchicalTableWidget
+                        {
+                            id:parameterTable
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            model:PM.NodeTableSliceProxyModel
+                            {
+                                id: parameterDialogProxyModel
+                                sourceModel:PM.NodeTableDialogModel
+                                {
+                                    id: parameterDialogModel
+                                    referenceModel: context.inputParameterModel
+                                }
+                            }
+
+                            // onCellDClicked:(row,column) =>
+                            // {
+                            //     let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
+                            //     if(!modelIndex.data(Qt.UserRole + 1))
+                            //     {
+                            //         modelIndex = inputDialogModel.createCell(modelIndex);
+                            //     }
+                            //     inputDialogProxyModel.currentIndex = modelIndex
+                            // }
+                        }
+                    }
+
                     ColumnLayout
                     {
                         SplitView.fillWidth: true
                         SplitView.fillHeight: true
                         spacing: 0
 
-                        Rectangle
-                        {
-                            color: "#404040"
-                            height: 1
-                            Layout.fillWidth: true
-                        }
-
-                        RowLayout
+                        WidgetTitleHeader
                         {
                             Layout.fillWidth: true
-                            spacing: 6
-                            PBreadCrumb
-                            {
-                                Layout.preferredHeight: 32
-                                id : breadcrumb
-                                color: "transparent"
-                                Layout.fillWidth: true
-                                index: inputDialogProxyModel.currentIndex
-                                onClicked: (modelIndex) =>
-                                           {
-                                               inputDialogProxyModel.currentIndex = inputDialogModel.index(modelIndex.row,modelIndex.column,modelIndex.parent)
-                                           }
-                            }
-
-                            Rectangle
-                            {
-                                width: 2
-                                color:"#303030"
-                                Layout.preferredHeight:breadcrumb.implicitHeight - 8
-                            }
-
-                            RowLayout {
-                                spacing: 6
-                                Layout.rightMargin: 8
-                                Label {
-                                    text: "Value"
-                                    color: inputTable.textColor
-                                }
-
-                                PTextEdit {
-                                    Layout.preferredHeight: 24
-                                    Layout.preferredWidth: 60
-                                    bottomPadding: 4
-                                    topPadding: 4
-                                    text: inputDialogProxyModel.currentIndexValue
-                                    onTextChanged: {
-                                        if(inputDialogProxyModel.currentIndexValue !== text)
-                                        {
-                                            inputDialogProxyModel.currentIndexValue = text
-                                        }
-                                    }
-                                }
-
-                                Label {
-                                    text: "Row Count:"
-                                    color: inputTable.textColor
-                                }
-
-
-
-                                PTextEdit {
-                                    Layout.preferredHeight: 24
-                                    Layout.preferredWidth: 60
-                                    bottomPadding: 4
-                                    topPadding: 4
-                                    text: inputDialogModel.rows
-                                    onTextChanged: {
-                                        let val = Number(text)
-                                        if(inputDialogModel.rows !== val)
-                                            inputDialogModel.rows = val
-                                    }
-                                }
-
-
-                                Label {
-                                    text: "Column Count:"
-                                    color: inputTable.textColor
-                                }
-
-                                PTextEdit {
-                                    Layout.preferredHeight: 24
-                                    Layout.preferredWidth: 60
-                                    bottomPadding: 4
-                                    topPadding: 4
-                                    text: inputDialogModel.columns
-                                    onTextChanged: {
-                                        let val = Number(text)
-                                        if(inputDialogModel.columns !== val)
-                                            inputDialogModel.columns = val
-                                    }
-                                }
-                            }
+                            text:"Input Table"
                         }
-
-
-                        TableGridWidget {
-                            id: inputTable
+                        HierarchicalTableWidget
+                        {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            // copy inputModel inside
                             model:PM.NodeTableSliceProxyModel
                             {
                                 id: inputDialogProxyModel
@@ -249,45 +198,29 @@ Window {
                                 }
                             }
 
-                            onCellDClicked:(row,column) =>
-                            {
-                                let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
-                                if(!modelIndex.data(Qt.UserRole + 1))
-                                {
-                                    modelIndex = inputDialogModel.createCell(modelIndex); 
-                                }
-                                inputDialogProxyModel.currentIndex = modelIndex
-                            }
+                            // onCellDClicked:(row,column) =>
+                            // {
+                            //     let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
+                            //     if(!modelIndex.data(Qt.UserRole + 1))
+                            //     {
+                            //         modelIndex = inputDialogModel.createCell(modelIndex);
+                            //     }
+                            //     inputDialogProxyModel.currentIndex = modelIndex
+                            // }
                         }
 
                     }
 
                     ColumnLayout
                     {
-                        SplitView.preferredHeight: 250
+                        SplitView.preferredHeight: 120
                         SplitView.fillWidth: true
                         spacing: 0
 
-                        Rectangle
+                        WidgetTitleHeader
                         {
-                            color: "#404040"
-
-                            Layout.preferredHeight: 28
                             Layout.fillWidth: true
-                            Label
-                            {
-                                anchors.fill: parent
-                                anchors.leftMargin: 8
-                                verticalAlignment: Text.AlignVCenter
-                                text:"Console Output"
-                            }
-                        }
-
-                        Rectangle
-                        {
-                            height: 1
-                            Layout.fillWidth: true
-                            color: "#656565"
+                            text:"Console Output"
                         }
 
 
@@ -318,90 +251,10 @@ Window {
                     Layout.topMargin: 32
                 }
 
-                RowLayout
+                HierarchicalTableWidget
                 {
                     Layout.fillWidth: true
-                    spacing: 6
-                    PBreadCrumb
-                    {
-                        id : outputBreadcrumb
-                        color: "transparent"
-                        Layout.fillWidth: true
-                    }
-
-                    Rectangle
-                    {
-                        width: 2
-                        color:"#303030"
-                        Layout.preferredHeight:outputBreadcrumb.implicitHeight - 8
-                    }
-
-                    RowLayout {
-                        spacing: 6
-                        Layout.rightMargin: 8
-                        Label {
-                            text: "Value"
-                            color: inputTable.textColor
-                        }
-
-                        PTextEdit {
-                            Layout.preferredHeight: 24
-                            Layout.preferredWidth: 60
-                            bottomPadding: 4
-                            topPadding: 4
-                            text: outputDialogProxyModel.currentIndexValue
-                            onTextChanged: {
-                                if(outputDialogProxyModel.currentIndexValue !== text)
-                                {
-                                    outputDialogProxyModel.currentIndexValue = text
-                                }
-                            }
-                        }
-
-                        Label {
-                            text: "Row Count:"
-                            color: outputTable.textColor
-                        }
-
-
-
-                        PTextEdit {
-                            Layout.preferredHeight: 24
-                            Layout.preferredWidth: 60
-                            bottomPadding: 4
-                            topPadding: 4
-                            text: outputDialogModel.rows
-                            onTextChanged: {
-                                let val = Number(text)
-                                if(outputDialogModel.rows !== val)
-                                    outputDialogModel.rows = val
-                            }
-                        }
-
-
-                        Label {
-                            text: "Column Count:"
-                            color: inputTable.textColor
-                        }
-
-                        PTextEdit {
-                            Layout.preferredHeight: 24
-                            Layout.preferredWidth: 60
-                            bottomPadding: 4
-                            topPadding: 4
-                            text: outputDialogModel.columns
-                            onTextChanged: {
-                                let val = Number(text)
-                                if(outputDialogModel.columns !== val)
-                                    outputDialogModel.columns = val
-                            }
-                        }
-                    }
-                }
-
-                TableGridWidget {
-                    id: outputTable
-                    // copy outputModel inside
+                    Layout.fillHeight: true
                     model:PM.NodeTableSliceProxyModel
                     {
                         id: outputDialogProxyModel
@@ -412,10 +265,16 @@ Window {
                         }
                     }
 
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    // onCellDClicked:(row,column) =>
+                    // {
+                    //     let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
+                    //     if(!modelIndex.data(Qt.UserRole + 1))
+                    //     {
+                    //         modelIndex = inputDialogModel.createCell(modelIndex);
+                    //     }
+                    //     inputDialogProxyModel.currentIndex = modelIndex
+                    // }
                 }
-
             }
         }
 
@@ -489,6 +348,7 @@ Window {
                     resultContext.pythonError = context.pythonError;
                     resultContext.inputModel = inputDialogModel;
                     resultContext.outputModel = outputDialogModel;
+                    resultContext.inputParameterModel = parameterDialogModel
                     accepted(resultContext)
                     detachedDialog.close()
                 }

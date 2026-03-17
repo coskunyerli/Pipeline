@@ -30,10 +30,18 @@ namespace Pipeline::Runtime
             return false;
         }
 
-        auto data = m_inputDataTable->getRoot()->serialize();
+        std::unique_ptr<HierarchicalTableData> allData = std::make_unique<HierarchicalTableData>();
+        allData->setSize(1,2);
+
+        auto parameters = m_inputParameterData->getRoot();
+        auto data = m_inputDataTable->getRoot();
+        allData->setCell(0,parameters);
+        allData->setCell(1,data);
+
+        auto serializedData = allData->serialize();
         QByteArray buffer(
-            reinterpret_cast<const char*>(data.data()),
-            static_cast<int>(data.size())
+            reinterpret_cast<const char*>(serializedData.data()),
+            static_cast<int>(serializedData.size())
         );
         process.write(buffer);
         process.closeWriteChannel();
@@ -146,4 +154,18 @@ namespace Pipeline::Runtime
     void PythonNodeDialogActor::onFailed(const QVariant &result)
     {
     }
+
+    NodeTableModel *PythonNodeDialogActor::getInputParameterDataTable() const
+    {
+        return m_inputParameterData;
+    }
+
+    void PythonNodeDialogActor::setInputParameterDataTable(NodeTableModel *newInputParameterData)
+    {
+        if (m_inputParameterData == newInputParameterData)
+            return;
+        m_inputParameterData = newInputParameterData;
+        emit inputParameterDataChanged();
+    }
+
 }

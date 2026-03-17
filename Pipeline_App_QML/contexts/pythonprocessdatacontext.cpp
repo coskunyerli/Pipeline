@@ -79,4 +79,17 @@ namespace Pipeline::Runtime
         emit nameChanged();
     }
 
+    NodeTableModel *PythonProcessDataContext::getInputParameterDataTable() const
+    {
+        return m_inputParameterModel;
+    }
+
+    void PythonProcessDataContext::setInputParemeterDataTable(NodeTableModel *newInputParameterModel)
+    {
+        if (m_inputParameterModel == newInputParameterModel)
+            return;
+        m_inputParameterModel = newInputParameterModel;
+        emit inputParameterDataChanged();
+    }
+
 }

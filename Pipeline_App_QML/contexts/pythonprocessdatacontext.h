@@ -10,6 +10,7 @@ namespace Pipeline::Runtime
             Q_PROPERTY(QString name READ getName WRITE setName NOTIFY nameChanged)
             Q_PROPERTY(QString pythonError READ getPythonError WRITE setPythonError NOTIFY pythonErrorChanged)
             Q_PROPERTY(NodeTableModel* inputModel READ getInputDataTable WRITE setInputDataTable NOTIFY inputDataChanged)
+            Q_PROPERTY(NodeTableModel* inputParameterModel READ getInputParameterDataTable WRITE setInputParemeterDataTable NOTIFY inputParameterDataChanged)
             Q_PROPERTY(NodeTableModel* outputModel READ getOutputDataTable WRITE setOutputDataTable NOTIFY outputDataChanged)
         public:
             explicit PythonProcessDataContext(QObject *parent = nullptr);
@@ -27,6 +28,9 @@ namespace Pipeline::Runtime
             QString getName() const;
             void setName(const QString &newName);
 
+            NodeTableModel *getInputParameterDataTable() const;
+            void setInputParemeterDataTable(NodeTableModel *newInputParameterModel);
+
         signals:
             void filenameChanged();
             void pythonErrorChanged();
@@ -35,11 +39,14 @@ namespace Pipeline::Runtime
 
             void nameChanged();
 
+            void inputParameterDataChanged();
+
         private:
             QString m_filename;
             QString m_pythonError;
             NodeTableModel* m_inputData = nullptr;
             NodeTableModel* m_outputData = nullptr;
             QString m_name;
+            NodeTableModel *m_inputParameterModel = nullptr;
     };
 }

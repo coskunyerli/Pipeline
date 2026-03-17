@@ -13,7 +13,7 @@ namespace Pipeline
                 Q_PROPERTY(size_t columns READ columns WRITE setColumns NOTIFY columnsChanged)
                 Q_OBJECT
             public:
-                explicit NodeTableModel(QObject*parent=nullptr);
+                explicit NodeTableModel(QObject*parent = nullptr);
                 virtual ~NodeTableModel() override;
                 int rowCount(const QModelIndex &parent = QModelIndex()) const override;
                 int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -22,10 +22,10 @@ namespace Pipeline
                 QModelIndex parent(const QModelIndex &child) const override;
                 QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
                 Q_INVOKABLE bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value,
-                                   int role = Qt::EditRole) override;
+                                               int role = Qt::EditRole) override;
                 Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
                 Q_INVOKABLE QVariant headerData(int section, Qt::Orientation orientation,
-                                                        int role = Qt::DisplayRole) const override;
+                                                int role = Qt::DisplayRole) const override;
                 Q_INVOKABLE QModelIndex createCell(const QModelIndex&index);
                 virtual QHash<int, QByteArray> roleNames() const;
 
@@ -35,7 +35,10 @@ namespace Pipeline
                 int columns() const;
                 void setRows(int rows);
                 void setColumns(int columns);
-                 std::shared_ptr<HierarchicalTableData> getRoot() const {return m_rootResult;}
+                std::shared_ptr<HierarchicalTableData> getRoot() const
+                {
+                    return m_rootResult;
+                }
             signals:
                 void rowsChanged();
                 void columnsChanged();

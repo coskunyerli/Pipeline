@@ -12,6 +12,7 @@ namespace Pipeline
             PythonError,
             ActorAction,
             InputTableModel,
+            InputParameterTableModel,
             OutputTableModel,
             NodeRunningState,
         };

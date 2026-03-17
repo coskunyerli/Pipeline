@@ -17,6 +17,7 @@ namespace Pipeline
     {
         PythonProcessActorNode::PythonProcessActorNode()
             : ActorNode()
+            , m_inputParameterDataTable(new NodeTableModel())
             , m_inputDataTable(new NodeTableModel())
             , m_outputDataTable(new NodeTableModel())
             , m_useInputTable(false)
@@ -34,10 +35,18 @@ namespace Pipeline
 
         QVariant PythonProcessActorNode::behaviour(const Thread::BehaviourContext &behaviour)
         {
-            auto data = m_inputDataTable->getRoot()->serialize();
+            std::unique_ptr<HierarchicalTableData> allData = std::make_unique<HierarchicalTableData>();
+            allData->setSize(1,2);
+
+            auto parameters = m_inputParameterDataTable->getRoot();
+            auto data = m_inputDataTable->getRoot();
+            allData->setCell(0,parameters);
+            allData->setCell(1,data);
+
+            auto serializedData = allData->serialize();
             QByteArray buffer(
-                reinterpret_cast<const char*>(data.data()),
-                static_cast<int>(data.size())
+                reinterpret_cast<const char*>(serializedData.data()),
+                static_cast<int>(serializedData.size())
             );
             m_pythonThrowError = false;
             QVariant result;
@@ -91,7 +100,8 @@ namespace Pipeline
         {
             auto roles = ActorNode::roleNames();
             roles[NodeRoles::PythonFileName] = "pythonFilename";
-            roles[NodeRoles::InputTableModel] = "inputTableModels";
+            roles[NodeRoles::InputTableModel] = "inputTableModel";
+            roles[NodeRoles::InputParameterTableModel] = "inputParameterTableModel";
             roles[NodeRoles::OutputTableModel] = "outputTableModel";
             roles[NodeRoles::PythonError] = "pythonError";
             roles[NodeRoles::NodeRunningState] = "runningState";
@@ -116,6 +126,12 @@ namespace Pipeline
             {
                 NodeTableModel* model = value.value<NodeTableModel*>();
                 m_inputDataTable = model;
+                result = true;
+            }
+            else if (role == NodeRoles::InputParameterTableModel)
+            {
+                NodeTableModel* model = value.value<NodeTableModel*>();
+                m_inputParameterDataTable = model;
                 result = true;
             }
             else if (role == NodeRoles::OutputTableModel)
@@ -152,6 +168,11 @@ namespace Pipeline
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
                 return v;
             }
+            else if (role == NodeRoles::InputParameterTableModel)
+            {
+                QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputParameterDataTable));
+                return v;
+            }
             else if (role == NodeRoles::OutputTableModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_outputDataTable));
@@ -173,6 +194,7 @@ namespace Pipeline
             context->setFilename(m_filename);
             context->setPythonError(m_pythonError);
             context->setInputDataTable(m_inputDataTable);
+            context->setInputParemeterDataTable(m_inputParameterDataTable);
             context->setOutputDataTable(m_outputDataTable);
             context->setName(this->data(UI::Roles::Name).toString());
             return context;
@@ -186,19 +208,29 @@ namespace Pipeline
             {
                 return;
             }
+
             this->setFilename(pythonContext->getFilename());
             this->m_pythonError = pythonContext->getPythonError();
             this->setName(pythonContext->getName().toStdString());
-            if(auto *inputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputDataTable()))
+
+            if (auto *inputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputDataTable()))
             {
                 inputDialogModel->saveData();
             }
-            if(auto *outputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getOutputDataTable()))
+
+            if (auto *inputParameterDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputParameterDataTable()))
+            {
+                inputParameterDialogModel->saveData();
+            }
+
+            if (auto *outputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getOutputDataTable()))
             {
                 outputDialogModel->saveData();
             }
 
-            notifyChanged({UI::Roles::Name, NodeRoles::PythonFileName, NodeRoles::PythonFileName});
+            notifyChanged({UI::Roles::Name, NodeRoles::PythonFileName, NodeRoles::PythonFileName, NodeRoles:: InputTableModel,
+                NodeRoles::InputParameterTableModel,
+                NodeRoles::OutputTableModel,});
         }
 
         void PythonProcessActorNode::onStarted()

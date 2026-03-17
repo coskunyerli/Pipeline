@@ -28,6 +28,7 @@ namespace Pipeline
                 void outConnectionChanged(UI::MPort *outPort, UI::MPort* inPort) override;
             private:
                 QString m_filename;
+                NodeTableModel* m_inputParameterDataTable;
                 NodeTableModel* m_inputDataTable;
                 NodeTableModel* m_outputDataTable;
                 QString m_pythonError;
