@@ -16,5 +16,6 @@
         <file>PBreadCrumb.qml</file>
         <file>WidgetTitleHeader.qml</file>
         <file>HierarchicalTableWidget.qml</file>
+        <file>ParameterGrid.qml</file>
     </qresource>
 </RCC>

@@ -8,21 +8,6 @@ namespace Pipeline::Runtime
         : BaseDataContext(parent)
     {
     }
-
-    QString PythonProcessDataContext::getFilename() const
-    {
-        return m_filename;
-    }
-
-    void PythonProcessDataContext::setFilename(const QString &newFilename)
-    {
-        if (m_filename == newFilename)
-            return;
-
-        m_filename = newFilename;
-        emit filenameChanged();
-    }
-
     QString PythonProcessDataContext::getPythonError() const
     {
         return m_pythonError;
@@ -65,31 +50,17 @@ namespace Pipeline::Runtime
         emit outputDataChanged();
     }
 
-    QString PythonProcessDataContext::getName() const
-    {
-        return m_name;
-    }
-
-    void PythonProcessDataContext::setName(const QString &newName)
-    {
-        if (m_name == newName)
-            return;
-
-        m_name = newName;
-        emit nameChanged();
-    }
-
-    NodeTableModel *PythonProcessDataContext::getInputParameterDataTable() const
+    NodeParamListModel *PythonProcessDataContext::getNodeParameterListModel() const
     {
         return m_inputParameterModel;
     }
 
-    void PythonProcessDataContext::setInputParemeterDataTable(NodeTableModel *newInputParameterModel)
+    void PythonProcessDataContext::setNodeParameterListModel(NodeParamListModel *inputParameterModel)
     {
-        if (m_inputParameterModel == newInputParameterModel)
+        if (m_inputParameterModel == inputParameterModel)
             return;
-        m_inputParameterModel = newInputParameterModel;
-        emit inputParameterDataChanged();
+        m_inputParameterModel = inputParameterModel;
+        emit nodeParameterListModelChanged();
     }
 
 }

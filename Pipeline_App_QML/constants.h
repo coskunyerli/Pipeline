@@ -12,7 +12,7 @@ namespace Pipeline
             PythonError,
             ActorAction,
             InputTableModel,
-            InputParameterTableModel,
+            NodeParameterListModel,
             OutputTableModel,
             NodeRunningState,
         };
@@ -24,6 +24,17 @@ namespace Pipeline
             CellName,
             HeaderData = Qt::UserRole + 1000,
             HeaderDataEnd = HeaderData + 1000,
+        };
+        // --------------------
+        // Roles
+        // --------------------
+        enum ParameterRoles
+        {
+            NameRole = Qt::UserRole + 1,
+            TypeRole,
+            ValueRole,
+            TypeStringRole,
+            IsBrowseRole
         };
     }
 }

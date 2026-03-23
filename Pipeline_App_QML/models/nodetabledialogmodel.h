@@ -3,7 +3,6 @@
 #include <models/nodetablemodel.h>
 namespace Pipeline::Runtime
 {
-    class HierarchicalTableData;
     class NodeTableDialogModel: public NodeTableModel
     {
             Q_OBJECT

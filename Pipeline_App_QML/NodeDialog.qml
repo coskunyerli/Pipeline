@@ -3,10 +3,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Dialogs
-import Pipeline.Models as PM
 import Pipeline.Actors as PA
 import Pipeline.Services as PS
 import Pipeline.Contexts as PC
+import Pipeline.Models as PM
 
 Window {
     id: detachedDialog
@@ -25,10 +25,10 @@ Window {
     property var actor : PA.PythonNodeDialogActor
     {
         id:actor
-        filename : pythonFilenameTextEdit.text
-        inputData : inputDialogModel
-        inputParameterData:parameterDialogModel
-        outputData: outputDialogModel
+        //filename : pythonFilenameTextEdit.text
+        inputData : inputTable.model
+        outputData: outputTable.model
+        inputParameterModel: paramListDialogModel
         onPythonErrorChanged:
         {
             context.pythonError = actor.pythonError
@@ -63,6 +63,11 @@ Window {
             Layout.fillWidth: true
 
             PTabButton {
+                id: controlParameter
+                text: "Parameters"
+            }
+
+            PTabButton {
                 id: controlInput
                 text: "Input"
             }
@@ -73,210 +78,140 @@ Window {
             }
         }
 
-        StackLayout {
-
+        SplitView
+        {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: tabBar.currentIndex
+            Layout.topMargin: 12
+            orientation: Qt.Vertical
 
-            /* ---------------- INPUT TAB ---------------- */
 
-            ColumnLayout {
-                spacing: 8
-                Layout.fillWidth: true
-                Layout.fillHeight: true
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 1
-                    color: "#505050"
-                }
-                GridLayout {
-                    columns: 3
-                    columnSpacing: 10
-                    Layout.fillWidth: true
+            StackLayout {
 
-                    Label {
-                        text: "Name:"
-                        color: "#e0e0e0"
-                    }
+                SplitView.fillHeight: true
+                SplitView.fillWidth: true
+                currentIndex: tabBar.currentIndex
 
-                    PTextEdit {
-                        id: nameTextEdit
-                        text:context.name
-                        Layout.fillWidth: true
-                        Layout.columnSpan: 2
-                    }
-
-                    Label {
-                        text: "Python File:"
-                        color: "#e0e0e0"
-                    }
-
-                    PTextEdit {
-                        id: pythonFilenameTextEdit
-                        text:context.filename
-                        Layout.fillWidth: true
-                    }
-
-                    PButton {
-                        id: control
-                        Layout.preferredWidth: 90
-                        text: "Browse"
-                        onClicked: fileDialog.open()
-                    }
-
-                }
-
-                SplitView
+                /* ---------------- INPUT TAB ---------------- */
+                ColumnLayout
                 {
+
+                    spacing: 8
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.topMargin: 12
-                    orientation: Qt.Vertical
-
-                    ColumnLayout
+                    WidgetTitleHeader
                     {
-                        spacing: 0
-                        SplitView.preferredHeight: 200
-                        SplitView.fillWidth: true
-                        WidgetTitleHeader
-                        {
-                            Layout.fillWidth: true
-                            text:"Parameters"
-                        }
+                        Layout.fillWidth: true
+                        text:"Parameters"
 
-                        HierarchicalTableWidget
+
+                        PButton
                         {
-                            id:parameterTable
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            model:PM.NodeTableSliceProxyModel
+                            text: "+"
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            ToolTip
                             {
-                                id: parameterDialogProxyModel
-                                sourceModel:PM.NodeTableDialogModel
-                                {
-                                    id: parameterDialogModel
-                                    referenceModel: context.inputParameterModel
-                                }
+                                text: "Add Parameter"
                             }
-
-                            // onCellDClicked:(row,column) =>
-                            // {
-                            //     let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
-                            //     if(!modelIndex.data(Qt.UserRole + 1))
-                            //     {
-                            //         modelIndex = inputDialogModel.createCell(modelIndex);
-                            //     }
-                            //     inputDialogProxyModel.currentIndex = modelIndex
-                            // }
                         }
-                    }
 
-                    ColumnLayout
-                    {
-                        SplitView.fillWidth: true
-                        SplitView.fillHeight: true
-                        spacing: 0
 
-                        WidgetTitleHeader
+                        PTextEdit
                         {
-                            Layout.fillWidth: true
-                            text:"Input Table"
-                        }
-                        HierarchicalTableWidget
-                        {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            model:PM.NodeTableSliceProxyModel
+                            id:columnCountEdit
+                            text: "1"
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            ToolTip
                             {
-                                id: inputDialogProxyModel
-                                sourceModel:PM.NodeTableDialogModel
-                                {
-                                    id: inputDialogModel
-                                    referenceModel: context.inputModel
-                                }
+                                text: "Add Parameter"
                             }
-
-                            // onCellDClicked:(row,column) =>
-                            // {
-                            //     let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
-                            //     if(!modelIndex.data(Qt.UserRole + 1))
-                            //     {
-                            //         modelIndex = inputDialogModel.createCell(modelIndex);
-                            //     }
-                            //     inputDialogProxyModel.currentIndex = modelIndex
-                            // }
                         }
 
                     }
-
-                    ColumnLayout
+                    ParameterGrid
                     {
-                        SplitView.preferredHeight: 120
-                        SplitView.fillWidth: true
-                        spacing: 0
-
-                        WidgetTitleHeader
+                        model: PM.NodeParamListDialogModel
                         {
-                            Layout.fillWidth: true
-                            text:"Console Output"
+                            id:paramListDialogModel
+                            referenceModel: context.inputParameterModel
                         }
 
+                        columnValue: Math.max(1,Number(columnCountEdit.text))
+                    }
+                }
 
-                        POutputConsole
-                        {
-                            id: outputConsole
-                            text: context.pythonError
-                            Layout.fillHeight: true
-                            Layout.fillWidth: true
-                        }
+                ColumnLayout {
+                    spacing: 0
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    WidgetTitleHeader
+                    {
+                        Layout.fillWidth: true
+                        text:"Input Table"
+                    }
+
+                    HierarchicalTableWidget
+                    {
+                        id:inputTable
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        referenceModel: context.inputModel
+                    }
+                }
+
+                /* ---------------- OUTPUT TAB ---------------- */
+
+                ColumnLayout {
+
+                    spacing: 0
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    WidgetTitleHeader
+                    {
+                        Layout.fillWidth: true
+                        text:"Output Table"
+                    }
+
+                    HierarchicalTableWidget
+                    {
+                        id:outputTable
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        referenceModel: context.outputModel
                     }
                 }
             }
 
-            /* ---------------- OUTPUT TAB ---------------- */
-
-            ColumnLayout {
-
+            ColumnLayout
+            {
+                SplitView.preferredHeight: 120
+                SplitView.fillWidth: true
                 spacing: 0
-                Layout.fillWidth: true
-                Layout.fillHeight: true
 
-                Rectangle
+                WidgetTitleHeader
                 {
-                    color: "#404040"
-                    height: 1
                     Layout.fillWidth: true
-                    Layout.topMargin: 32
+                    text:"Console Output"
                 }
 
-                HierarchicalTableWidget
-                {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    model:PM.NodeTableSliceProxyModel
-                    {
-                        id: outputDialogProxyModel
-                        sourceModel:PM.NodeTableDialogModel
-                        {
-                            id: outputDialogModel
-                            referenceModel:context.outputModel
-                        }
-                    }
 
-                    // onCellDClicked:(row,column) =>
-                    // {
-                    //     let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
-                    //     if(!modelIndex.data(Qt.UserRole + 1))
-                    //     {
-                    //         modelIndex = inputDialogModel.createCell(modelIndex);
-                    //     }
-                    //     inputDialogProxyModel.currentIndex = modelIndex
-                    // }
+                POutputConsole
+                {
+                    id: outputConsole
+                    text: context.pythonError
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
                 }
             }
+
+
         }
+
 
         /* ---------------- BUTTONS ---------------- */
 
@@ -319,8 +254,8 @@ Window {
                 Layout.preferredWidth: 90
                 onClicked:
                 {
-                    inputDialogModel.resetData();
-                    outputDialogModel.resetData();
+                    inputTable.model.resetData();
+                    outputTable.model.resetData();
                     context.pythonError = ""
                 }
             }
@@ -330,8 +265,8 @@ Window {
                 Layout.preferredWidth: 90
                 onClicked:
                 {
-                    inputDialogModel.resetData();
-                    outputDialogModel.resetData();
+                    inputTable.model.resetData();
+                    outputTable.model.resetData();
                     detachedDialog.close()
                 }
             }
@@ -343,12 +278,10 @@ Window {
                 onClicked:
                 {
                     // copy data into reference model
-                    resultContext.filename = actor.filename;
-                    resultContext.name = nameTextEdit.text;
                     resultContext.pythonError = context.pythonError;
-                    resultContext.inputModel = inputDialogModel;
-                    resultContext.outputModel = outputDialogModel;
-                    resultContext.inputParameterModel = parameterDialogModel
+                    resultContext.inputModel = inputTable.model;
+                    resultContext.outputModel = outputTable.model;
+                    resultContext.inputParameterModel = paramListDialogModel
                     accepted(resultContext)
                     detachedDialog.close()
                 }

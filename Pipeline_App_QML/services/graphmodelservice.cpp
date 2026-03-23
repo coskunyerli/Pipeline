@@ -17,7 +17,7 @@ namespace Pipeline
 
             auto *node = new PythonProcessActorNode();
             node->setName("Python Node");
-            node->setFilename("C:\\Users\\yerli\\PycharmProjects\\opengl\\cppTest.py");
+            node->setData("C:\\Users\\yerli\\PycharmProjects\\opengl\\cppTest.py", NodeRoles::PythonFileName);
             auto *outPort = new UI::MPort(node);
             auto *inPort = new UI::MPort(node);
             //auto *inPort2 = new UI::MPort(node);

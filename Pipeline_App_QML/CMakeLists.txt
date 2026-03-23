@@ -55,19 +55,34 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         contexts/pythonprocessdatacontext.h
         contexts/pythonprocessdatacontext.cpp
         dispatchers/baseactornodedispatcher.h
+        models/nodeparamlistmodel.h
+        models/nodeparamlistmodel.cpp
+        data/nodeparameter.h
+        models/nodeparamuilistmodel.h
+        models/nodeparamuilistmodel.cpp
+        models/nodeparamlistdialogmodel.h
+        models/nodeparamlistdialogmodel.cpp
+        helpers/serializehelper.h
+        helpers/serializehelper.cpp
+        data/nodeparameterlist.h
+        data/nodeparameterlist.cpp
     )
 
     qt_add_resources(APP_RESOURCES
         resources.qrc
     )
-pybind11_add_module(HierarchicalTableData
-    bindings/hierarchicaltabledata_python.cpp
+pybind11_add_module(PipelineData
+    bindings/pipelinedata_python.cpp
     helpers/stringhelper.h
     helpers/stringhelper.cpp
+    helpers/serializehelper.h
+    helpers/serializehelper.cpp
     data/hierarchicaltabledata.h data/hierarchicaltabledata.cpp
+    data/nodeparameterlist.h data/nodeparameterlist.cpp
+    data/nodeparameter.h
 )
 
-target_include_directories(HierarchicalTableData PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(PipelineData PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # Define target properties for Android with Qt 6 as:

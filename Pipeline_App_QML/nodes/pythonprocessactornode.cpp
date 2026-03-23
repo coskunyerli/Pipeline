@@ -6,6 +6,7 @@
 #include <constants.h>
 #include <contexts/pythonprocessdatacontext.h>
 #include <models/nodetabledialogmodel.h>
+#include <models/nodeparamlistdialogmodel.h>
 #include <iostream>
 
 Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::HierarchicalTableData>);
@@ -17,33 +18,27 @@ namespace Pipeline
     {
         PythonProcessActorNode::PythonProcessActorNode()
             : ActorNode()
-            , m_inputParameterDataTable(new NodeTableModel())
+            , m_nodeParamListModel(new NodeParamListModel())
             , m_inputDataTable(new NodeTableModel())
             , m_outputDataTable(new NodeTableModel())
             , m_useInputTable(false)
         {
+            this->m_nodeParamListModel->addParameter("Name", (int)ParamType::String, "Python Node");
+            this->m_nodeParamListModel->addParameter("Python File", (int)ParamType::Browse, "");
         }
 
         PythonProcessActorNode::~PythonProcessActorNode()
         {
-        }
-
-        void PythonProcessActorNode::setFilename(const QString &filename)
-        {
-            m_filename = filename;
+            m_nodeParamListModel->deleteLater();
+            m_inputDataTable->deleteLater();
+            m_outputDataTable->deleteLater();
         }
 
         QVariant PythonProcessActorNode::behaviour(const Thread::BehaviourContext &behaviour)
         {
-            std::unique_ptr<HierarchicalTableData> allData = std::make_unique<HierarchicalTableData>();
-            allData->setSize(1,2);
-
-            auto parameters = m_inputParameterDataTable->getRoot();
+            //auto parameters = m_inputParameterDataTable->getRoot();
             auto data = m_inputDataTable->getRoot();
-            allData->setCell(0,parameters);
-            allData->setCell(1,data);
-
-            auto serializedData = allData->serialize();
+            auto serializedData = data->serialize();
             QByteArray buffer(
                 reinterpret_cast<const char*>(serializedData.data()),
                 static_cast<int>(serializedData.size())
@@ -51,7 +46,14 @@ namespace Pipeline
             m_pythonThrowError = false;
             QVariant result;
             QProcess process;
-            process.start("C:\\Users\\yerli\\AppData\\Local\\Programs\\Python\\Python39\\python.exe", QStringList() << m_filename);
+            QString filename = this->data(NodeRoles::PythonFileName).toString();
+
+            if (filename.isEmpty())
+            {
+                return false;
+            }
+
+            process.start("C:\\Users\\yerli\\AppData\\Local\\Programs\\Python\\Python39\\python.exe", QStringList() << filename);
 
             if (!process.waitForStarted())
             {
@@ -101,7 +103,7 @@ namespace Pipeline
             auto roles = ActorNode::roleNames();
             roles[NodeRoles::PythonFileName] = "pythonFilename";
             roles[NodeRoles::InputTableModel] = "inputTableModel";
-            roles[NodeRoles::InputParameterTableModel] = "inputParameterTableModel";
+            roles[NodeRoles::NodeParameterListModel] = "nodeParameterListModel";
             roles[NodeRoles::OutputTableModel] = "outputTableModel";
             roles[NodeRoles::PythonError] = "pythonError";
             roles[NodeRoles::NodeRunningState] = "runningState";
@@ -114,7 +116,7 @@ namespace Pipeline
 
             if (role == NodeRoles::PythonFileName)
             {
-                this->setFilename(value.toString());
+                this->m_nodeParamListModel->setData("Python File", value.toString(), ParameterRoles::ValueRole);
                 result = true;
             }
             else if (role == NodeRoles::PythonError)
@@ -128,10 +130,10 @@ namespace Pipeline
                 m_inputDataTable = model;
                 result = true;
             }
-            else if (role == NodeRoles::InputParameterTableModel)
+            else if (role == NodeRoles::NodeParameterListModel)
             {
-                NodeTableModel* model = value.value<NodeTableModel*>();
-                m_inputParameterDataTable = model;
+                NodeParamListModel* model = value.value<NodeParamListModel*>();
+                m_nodeParamListModel = model;
                 result = true;
             }
             else if (role == NodeRoles::OutputTableModel)
@@ -145,7 +147,7 @@ namespace Pipeline
                 result = ActorNode::setData(value, role, false);
             }
 
-            if (result && emitSignal)
+            if (result && emitSignal && notifyChanged)
             {
                 notifyChanged({role});
             }
@@ -157,7 +159,7 @@ namespace Pipeline
         {
             if (role == NodeRoles::PythonFileName)
             {
-                return m_filename;
+                return this->m_nodeParamListModel->data("Python File", ParameterRoles::ValueRole).toString();
             }
             else if (role == NodeRoles::PythonError)
             {
@@ -168,9 +170,9 @@ namespace Pipeline
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
                 return v;
             }
-            else if (role == NodeRoles::InputParameterTableModel)
+            else if (role == NodeRoles::NodeParameterListModel)
             {
-                QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputParameterDataTable));
+                QVariant v = QVariant::fromValue(static_cast<QObject*>(m_nodeParamListModel));
                 return v;
             }
             else if (role == NodeRoles::OutputTableModel)
@@ -191,12 +193,10 @@ namespace Pipeline
         BaseDataContext* PythonProcessActorNode::createDataContext(QObject *parent)
         {
             auto *context = new PythonProcessDataContext(parent);
-            context->setFilename(m_filename);
             context->setPythonError(m_pythonError);
             context->setInputDataTable(m_inputDataTable);
-            context->setInputParemeterDataTable(m_inputParameterDataTable);
+            context->setNodeParameterListModel(m_nodeParamListModel);
             context->setOutputDataTable(m_outputDataTable);
-            context->setName(this->data(UI::Roles::Name).toString());
             return context;
         }
 
@@ -208,19 +208,16 @@ namespace Pipeline
             {
                 return;
             }
-
-            this->setFilename(pythonContext->getFilename());
             this->m_pythonError = pythonContext->getPythonError();
-            this->setName(pythonContext->getName().toStdString());
 
             if (auto *inputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputDataTable()))
             {
                 inputDialogModel->saveData();
             }
 
-            if (auto *inputParameterDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputParameterDataTable()))
+            if (auto *nodeParamListModel = dynamic_cast<NodeParamListDialogModel*>(pythonContext->getNodeParameterListModel()))
             {
-                inputParameterDialogModel->saveData();
+                nodeParamListModel->saveData();
             }
 
             if (auto *outputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getOutputDataTable()))
@@ -229,8 +226,8 @@ namespace Pipeline
             }
 
             notifyChanged({UI::Roles::Name, NodeRoles::PythonFileName, NodeRoles::PythonFileName, NodeRoles:: InputTableModel,
-                NodeRoles::InputParameterTableModel,
-                NodeRoles::OutputTableModel,});
+                           NodeRoles::NodeParameterListModel,
+                           NodeRoles::OutputTableModel,});
         }
 
         void PythonProcessActorNode::onStarted()

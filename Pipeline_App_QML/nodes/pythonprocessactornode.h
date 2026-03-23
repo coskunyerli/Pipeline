@@ -1,6 +1,7 @@
 #pragma once
 #include "actornode.h"
 #include <models/nodetablemodel.h>
+#include <models/nodeparamlistmodel.h>
 #include <QObject>
 
 class QSharedMemory;
@@ -14,7 +15,7 @@ namespace Pipeline
             public:
                 explicit PythonProcessActorNode();
                 ~PythonProcessActorNode() override;
-                void setFilename(const QString &filename);
+
                 QVariant behaviour(const Thread::BehaviourContext& behaviour) override;
                 QHash<int, QByteArray> roleNames() const override;
                 bool setData(const QVariant &value, int role, bool emitSignal = false) override;
@@ -27,8 +28,7 @@ namespace Pipeline
                 void inConnectionChanged(UI::MPort *inPort, UI::MPort* outPort) override;
                 void outConnectionChanged(UI::MPort *outPort, UI::MPort* inPort) override;
             private:
-                QString m_filename;
-                NodeTableModel* m_inputParameterDataTable;
+                NodeParamListModel* m_nodeParamListModel;
                 NodeTableModel* m_inputDataTable;
                 NodeTableModel* m_outputDataTable;
                 QString m_pythonError;

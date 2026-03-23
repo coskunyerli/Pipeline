@@ -1,7 +1,6 @@
 #include "hierarchicaltabledata.h"
-
+#include <helpers/serializehelper.h>
 #include <stdexcept>
-
 #include <helpers/stringhelper.h>
 
 
@@ -9,88 +8,6 @@ namespace Pipeline
 {
     namespace Runtime
     {
-
-        namespace
-        {
-
-            // --- Write helpers (big-endian) ---
-
-            void writeU8(std::vector<uint8_t>& buf, uint8_t val)
-            {
-                buf.push_back(val);
-            }
-
-            void writeU32(std::vector<uint8_t>& buf, uint32_t val)
-            {
-                buf.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
-                buf.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
-                buf.push_back(static_cast<uint8_t>((val >>  8) & 0xFF));
-                buf.push_back(static_cast<uint8_t>((val) & 0xFF));
-            }
-
-            void writeU64(std::vector<uint8_t>& buf, uint64_t val)
-            {
-                for (int i = 56; i >= 0; i -= 8)
-                    buf.push_back(static_cast<uint8_t>((val >> i) & 0xFF));
-            }
-
-            void writeString(std::vector<uint8_t>& buf, const std::string& str)
-            {
-                writeU32(buf, static_cast<uint32_t>(str.size()));
-                buf.insert(buf.end(), str.begin(), str.end());
-            }
-
-            // --- Read helpers (big-endian) ---
-
-            uint8_t readU8(const uint8_t* data, size_t size, size_t& offset)
-            {
-                if (offset + 1 > size)
-                    throw std::runtime_error("PythonNodeResult::deserialize: buffer underflow (U8)");
-
-                return data[offset++];
-            }
-
-            uint32_t readU32(const uint8_t* data, size_t size, size_t& offset)
-            {
-                if (offset + 4 > size)
-                    throw std::runtime_error("PythonNodeResult::deserialize: buffer underflow (U32)");
-
-                uint32_t val = (static_cast<uint32_t>(data[offset])     << 24)
-                               | (static_cast<uint32_t>(data[offset + 1]) << 16)
-                               | (static_cast<uint32_t>(data[offset + 2]) <<  8)
-                               | (static_cast<uint32_t>(data[offset + 3]));
-                offset += 4;
-                return val;
-            }
-
-            uint64_t readU64(const uint8_t* data, size_t size, size_t& offset)
-            {
-                if (offset + 8 > size)
-                    throw std::runtime_error("PythonNodeResult::deserialize: buffer underflow (U64)");
-
-                uint64_t val = 0;
-
-                for (int i = 0; i < 8; i++)
-                    val = (val << 8) | data[offset++];
-
-                return val;
-            }
-
-            std::string readString(const uint8_t* data, size_t size, size_t& offset)
-            {
-                uint32_t len = readU32(data, size, offset);
-
-                if (offset + len > size)
-                    throw std::runtime_error("PythonNodeResult::deserialize: buffer underflow (string)");
-
-                std::string str(reinterpret_cast<const char*>(data + offset), len);
-                offset += len;
-                return str;
-            }
-
-        } // anonymous namespace
-
-
         HierarchicalTableData::HierarchicalTableData(HierarchicalTableData* parent)
             : m_columnCount(0)
             , m_rowCount(0)
@@ -150,7 +67,6 @@ namespace Pipeline
             {
                 const CellKey& key = pair.first;
                 const auto& child = pair.second;
-
                 auto it = other.m_tables.find(key);
 
                 if (it == other.m_tables.end())
@@ -347,8 +263,8 @@ namespace Pipeline
             std::vector<uint8_t> buffer;
             buffer.reserve(4096);
             // Header
-            writeU32(buffer, 0x504E5231); // "PNR1"
-            writeU8(buffer, 1);            // version
+            SerializeHelper::writeU32(buffer, 0x504E5231); // "PNR1"
+            SerializeHelper::writeU8(buffer, 1);            // version
             serializeNode(buffer, node);
             return buffer;
         }
@@ -356,12 +272,12 @@ namespace Pipeline
         HierarchicalTableData* HierarchicalTableData::deserialize(const uint8_t* data, size_t size)
         {
             size_t offset = 0;
-            uint32_t magic = readU32(data, size, offset);
+            uint32_t magic = SerializeHelper::readU32(data, size, offset);
 
             if (magic != 0x504E5231)
                 throw std::runtime_error("PythonNodeResult::deserialize: invalid magic (expected PNR1)");
 
-            uint8_t version = readU8(data, size, offset);
+            uint8_t version = SerializeHelper::readU8(data, size, offset);
 
             if (version != 1)
                 throw std::runtime_error("PythonNodeResult::deserialize: unsupported version");
@@ -411,28 +327,28 @@ namespace Pipeline
         {
             if (!node)
             {
-                writeU8(buf, 0);
+                SerializeHelper::writeU8(buf, 0);
                 return;
             }
 
-            writeU8(buf, 1);
+            SerializeHelper::writeU8(buf, 1);
             size_t rows = node->getRowCount();
             size_t cols = node->getColumnCount();
-            writeU64(buf, rows);
-            writeU64(buf, cols);
-            writeU8(buf, !!node->m_parent);
+            SerializeHelper::writeU64(buf, rows);
+            SerializeHelper::writeU64(buf, cols);
+            SerializeHelper::writeU8(buf, !!node->m_parent);
 
             if (!node->m_parent)
             {
-                writeString(buf, node->getValue());
+                SerializeHelper::writeString(buf, node->getValue());
             }
 
-            writeU32(buf, static_cast<uint32_t>(node->m_headerData.size()));
+            SerializeHelper::writeU32(buf, static_cast<uint32_t>(node->m_headerData.size()));
 
             for (const auto& pair : node->m_headerData)
             {
-                writeU32(buf, static_cast<uint32_t>(pair.first));
-                writeString(buf, pair.second);
+                SerializeHelper::writeU32(buf, static_cast<uint32_t>(pair.first));
+                SerializeHelper::writeString(buf, pair.second);
             }
 
             // -------- VALUES (SPARSE) --------
@@ -442,66 +358,66 @@ namespace Pipeline
                 if (!node->m_values[i].empty())
                     nonEmptyValues.emplace_back(i, node->m_values[i]);
             }
-            writeU64(buf, nonEmptyValues.size());
+            SerializeHelper::writeU64(buf, nonEmptyValues.size());
             for (auto& pair : nonEmptyValues)
             {
                 size_t row = pair.first / cols;
                 size_t col = pair.first % cols;
-                writeU64(buf, row);
-                writeU64(buf, col);
-                writeString(buf, pair.second);
+                SerializeHelper::writeU64(buf, row);
+                SerializeHelper::writeU64(buf, col);
+                SerializeHelper::writeString(buf, pair.second);
             }
             // Serializer Child Table
             size_t childCount = node->m_tables.size();
-            writeU64(buf, childCount);
+            SerializeHelper::writeU64(buf, childCount);
             for (auto& pair : node->m_tables)
             {
-                writeU64(buf, pair.first.row);
-                writeU64(buf, pair.first.column);
+                SerializeHelper::writeU64(buf, pair.first.row);
+                SerializeHelper::writeU64(buf, pair.first.column);
                 serializeNode(buf, pair.second.get());
             }
         }
 
         HierarchicalTableData* HierarchicalTableData::deserializeNode(const uint8_t* data, size_t size, size_t& offset, HierarchicalTableData *parent)
         {
-            uint8_t marker = readU8(data, size, offset);
+            uint8_t marker = SerializeHelper::readU8(data, size, offset);
             if (marker == 0)
                 return nullptr;
             auto* node = new HierarchicalTableData(parent);
-            uint64_t rows = readU64(data, size, offset);
-            uint64_t cols = readU64(data, size, offset);
-            bool hasParent = readU8(data, size, offset);
+            uint64_t rows = SerializeHelper::readU64(data, size, offset);
+            uint64_t cols = SerializeHelper::readU64(data, size, offset);
+            bool hasParent = SerializeHelper::readU8(data, size, offset);
             if(!hasParent)
             {
-                std::string value = readString(data, size, offset);
+                std::string value = SerializeHelper::readString(data, size, offset);
                 node->setValue(value);
             }
             node->setSize(static_cast<size_t>(rows), static_cast<size_t>(cols));
-            uint32_t headerCount = readU32(data, size, offset);
+            uint32_t headerCount = SerializeHelper::readU32(data, size, offset);
 
             for (uint32_t i = 0; i < headerCount; i++)
             {
-                int key = static_cast<int>(readU32(data, size, offset));
-                std::string value = readString(data, size, offset);
+                int key = static_cast<int>(SerializeHelper::readU32(data, size, offset));
+                std::string value = SerializeHelper::readString(data, size, offset);
                 node->setHeaderData(key, value);
             }
 
-            uint64_t valueSize = readU64(data, size, offset);
+            uint64_t valueSize = SerializeHelper::readU64(data, size, offset);
 
             for (size_t i = 0; i < valueSize; i++)
             {
-                uint64_t row = readU64(data, size, offset);
-                uint64_t column = readU64(data, size, offset);
-                std::string value = readString(data, size, offset);
+                uint64_t row = SerializeHelper::readU64(data, size, offset);
+                uint64_t column = SerializeHelper::readU64(data, size, offset);
+                std::string value = SerializeHelper::readString(data, size, offset);
                 node->setCellValue(row, column, value);
             }
 
-            uint64_t childCount = readU64(data, size, offset);
+            uint64_t childCount = SerializeHelper::readU64(data, size, offset);
 
             for (uint64_t i = 0; i < childCount; i++)
             {
-                uint64_t row = readU64(data, size, offset);
-                uint64_t column = readU64(data, size, offset);
+                uint64_t row = SerializeHelper::readU64(data, size, offset);
+                uint64_t column = SerializeHelper::readU64(data, size, offset);
                 HierarchicalTableData* child = deserializeNode(data, size, offset, node);
 
                 if (child)

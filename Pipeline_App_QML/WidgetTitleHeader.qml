@@ -5,19 +5,37 @@ import QtQuick.Layouts
 ColumnLayout
 {
     property alias text : label.text
+
+    default property alias actions: actionRow.data
+
     spacing: 0
+
     Rectangle
     {
         color: "#404040"
-
         Layout.preferredHeight: 28
         Layout.fillWidth: true
-        Label
+
+        RowLayout
         {
-            id:label
             anchors.fill: parent
             anchors.leftMargin: 8
-            verticalAlignment: Text.AlignVCenter
+            anchors.rightMargin: 8
+            spacing: 6
+
+            Label
+            {
+                id: label
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            Item { Layout.fillWidth: true } // spacer
+
+            RowLayout
+            {
+                id: actionRow
+                spacing: 4
+            }
         }
     }
 
@@ -28,4 +46,3 @@ ColumnLayout
         color: "#656565"
     }
 }
-

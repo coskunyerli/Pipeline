@@ -1,9 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Pipeline.Models as PM
 ColumnLayout
 {
-    property alias model : inputTable.model
+    id:root
+    property var referenceModel
+    readonly property alias model: dialogModel
     spacing: 0
     RowLayout
     {
@@ -15,10 +18,10 @@ ColumnLayout
             id : breadcrumb
             color: "transparent"
             Layout.fillWidth: true
-            index: inputDialogProxyModel.currentIndex
+            index: modelProxyModel.currentIndex
             onClicked: (modelIndex) =>
                        {
-                           inputDialogProxyModel.currentIndex = inputDialogModel.index(modelIndex.row,modelIndex.column,modelIndex.parent)
+                           modelProxyModel.currentIndex = dialogModel.index(modelIndex.row,modelIndex.column,modelIndex.parent)
                        }
         }
 
@@ -42,11 +45,11 @@ ColumnLayout
                 Layout.preferredWidth: 60
                 bottomPadding: 4
                 topPadding: 4
-                text: inputDialogProxyModel.currentIndexValue
+                text: modelProxyModel.currentIndexValue
                 onTextChanged: {
-                    if(inputDialogProxyModel.currentIndexValue !== text)
+                    if(modelProxyModel.currentIndexValue !== text)
                     {
-                        inputDialogProxyModel.currentIndexValue = text
+                        modelProxyModel.currentIndexValue = text
                     }
                 }
             }
@@ -63,11 +66,11 @@ ColumnLayout
                 Layout.preferredWidth: 60
                 bottomPadding: 4
                 topPadding: 4
-                text: inputDialogModel.rows
+                text: dialogModel.rows
                 onTextChanged: {
                     let val = Number(text)
-                    if(inputDialogModel.rows !== val)
-                        inputDialogModel.rows = val
+                    if(dialogModel.rows !== val)
+                        dialogModel.rows = val
                 }
             }
 
@@ -82,11 +85,11 @@ ColumnLayout
                 Layout.preferredWidth: 60
                 bottomPadding: 4
                 topPadding: 4
-                text: inputDialogModel.columns
+                text: dialogModel.columns
                 onTextChanged: {
                     let val = Number(text)
-                    if(inputDialogModel.columns !== val)
-                        inputDialogModel.columns = val
+                    if(dialogModel.columns !== val)
+                        dialogModel.columns = val
                 }
             }
         }
@@ -98,14 +101,24 @@ ColumnLayout
         Layout.fillHeight: true
         // copy inputModel inside
 
+        model:PM.NodeTableSliceProxyModel
+        {
+            id: modelProxyModel
+            sourceModel:PM.NodeTableDialogModel
+            {
+                id: dialogModel
+                referenceModel: root.referenceModel
+            }
+        }
+
         onCellDClicked:(row,column) =>
         {
-            let modelIndex = inputDialogModel.index(row,column, inputDialogProxyModel.currentIndex);
+            let modelIndex = dialogModel.index(row,column, modelProxyModel.currentIndex);
             if(!modelIndex.data(Qt.UserRole + 1))
             {
-                modelIndex = inputDialogModel.createCell(modelIndex);
+                modelIndex = dialogModel.createCell(modelIndex);
             }
-            inputDialogProxyModel.currentIndex = modelIndex
+            modelProxyModel.currentIndex = modelIndex
         }
     }
 }

@@ -11,7 +11,9 @@
 #include <services/nodemodelservice.h>
 #include <models/nodetabledialogmodel.h>
 #include <models/nodemodel.h>
-#include <models/nodetablesliceproxymodel.h>>
+#include <models/nodetablesliceproxymodel.h>
+#include <models/nodeparamlistdialogmodel.h>
+#include <models/nodeparamuilistmodel.h>
 #include <Models/portgraphviewmodel.h>
 #include <nodes/pythonnodedialogactor.h>
 #include <nodes/pythonprocessactornode.h>
@@ -38,6 +40,8 @@ int main(int argc, char* argv[])
     qmlRegisterType<Pipeline::UI::PortGraphViewModel>("Pipeline.Models", 1, 0, "PortGraphViewModel");
     qmlRegisterType<Pipeline::Runtime::GraphModelService>("Pipeline.Services", 1, 0, "GraphModelService");
     qmlRegisterType<Pipeline::Runtime::NodeTableDialogModel>("Pipeline.Models", 1, 0, "NodeTableDialogModel");
+    qmlRegisterType<Pipeline::Runtime::NodeParamListDialogModel>("Pipeline.Models", 1, 0, "NodeParamListDialogModel");
+    qmlRegisterType<Pipeline::Runtime::NodeParamUIListModel>("Pipeline.Models", 1, 0, "NodeParamUIListModel");
     qmlRegisterType<Pipeline::Runtime::PythonNodeDialogActor>("Pipeline.Actors", 1, 0, "PythonNodeDialogActor");
     qmlRegisterType<Pipeline::Runtime::PythonProcessDataContext>("Pipeline.Contexts", 1, 0, "PythonProcessDataContext");
     qmlRegisterType<Pipeline::UI::NodeIUManager>("Pipeline.Managers", 1, 0, "NodeUIManager");
@@ -56,7 +60,7 @@ int main(int argc, char* argv[])
         0,
         "NodeModelService",
         &Pipeline::Runtime::NodeModelService::instance
-        );
+    );
     //qmlRegisterSingletonType<Pipeline::Runtime::GraphModelService>("Pipeline.Services", 1, 0, "GraphModelService", Pipeline::Runtime::GraphModelService::createSingletonInstance);
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(

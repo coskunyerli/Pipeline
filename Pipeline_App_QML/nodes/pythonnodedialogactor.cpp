@@ -1,8 +1,10 @@
 #include "pythonnodedialogactor.h"
 #include <QProcess>
 #include <models/nodetablemodel.h>
+#include <models/nodeparamlistmodel.h>
 #include <nodes/pythonprocessactornode.h>
 #include <memory.h>
+#include <vector>
 Q_DECLARE_METATYPE(std::shared_ptr<Pipeline::Runtime::HierarchicalTableData>);
 
 namespace Pipeline::Runtime
@@ -22,7 +24,8 @@ namespace Pipeline::Runtime
         m_pythonError = "";
         QVariant result;
         QProcess process;
-        process.start("C:\\Users\\yerli\\AppData\\Local\\Programs\\Python\\Python39\\python.exe", QStringList() << m_filename);
+        auto stringList =  QStringList() << m_inputParameterModel->data("Python File").toString();
+        process.start("C:\\Users\\yerli\\AppData\\Local\\Programs\\Python\\Python39\\python.exe", stringList);
 
         if (!process.waitForStarted())
         {
@@ -30,19 +33,31 @@ namespace Pipeline::Runtime
             return false;
         }
 
-        std::unique_ptr<HierarchicalTableData> allData = std::make_unique<HierarchicalTableData>();
-        allData->setSize(1,2);
+        std::vector<uint8_t> data;
 
-        auto parameters = m_inputParameterData->getRoot();
-        auto data = m_inputDataTable->getRoot();
-        allData->setCell(0,parameters);
-        allData->setCell(1,data);
+        auto rootTableData = m_inputDataTable->getRoot();
+        auto tableData = rootTableData->serialize();
 
-        auto serializedData = allData->serialize();
+        std::vector<uint8_t> parameter;
+        m_inputParameterModel->serialize(parameter);
+
+
+        // boyutları ekle
+        uint32_t parameterSize = static_cast<uint32_t>(parameter.size());
+        uint32_t tableSize = static_cast<uint32_t>(tableData.size());
+
+        // data vector içine yaz
+        data.insert(data.end(), reinterpret_cast<uint8_t*>(&parameterSize), reinterpret_cast<uint8_t*>(&parameterSize) + sizeof(parameterSize));
+        data.insert(data.end(), parameter.begin(), parameter.end());
+
+        data.insert(data.end(), reinterpret_cast<uint8_t*>(&tableSize), reinterpret_cast<uint8_t*>(&tableSize) + sizeof(tableSize));
+        data.insert(data.end(), tableData.begin(), tableData.end());
+
         QByteArray buffer(
-            reinterpret_cast<const char*>(serializedData.data()),
-            static_cast<int>(serializedData.size())
+            reinterpret_cast<const char*>(data.data()),
+            static_cast<int>(data.size())
         );
+
         process.write(buffer);
         process.closeWriteChannel();
         process.waitForFinished();
@@ -80,17 +95,6 @@ namespace Pipeline::Runtime
         }
 
         return result;
-    }
-
-    void PythonNodeDialogActor::setFilename(const QString &filename)
-    {
-        if (m_filename == filename)
-        {
-            return;
-        }
-
-        m_filename = filename;
-        emit this->filenameChanged();
     }
 
     void PythonNodeDialogActor::setPythonError(const QString &pythonError)
@@ -155,17 +159,17 @@ namespace Pipeline::Runtime
     {
     }
 
-    NodeTableModel *PythonNodeDialogActor::getInputParameterDataTable() const
+    NodeParamListModel *PythonNodeDialogActor::getNodeParameterListModel() const
     {
-        return m_inputParameterData;
+        return m_inputParameterModel;
     }
 
-    void PythonNodeDialogActor::setInputParameterDataTable(NodeTableModel *newInputParameterData)
+    void PythonNodeDialogActor::setNodeParameterListModel(NodeParamListModel *newInputParameterModel)
     {
-        if (m_inputParameterData == newInputParameterData)
+        if (m_inputParameterModel == newInputParameterModel)
             return;
-        m_inputParameterData = newInputParameterData;
-        emit inputParameterDataChanged();
+        m_inputParameterModel = newInputParameterModel;
+        emit nodeParameterListModelChanged();
     }
 
 }

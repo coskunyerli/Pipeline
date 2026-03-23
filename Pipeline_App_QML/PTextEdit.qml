@@ -1,17 +1,25 @@
 import QtQuick 2.12
-
-TextEdit {
+import QtQuick.Controls
+TextField {
+    id: customTextField
+    text: textValue          // binding model.text veya istediğin değer
     height: 28
     padding: 6
-    Rectangle
-    {
-        z:-1
-        radius: 3
+    color: "#e0e0e0"         // text color
+    selectByMouse: true
+
+    background: Rectangle {
         anchors.fill: parent
-        color:"#505050"
+        radius: 3
+        color: "#505050"
         border.color: "#656565"
+        z: -1
     }
 
-    color: "#e0e0e0"
-    selectByMouse: true
+    // Eğer focus olunca border rengini değiştirmek istersen
+    focus: false
+    onActiveFocusChanged: {
+        if(activeFocus) background.border.color = "#a0a0a0"
+        else background.border.color = "#656565"
+    }
 }
