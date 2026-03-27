@@ -1,8 +1,29 @@
 #pragma once
 #include <QAbstractListModel>
+#include <data/contextmetadata.h>
 #include <vector>
+
 namespace Pipeline::Runtime
 {
+    class NodeModelItem
+    {
+        public:
+            explicit NodeModelItem() = default;
+            explicit NodeModelItem(const QString description, const NodeContextMetadata &metadata);
+            QString getDescription()const
+            {
+                return m_description;
+            }
+
+            const NodeContextMetadata& getMetadata() const
+            {
+                return m_metadata;
+            }
+        private:
+            QString m_description;
+            NodeContextMetadata m_metadata;
+    };
+
     class NodeModel : public QAbstractListModel
     {
             Q_OBJECT
@@ -11,7 +32,9 @@ namespace Pipeline::Runtime
             Q_INVOKABLE int rowCount(const QModelIndex&parent = QModelIndex()) const override;
             Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
             Q_INVOKABLE virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+            Q_INVOKABLE void addNode(const QString &description, const NodeContextMetadata& metadata);
+            QHash<int, QByteArray> roleNames() const override;
         private:
-            std::vector<int> m_nodes;
+            std::vector<NodeModelItem> m_nodes;
     };
 }

@@ -1,5 +1,6 @@
 #include "pythonprocessactornode.h"
 #include <QSharedMemory>
+#include <QJsonArray>
 #include <QProcess>
 #include <QUuid>
 #include <QCoreApplication>
@@ -7,10 +8,7 @@
 #include <contexts/pythonprocessdatacontext.h>
 #include <models/nodetabledialogmodel.h>
 #include <models/nodeparamlistdialogmodel.h>
-#include <iostream>
-
-Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::HierarchicalTableData>);
-
+#include <data/contextmetadata.h>
 
 namespace Pipeline
 {
@@ -23,8 +21,9 @@ namespace Pipeline
             , m_outputDataTable(new NodeTableModel())
             , m_useInputTable(false)
         {
-            this->m_nodeParamListModel->addParameter("Name", (int)ParamType::String, "Python Node");
+            this->m_nodeParamListModel->addParameter("Name", (int)ParamType::String, "");
             this->m_nodeParamListModel->addParameter("Python File", (int)ParamType::Browse, "");
+            this->m_nodeParamListModel->addParameter("CSV Data", (int)ParamType::Browse, "");
         }
 
         PythonProcessActorNode::~PythonProcessActorNode()
@@ -65,18 +64,19 @@ namespace Pipeline
             process.closeWriteChannel();
             process.waitForFinished();
             auto error = process.readAllStandardError();
+            QByteArray outputData = process.readAllStandardOutput();
 
-            if (!error.isEmpty() && m_pythonError != error)
+            int exitCode = process.exitCode();
+            auto status = process.exitStatus();
+
+            if (status == QProcess::NormalExit && exitCode == 0)
+            {
+                m_pythonError += QString(!m_pythonError.isEmpty() ? "\n": "") + "Process is finished successfully.";
+            }
+            else
             {
                 m_pythonError = error;
                 m_pythonThrowError = true;
-            }
-
-            QByteArray outputData = process.readAllStandardOutput();
-
-            if (m_pythonError.isEmpty())
-            {
-                m_pythonError = "Process is finished successfully";
             }
 
             try
@@ -117,6 +117,11 @@ namespace Pipeline
             if (role == NodeRoles::PythonFileName)
             {
                 this->m_nodeParamListModel->setData("Python File", value.toString(), ParameterRoles::ValueRole);
+                result = true;
+            }
+            else if (role == UI::Roles::Name)
+            {
+                this->m_nodeParamListModel->setData("Name", value.toString(), ParameterRoles::ValueRole);
                 result = true;
             }
             else if (role == NodeRoles::PythonError)
@@ -161,6 +166,10 @@ namespace Pipeline
             {
                 return this->m_nodeParamListModel->data("Python File", ParameterRoles::ValueRole).toString();
             }
+            else if (role == UI::Roles::Name)
+            {
+                return this->m_nodeParamListModel->data("Name", ParameterRoles::ValueRole).toString();
+            }
             else if (role == NodeRoles::PythonError)
             {
                 return m_pythonError;
@@ -188,6 +197,67 @@ namespace Pipeline
             {
                 return ActorNode::data(role);
             }
+        }
+
+        NodeContextMetadata PythonProcessActorNode::createMetadata() const
+        {
+            NodeContextMetadata metadata;
+            metadata.setName(this->data(UI::Roles::Name).toString());
+            metadata.setNodeType(NodeTypes::PythonNode);
+            QJsonArray array;
+            {
+                for(int i = 0; i < this->m_nodeParamListModel->rowCount(); i++)
+                {
+                    auto index = this->m_nodeParamListModel->index(i,0);
+                    if(index.data(ParameterRoles::NameRole).toString() != "Name")
+                    {
+                        QJsonObject o;
+                        o["name"] = index.data(ParameterRoles::NameRole).toString();
+                        o["value"] = index.data(ParameterRoles::ValueRole).toString();
+                        o["type"] = index.data(ParameterRoles::TypeRole).toInt();
+                        array.append(o);
+                    }
+
+                }
+            }
+            metadata.add("parameters",array);
+            QJsonObject input;
+            {
+                auto root = m_inputDataTable->getRoot();
+                input["row_count"] = m_inputDataTable->rowCount();
+                input["column_count"] = m_inputDataTable->columnCount();
+                const auto & headerList = root->getHeaders();
+                QJsonArray headers;
+                for(auto& pair : headerList)
+                {
+                    QJsonObject h;
+                    h["key"] = pair.first;
+                    h["value"] = QString::fromStdString(pair.second);
+                    headers.append(h);
+                }
+                input["header_data"] = headers;
+            }
+            metadata.add("input", input);
+
+
+            QJsonObject output;
+            {
+                auto root = m_outputDataTable->getRoot();
+                output["row_count"] = m_outputDataTable->rowCount();
+                output["column_count"] = m_outputDataTable->columnCount();
+                const auto & headerList = root->getHeaders();
+                QJsonArray headers;
+                for(auto& pair : headerList)
+                {
+                    QJsonObject h;
+                    h["key"] = pair.first;
+                    h["value"] = QString::fromStdString(pair.second);
+                    headers.append(h);
+                }
+                output["header_data"] = headers;
+            }
+            metadata.add("output", output);
+            return metadata;
         }
 
         BaseDataContext* PythonProcessActorNode::createDataContext(QObject *parent)

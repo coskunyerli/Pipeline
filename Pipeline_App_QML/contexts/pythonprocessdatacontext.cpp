@@ -1,5 +1,6 @@
 #include "pythonprocessdatacontext.h"
 #include <models/nodetablemodel.h>
+#include <data/contextmetadata.h>
 
 namespace Pipeline::Runtime
 {
@@ -8,6 +9,7 @@ namespace Pipeline::Runtime
         : BaseDataContext(parent)
     {
     }
+
     QString PythonProcessDataContext::getPythonError() const
     {
         return m_pythonError;

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/play_arrow.svg</file>
+        <file>icons/add_24.svg</file>
     </qresource>
 </RCC>

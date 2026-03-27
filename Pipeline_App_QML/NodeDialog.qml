@@ -22,10 +22,11 @@ Window {
     signal accepted(var context)
     signal saveRequested()
     property var context;
+    readonly property var localContext : resultContext
+    readonly property var localActor : actor
     property var actor : PA.PythonNodeDialogActor
     {
         id:actor
-        //filename : pythonFilenameTextEdit.text
         inputData : inputTable.model
         outputData: outputTable.model
         inputParameterModel: paramListDialogModel
@@ -38,6 +39,10 @@ Window {
     PC.PythonProcessDataContext
     {
         id:resultContext
+        pythonError : context.pythonError
+        inputModel : inputTable.model
+        outputModel : outputTable.model
+        inputParameterModel : paramListDialogModel
     }
 
     onClosing: dialogClosed()
@@ -106,29 +111,77 @@ Window {
                         text:"Parameters"
 
 
-                        PButton
+                        Button
                         {
-                            text: "+"
+                            id:addParameterButton
+                            icon.source: "qrc:/icons/add_24.svg"
                             Layout.preferredWidth: 22
                             Layout.preferredHeight: 22
                             ToolTip
                             {
                                 text: "Add Parameter"
                             }
-                        }
 
-
-                        PTextEdit
-                        {
-                            id:columnCountEdit
-                            text: "1"
-                            Layout.preferredWidth: 22
-                            Layout.preferredHeight: 22
-                            ToolTip
+                            onClicked:
                             {
-                                text: "Add Parameter"
+                                contextMenu.open()
                             }
+
+                            Menu {
+                                    id: contextMenu
+
+                                    x: addParameterButton.x
+                                    y: addParameterButton.y + addParameterButton.height + 4
+                                    implicitWidth: 160
+                                    background: Rectangle {
+                                        color: "#505050"
+                                        border.color: "#656565"
+                                    }
+
+                                    delegate: MenuItem {
+                                        id: item
+
+                                        contentItem: Label {
+                                            text: item.text
+                                            color: "#e0e0e0"
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            leftPadding: 10
+                                        }
+
+                                        background: Rectangle {
+                                            color: item.highlighted ? "#606060" : "transparent"
+                                        }
+                                    }
+
+                                    MenuItem {
+                                        text: "Add String"
+                                        onTriggered: paramListDialogModel.addParameter("String",3,"")
+                                    }
+
+                                    MenuItem {
+                                        text: "Add Bool"
+                                        onTriggered: paramListDialogModel.addParameter("Bool",2, false)
+                                    }
+
+                                    MenuItem {
+                                        text: "Add Browse"
+                                        onTriggered: paramListDialogModel.addParameter("Browse",6,"")
+                                    }
+                                }
                         }
+
+
+                        // PTextEdit
+                        // {
+                        //     id:columnCountEdit
+                        //     text: "1"
+                        //     Layout.preferredWidth: 22
+                        //     Layout.preferredHeight: 22
+                        //     ToolTip
+                        //     {
+                        //         text: "Add Parameter"
+                        //     }
+                        // }
 
                     }
                     ParameterGrid
@@ -139,7 +192,7 @@ Window {
                             referenceModel: context.inputParameterModel
                         }
 
-                        columnValue: Math.max(1,Number(columnCountEdit.text))
+                        columnValue: 1 //Math.max(1,Number(columnCountEdit.text))
                     }
                 }
 
@@ -278,10 +331,7 @@ Window {
                 onClicked:
                 {
                     // copy data into reference model
-                    resultContext.pythonError = context.pythonError;
-                    resultContext.inputModel = inputTable.model;
-                    resultContext.outputModel = outputTable.model;
-                    resultContext.inputParameterModel = paramListDialogModel
+
                     accepted(resultContext)
                     detachedDialog.close()
                 }

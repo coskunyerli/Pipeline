@@ -1,6 +1,7 @@
 #pragma once
 #include <nodes/actornode.h>
 #include <models/nodeparamlistmodel.h>
+#include <data/contextmetadata.h>
 namespace Pipeline::Runtime
 {
     class NodeTableModel;
@@ -11,11 +12,13 @@ namespace Pipeline::Runtime
             Q_PROPERTY(NodeTableModel* inputData READ getInputDataTable WRITE setInputDataTable NOTIFY inputDataChanged)
             Q_PROPERTY(NodeParamListModel* inputParameterModel READ getNodeParameterListModel WRITE setNodeParameterListModel NOTIFY nodeParameterListModelChanged)
             Q_PROPERTY(NodeTableModel* outputData READ getOutputDataTable WRITE setOutputDataTable NOTIFY outputDataChanged)
+            Q_PROPERTY(BaseActorNodeDispatcher* actorAction READ getActorAction)
         public:
             Q_INVOKABLE void runStandalone() override;
 
         public:
             explicit PythonNodeDialogActor();
+            NodeContextMetadata createMetadata() const override;
             void setRefenceActor(ActorNode*referenceActor)
             {
                 this->m_referenceActor = referenceActor;
@@ -45,6 +48,8 @@ namespace Pipeline::Runtime
 
             NodeParamListModel* getNodeParameterListModel() const;
             void setNodeParameterListModel(NodeParamListModel *newInputParameterModel);
+
+            BaseActorNodeDispatcher *getActorAction() const;
 
         signals:
             void pythonErrorChanged();

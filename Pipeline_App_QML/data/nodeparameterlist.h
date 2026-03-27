@@ -16,10 +16,11 @@ namespace Pipeline::Runtime
             void removeParameter(int index);
             void removeParameter(const std::string& name);
             std::vector<uint8_t> serialize(std::vector<uint8_t>& output) const;
-            NodeParameter& aceessParameter(const std::string& name, bool &has);
+            NodeParameter& accessParameter(const std::string& name, bool &has);
 
             const NodeParameter& getParameter(size_t index, bool &has) const ;
             const NodeParameter& getParameter(const std::string& name, bool &has) const;
+            bool updateParameterName(const std::string& parameterName, const std::string& newParameterName);
             void deserialize(const uint8_t* data, size_t size);
             size_t paramSize() const
             {

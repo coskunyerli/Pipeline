@@ -10,16 +10,18 @@ namespace Pipeline::Runtime
     {
         Label,
         Input,
-        Button
+        Button,
+        CheckBox
     };
 
     struct UIItem
     {
-        QString text;      // Label veya initial value
+        QVariant value;      // Label veya initial value
         ParamUIType type;  // Label, Input, Button
         int paramIndex;    // hangi NodeParameter
         bool fillWidth;    // TextEdit fillWidth
         int span;
+        int role;
     };
 
     class NodeParamUIListModel : public QAbstractListModel
@@ -32,7 +34,7 @@ namespace Pipeline::Runtime
 
             enum Roles
             {
-                TextRole = Qt::UserRole + 1,
+                ValueRole = Qt::UserRole + 1,
                 UITypeRole,
                 ParamIndexRole,
                 FillWidthRole,
@@ -50,7 +52,8 @@ namespace Pipeline::Runtime
         signals:
             void parameterModelChanged();
             void maxColumnsChanged();
-
+        private:
+            void addRowToUI(int row);
         private:
             std::vector<UIItem> m_items;
             NodeParamListModel* m_parameterModel = nullptr;

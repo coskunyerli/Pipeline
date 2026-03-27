@@ -1,15 +1,14 @@
 #include "nodemodelservice.h"
 #include <services/appdataservice.h>
 #include <models/nodemodel.h>
-
 namespace Pipeline::Runtime
 {
-    // TODOJ burada nodelar json tutulacak
-    NodeModelService* NodeModelService::instance(QQmlEngine*, QJSEngine*)
-    {
-        static NodeModelService service;
-        return &service;
-    }
+    // // TODOJ burada nodelar json tutulacak
+    // NodeModelService* NodeModelService::instance(QQmlEngine*, QJSEngine*)
+    // {
+    //     static NodeModelService service;
+    //     return &service;
+    // }
 
     NodeModelService::NodeModelService(QObject* parent)
         : QObject(parent)
@@ -18,36 +17,40 @@ namespace Pipeline::Runtime
         loadAllNodes();
     }
 
-    QObject* NodeModelService::model() const
+    QAbstractItemModel* NodeModelService::model() const
     {
         return m_model;
     }
 
-    bool NodeModelService::saveNode(const QString& name, const QByteArray& data)
+    bool NodeModelService::saveNode(const QString& description, const NodeContextMetadata& metadata)
     {
         QString dir = AppDataService::instance()->templatesDir();
+        QString name = metadata.getName();
         QString path = dir + "/" + name + ".node";
         QFile file(path);
 
         if (!file.open(QIODevice::WriteOnly))
             return false;
 
-        file.write(data);
+        QString data = metadata.serialize();
+        file.write(data.toUtf8());
         file.close();
-        // TODOJ m_model->addNode(name, data);
+        m_model->addNode(description, metadata);
         return true;
     }
 
-    QByteArray NodeModelService::loadNode(const QString& name)
+    NodeContextMetadata NodeModelService::loadNode(const QString& name)
     {
         QString dir = AppDataService::instance()->templatesDir();
         QString path = dir + "/" + name + ".node";
         QFile file(path);
 
+        NodeContextMetadata metadata;
         if (!file.open(QIODevice::ReadOnly))
-            return {};
+            return metadata;
 
-        return file.readAll();
+        metadata.deserialize(file.readAll());
+        return metadata;
     }
 
     QStringList NodeModelService::listNodes()
@@ -72,8 +75,8 @@ namespace Pipeline::Runtime
 
         for (const QString& name : nodes)
         {
-            QByteArray data = loadNode(name);
-            // TODOJ m_model->addNode(name, data);
+            NodeContextMetadata data = loadNode(name);
+            m_model->addNode(name, data);
         }
     }
 }

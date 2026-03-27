@@ -3,6 +3,7 @@
 #include <QAbstractListModel>
 #include <QString>
 #include <QVariant>
+#include <QUrl>
 #include <vector>
 #include <constants.h>
 #include <data/nodeparameter.h>
@@ -61,6 +62,9 @@ namespace Pipeline::Runtime
 
                 case QMetaType::QString:
                     return PVariant(v.toString().toStdString());
+
+                case QMetaType::QUrl:
+                    return PVariant(v.toUrl().toLocalFile().toStdString());
 
                 default:
                     throw std::runtime_error("Unsupported QVariant type");

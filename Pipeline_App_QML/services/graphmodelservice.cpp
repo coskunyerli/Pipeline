@@ -2,6 +2,7 @@
 #include "nodes/pythonprocessactornode.h"
 #include "nodes/pythonscriptactornode.h"
 #include "Models/constants.h"
+#include <Models/constants.h>
 #include <QFile>
 
 namespace Pipeline
@@ -16,8 +17,8 @@ namespace Pipeline
             }
 
             auto *node = new PythonProcessActorNode();
-            node->setName("Python Node");
-            node->setData("C:\\Users\\yerli\\PycharmProjects\\opengl\\cppTest.py", NodeRoles::PythonFileName);
+            node->setData("C:\\Users\\yerli\\PycharmProjects\\opengl\\read_csv.py", NodeRoles::PythonFileName);
+            node->setData("Python Node", UI::Roles::Name);
             auto *outPort = new UI::MPort(node);
             auto *inPort = new UI::MPort(node);
             //auto *inPort2 = new UI::MPort(node);

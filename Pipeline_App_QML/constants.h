@@ -5,6 +5,18 @@ namespace Pipeline
 {
     namespace Runtime
     {
+        enum NodeTypes
+        {
+            PythonNode = 0,
+        };
+        enum NodeModelRoles
+        {
+            NodeNameRole,
+            NodeShortNameRole,
+            NodeDescriptionRole,
+            NodeTypeRole,
+        };
+
         enum NodeRoles
         {
             PythonFileName = UI::Roles::PortConnectionIndexEnd + 100,

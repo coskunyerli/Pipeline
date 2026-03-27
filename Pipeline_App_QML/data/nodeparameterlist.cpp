@@ -93,7 +93,7 @@ namespace Pipeline::Runtime
             {
                 case ParamType::Int:
                     {
-                int v = p.value.toInt();
+                        int v = p.value.toInt();
                         SerializeHelper::writeU32(buffer, v);
                         break;
                     }
@@ -123,12 +123,10 @@ namespace Pipeline::Runtime
                     {
                         // uint32_t listSize = static_cast<uint32_t>(p.listValues.size());
                         // SerializeHelper::writeU32(buffer, listSize);
-
                         // for (const auto& v : p.listValues)
                         // {
                         //     SerializeHelper::writeString(buffer, v.toString().toStdString());
                         // }
-
                         break;
                     }
 
@@ -145,7 +143,7 @@ namespace Pipeline::Runtime
         return buffer;
     }
 
-    NodeParameter& NodeParameterList::aceessParameter(const std::string &name, bool &has)
+    NodeParameter& NodeParameterList::accessParameter(const std::string &name, bool &has)
     {
         auto it = m_params.find(name);
 
@@ -183,6 +181,29 @@ namespace Pipeline::Runtime
 
         has = true;
         return it->second;
+    }
+
+    bool NodeParameterList::updateParameterName(const std::string &parameterName, const std::string &newParameterName)
+    {
+        int index = this->getParameterIndex(parameterName);
+
+        if (index == -1)
+        {
+            return false;
+        }
+
+        auto it = m_params.find(parameterName);
+
+        if (it != m_params.end())
+        {
+            NodeParameter val = std::move(it->second);
+            val.name = newParameterName;
+            m_params.erase(it);
+            m_params.emplace(newParameterName, std::move(val));
+        }
+
+        m_paramsKeys[index] = newParameterName;
+        return true;
     }
 
     void NodeParameterList::deserialize(const uint8_t* buffer, size_t size)
@@ -244,12 +265,10 @@ namespace Pipeline::Runtime
                     case ParamType::List:
                         {
                             // uint32_t listSize = SerializeHelper::readU32(buffer, size, offset);
-
                             // for (uint32_t j = 0; j < listSize; ++j)
                             // {
                             //     p.listValues.push_back(QString::fromStdString(SerializeHelper::readString(buffer, size, offset)));
                             // }
-
                             break;
                         }
 

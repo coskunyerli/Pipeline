@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls
 TextField {
     id: customTextField
-    text: textValue          // binding model.text veya istediğin değer
     height: 28
     padding: 6
     color: "#e0e0e0"         // text color

@@ -1,30 +1,31 @@
 #pragma once
 #include <QObject>
 #include <QQmlEngine>
-
+#include <QAbstractItemModel>
+#include <data/contextmetadata.h>
 namespace Pipeline::Runtime
 {
     class NodeModel;
     class AppDataService;
-
+    class NodeContextMetadata;
     class NodeModelService : public QObject
     {
             Q_OBJECT
-            Q_PROPERTY(QObject* model READ model CONSTANT)
+            Q_PROPERTY(QAbstractItemModel* model READ model CONSTANT)
 
         public:
+            explicit NodeModelService(QObject* parent = nullptr);
+            //static NodeModelService* instance(QQmlEngine*, QJSEngine*);
 
-            static NodeModelService* instance(QQmlEngine*, QJSEngine*);
+            QAbstractItemModel* model() const;
 
-            QObject* model() const;
-
-            Q_INVOKABLE bool saveNode(const QString& name, const QByteArray& data);
-            Q_INVOKABLE QByteArray loadNode(const QString& name);
+            Q_INVOKABLE bool saveNode(const QString& description, const NodeContextMetadata& data);
+            Q_INVOKABLE NodeContextMetadata loadNode(const QString& name);
             Q_INVOKABLE QStringList listNodes();
 
         private:
 
-            explicit NodeModelService(QObject* parent = nullptr);
+
             void loadAllNodes();
 
         private:

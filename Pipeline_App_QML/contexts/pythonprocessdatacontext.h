@@ -13,7 +13,6 @@ namespace Pipeline::Runtime
             Q_PROPERTY(NodeTableModel* outputModel READ getOutputDataTable WRITE setOutputDataTable NOTIFY outputDataChanged)
         public:
             explicit PythonProcessDataContext(QObject *parent = nullptr);
-
             QString getPythonError() const;
             void setPythonError(const QString &newPythonError);
 

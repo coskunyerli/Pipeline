@@ -7,8 +7,9 @@ namespace Pipeline
 {
     namespace Runtime
     {
+        class NodeContextMetadata;
         class HierarchicalTableData;
-    class BaseActorNodeDispatcher;
+        class BaseActorNodeDispatcher;
         class BaseDataContext;
         class ActorNode: public UI::MNode
         {
@@ -21,6 +22,7 @@ namespace Pipeline
                 void removeNextNode(ActorNode* other);
                 QHash<int, QByteArray> roleNames() const override;
                 QVariant data(int role) const override;
+                virtual NodeContextMetadata createMetadata() const = 0;
                 virtual QVariant behaviour(const Thread::BehaviourContext& behaviour) = 0;
                 // onStarted is working before starting execution
                 virtual void onStarted() = 0;

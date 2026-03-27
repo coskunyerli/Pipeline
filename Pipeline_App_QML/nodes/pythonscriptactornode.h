@@ -1,5 +1,6 @@
 #pragma once
 #include "actornode.h"
+#include <data/contextmetadata.h>
 namespace Pipeline
 {
     namespace Runtime
@@ -11,6 +12,7 @@ namespace Pipeline
                 explicit PythonScriptActorNode(Thread::Actor* actor);
                 explicit PythonScriptActorNode(QString script);
                 explicit PythonScriptActorNode(QString script, Thread::Actor* actor);
+                NodeContextMetadata createMetadata() const override {return NodeContextMetadata();}
                 void setScript(const QString &script);
                 QVariant behaviour(const Thread::BehaviourContext& behaviour) override;
                 QHash<int, QByteArray> roleNames() const override;

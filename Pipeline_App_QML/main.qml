@@ -16,25 +16,25 @@ Window {
 
     Loader {
         id: dialogLoader
-        property var nodeModel
+        property var dialogNodeModel
         active: false
         sourceComponent: NodeDialog
         {
             id:nodeDialog
-            context:dialogLoader.nodeModel.actorAction.createDataContext(nodeDialog)
+            context:dialogLoader.dialogNodeModel.actorAction.createDataContext(nodeDialog)
             onAccepted : (resultContext) =>
             {
-                dialogLoader.nodeModel.actorAction.saveContext(resultContext);
+                dialogLoader.dialogNodeModel.actorAction.saveContext(resultContext);
             }
             onSaveRequested :
             {
-
+                let metadata = nodeDialog.localActor.actorAction.createMetadata()
+                nodeModelService.saveNode("This is test description", metadata)
             }
-            actor: dialogLoader.nodeModel.actor
+            actor: dialogLoader.dialogNodeModel.actor
         }
 
         onLoaded: {
-                    //nodeDialog.context = ;
                     item.dialogClosed.connect(() => {
                         dialogLoader.active = false
                     })
@@ -45,6 +45,11 @@ Window {
     {
         id: graphModelService
         model:nodeGraphTreeModel
+    }
+
+    PS.NodeModelService
+    {
+        id: nodeModelService
     }
 
     function addNode(pos)
@@ -151,16 +156,76 @@ Window {
                 color:"#202020"
                 ListView
                 {
+                    id:nodeListView
                     anchors.fill:parent
-                    model: PM.NodeModel
-                    {
+                    model: nodeModelService.model
 
-                    }
+                    delegate: Rectangle {
+                            id: root
+                            width: ListView.view.width
+                            height: 64
+                            radius: 6
 
-                    delegate: QC.Label
-                    {
-                        text : "Test"
-                    }
+                            color: hovered ? "#3a3a3a" : "#2b2b2b"
+                            border.color: "#444"
+
+                            property bool hovered: false
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+
+                                onEntered: root.hovered = true
+                                onExited: root.hovered = false
+
+                                onClicked: {
+                                    console.log("Node selected:", model.name)
+                                    // buradan node create tetiklenebilir
+                                }
+                            }
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                spacing: 10
+
+                                // 🔹 Icon (opsiyonel)
+                                Rectangle {
+                                    width: 40
+                                    height: 40
+                                    radius: 4
+                                    color: "#555"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: model.shortName || "N"
+                                        color: "white"
+                                        font.bold: true
+                                    }
+                                }
+
+                                // 🔹 Text alanı
+                                Column {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 2
+
+                                    Text {
+                                        text: model.name
+                                        color: "#e0e0e0"
+                                        font.pixelSize: 14
+                                        font.bold: true
+                                    }
+
+                                    Text {
+                                        text: "This is test node description" //model.description
+                                        color: "#a0a0a0"
+                                        font.pixelSize: 11
+                                        elide: Text.ElideRight
+                                        width: 160
+                                    }
+                                }
+                            }
+                        }
                 }
             }
             Item
@@ -199,7 +264,7 @@ Window {
                                 {
                                     if (!dialogLoader.active)
                                     {
-                                        dialogLoader.nodeModel = nodeModel
+                                        dialogLoader.dialogNodeModel = nodeModel
                                         dialogLoader.active = true
                                     }
                                 }

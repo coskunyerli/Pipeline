@@ -94,12 +94,17 @@ namespace Pipeline::Runtime
     bool NodeParamListModel::setData(const QString &name, const QVariant &value, int role)
     {
         bool has;
-        auto&p = this->m_nodeParamList.aceessParameter(name.toStdString(), has);
+        auto key = name.toStdString();
+        auto&p = this->m_nodeParamList.accessParameter(name.toStdString(), has);
 
         switch (role)
         {
             case ParameterRoles::NameRole:
-                p.name = value.toString().toStdString();
+                if(!this->m_nodeParamList.updateParameterName(p.name, value.toString().toStdString()))
+                {
+                    return false;
+                }
+                key = value.toString().toStdString();
                 break;
 
             // case ParameterRoles::TypeRole:
@@ -129,7 +134,7 @@ namespace Pipeline::Runtime
                 }
         }
 
-        int i = this->m_nodeParamList.getParameterIndex(name.toStdString());
+        int i = this->m_nodeParamList.getParameterIndex(key);
         QModelIndex index = this->index(i, 0);
         emit dataChanged(index, index, {role});
         return true;

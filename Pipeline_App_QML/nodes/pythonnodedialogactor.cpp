@@ -1,5 +1,6 @@
 #include "pythonnodedialogactor.h"
 #include <QProcess>
+#include <QJsonArray>
 #include <models/nodetablemodel.h>
 #include <models/nodeparamlistmodel.h>
 #include <nodes/pythonprocessactornode.h>
@@ -16,6 +17,68 @@ namespace Pipeline::Runtime
 
     PythonNodeDialogActor::PythonNodeDialogActor()
     {
+    }
+
+    NodeContextMetadata PythonNodeDialogActor::createMetadata() const
+    {
+        NodeContextMetadata metadata;
+        metadata.setName(this->m_inputParameterModel->data("Name", ParameterRoles::ValueRole).toString());
+        metadata.setNodeType(NodeTypes::PythonNode);
+
+        QJsonArray array;
+        {
+            for(int i = 0; i < this->m_inputParameterModel->rowCount(); i++)
+            {
+                auto index = this->m_inputParameterModel->index(i,0);
+                if(index.data(ParameterRoles::NameRole).toString() != "Name")
+                {
+                    QJsonObject o;
+                    o["name"] = index.data(ParameterRoles::NameRole).toString();
+                    o["value"] = index.data(ParameterRoles::ValueRole).toString();
+                    o["type"] = index.data(ParameterRoles::TypeRole).toInt();
+                    array.append(o);
+                }
+
+            }
+        }
+        metadata.add("parameters",array);
+        QJsonObject input;
+        {
+            auto root = m_inputDataTable->getRoot();
+            input["row_count"] = m_inputDataTable->rowCount();
+            input["column_count"] = m_inputDataTable->columnCount();
+            const auto & headerList = root->getHeaders();
+            QJsonArray headers;
+            for(auto& pair : headerList)
+            {
+                QJsonObject h;
+                h["key"] = pair.first;
+                h["value"] = QString::fromStdString(pair.second);
+                headers.append(h);
+            }
+            input["header_data"] = headers;
+        }
+        metadata.add("input", input);
+
+
+        QJsonObject output;
+        {
+            auto root = m_outputDataTable->getRoot();
+            output["row_count"] = m_outputDataTable->rowCount();
+            output["column_count"] = m_outputDataTable->columnCount();
+            const auto & headerList = root->getHeaders();
+            QJsonArray headers;
+            for(auto& pair : headerList)
+            {
+                QJsonObject h;
+                h["key"] = pair.first;
+                h["value"] = QString::fromStdString(pair.second);
+                headers.append(h);
+            }
+            output["header_data"] = headers;
+        }
+        metadata.add("output", output);
+        return metadata;
     }
 
     QVariant PythonNodeDialogActor::behaviour(const Thread::BehaviourContext &behaviour)
@@ -64,19 +127,20 @@ namespace Pipeline::Runtime
         QByteArray outputData = process.readAllStandardOutput();
         auto error = process.readAllStandardError();
 
-        if (!error.isEmpty() && m_pythonError != error)
+        int exitCode = process.exitCode();
+        auto status = process.exitStatus();
+
+        if (status == QProcess::NormalExit && exitCode == 0)
+        {
+            m_pythonError += QString(!m_pythonError.isEmpty() ? "\n": "") + "Process is finished successfully.";
+            emit this->pythonErrorChanged();
+        }
+        else
         {
             m_pythonError = error;
             m_pythonThrowError = true;
             emit this->pythonErrorChanged();
         }
-
-        if (m_pythonError.isEmpty())
-        {
-            m_pythonError = "Process is finished successfully";
-            emit this->pythonErrorChanged();
-        }
-
 
         try
         {
@@ -170,6 +234,11 @@ namespace Pipeline::Runtime
             return;
         m_inputParameterModel = newInputParameterModel;
         emit nodeParameterListModelChanged();
+    }
+
+    BaseActorNodeDispatcher *PythonNodeDialogActor::getActorAction() const
+    {
+        return getDispatcher();
     }
 
 }

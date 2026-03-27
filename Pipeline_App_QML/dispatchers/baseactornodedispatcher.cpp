@@ -1,6 +1,7 @@
 #include "baseactornodedispatcher.h"
 #include <nodes/actornode.h>
 #include <contexts/basedatacontext.h>
+#include <data/contextmetadata.h>
 namespace Pipeline::Runtime
 {
 
@@ -18,6 +19,16 @@ namespace Pipeline::Runtime
         }
 
         return m_relatedNode->createDataContext(parent);
+    }
+
+    NodeContextMetadata BaseActorNodeDispatcher::createMetadata()
+    {
+        if (!m_relatedNode)
+        {
+            return NodeContextMetadata();
+        }
+
+        return m_relatedNode->createMetadata();
     }
 
     void BaseActorNodeDispatcher::saveContext(BaseDataContext *dataContext)

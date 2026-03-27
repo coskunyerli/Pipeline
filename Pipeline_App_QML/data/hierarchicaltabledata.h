@@ -38,6 +38,10 @@ namespace Pipeline
                     return m_values.size();
                 }
                 std::string getHeaderData(int section) const;
+                const std::unordered_map<int, std::string>& getHeaders() const
+                {
+                    return m_headerData;
+                }
                 void setHeaderData(int section, const std::string& value);
                 std::shared_ptr<HierarchicalTableData> getCell(size_t row, size_t column) const;
                 std::string getCellValue(size_t row, size_t column) const;
