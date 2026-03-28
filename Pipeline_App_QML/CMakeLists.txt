@@ -23,11 +23,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         services/graphmodelservice.cpp
         nodes/actornode.h
         nodes/actornode.cpp
-        nodes/pythonscriptactornode.h
-        nodes/pythonscriptactornode.cpp
+
+
         constants.h
-        nodes/pythonfileactornode.h
-        nodes/pythonfileactornode.cpp
+
+
         data/hierarchicaltabledata.h
         models/nodetablemodel.h
         models/nodetablemodel.cpp

@@ -1,6 +1,5 @@
 #include "graphmodelservice.h"
 #include "nodes/pythonprocessactornode.h"
-#include "nodes/pythonscriptactornode.h"
 #include "Models/constants.h"
 #include <Models/constants.h>
 #include <QFile>
@@ -9,16 +8,23 @@ namespace Pipeline
 {
     namespace Runtime
     {
-        bool GraphModelService::addNode(const QPointF & pos)
+        bool GraphModelService::addNode(const QString& quickNodeName, const QPointF & pos)
         {
             if (!m_model)
             {
                 return false;
             }
 
+            auto nodeMetadata = m_quickNodeModel->getNodeContext(quickNodeName);
+
+            if (!nodeMetadata.isValid())
+            {
+                return false;
+            }
+
             auto *node = new PythonProcessActorNode();
             node->setData("C:\\Users\\yerli\\PycharmProjects\\opengl\\read_csv.py", NodeRoles::PythonFileName);
-            node->setData("Python Node", UI::Roles::Name);
+            node->setData(nodeMetadata.getName(), UI::Roles::Name);
             auto *outPort = new UI::MPort(node);
             auto *inPort = new UI::MPort(node);
             //auto *inPort2 = new UI::MPort(node);
@@ -76,7 +82,6 @@ namespace Pipeline
 
             if (m_model)
             {
-                m_model->registerNodeType<PythonScriptActorNode>();
                 m_model->registerNodeType<PythonProcessActorNode>();
                 connect(m_model, &QAbstractItemModel::rowsInserted, this, &GraphModelService::onRowsInserted);
                 // connect(sourceModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, &ConnectionGraphViewModel::onRowsAboutToBeRemoved);
@@ -124,6 +129,21 @@ namespace Pipeline
         GraphModelService::~GraphModelService()
         {
         }
+
+        NodeModel* GraphModelService::quickNodeModel() const
+        {
+            return m_quickNodeModel;
+        }
+
+        void GraphModelService::setQuickNodeModel(NodeModel *newQuickNodeModel)
+        {
+            if (m_quickNodeModel == newQuickNodeModel)
+                return;
+
+            m_quickNodeModel = newQuickNodeModel;
+            emit quickNodeModelChanged();
+        }
+
     }
 }
 

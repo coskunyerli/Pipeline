@@ -24,6 +24,11 @@ namespace Pipeline::Runtime
                 return m_name;
             }
 
+            bool isValid() const
+            {
+                return !m_name.isEmpty();
+            }
+
             void setNodeType(int type)
             {
                 m_nodeType = type;

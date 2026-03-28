@@ -33,6 +33,8 @@ namespace Pipeline::Runtime
             Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
             Q_INVOKABLE virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
             Q_INVOKABLE void addNode(const QString &description, const NodeContextMetadata& metadata);
+            Q_INVOKABLE void removeNode(const QModelIndex & index);
+            Q_INVOKABLE NodeContextMetadata getNodeContext(const QString &nodeName);
             QHash<int, QByteArray> roleNames() const override;
         private:
             std::vector<NodeModelItem> m_nodes;

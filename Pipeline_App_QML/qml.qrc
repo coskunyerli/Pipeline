@@ -17,5 +17,6 @@
         <file>WidgetTitleHeader.qml</file>
         <file>HierarchicalTableWidget.qml</file>
         <file>ParameterGrid.qml</file>
+        <file>QuickNodeListView.qml</file>
     </qresource>
 </RCC>

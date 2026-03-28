@@ -45,6 +45,7 @@ Window {
     {
         id: graphModelService
         model:nodeGraphTreeModel
+        quickNodeModel: nodeModelService.model
     }
 
     PS.NodeModelService
@@ -52,9 +53,9 @@ Window {
         id: nodeModelService
     }
 
-    function addNode(pos)
+    function addNode(name, pos)
     {
-        graphModelService.addNode(pos)
+        graphModelService.addNode(name, pos)
     }
 
     PMan.NodeUIManager
@@ -149,85 +150,13 @@ Window {
         RowLayout
         {
             spacing: 0
-            Rectangle
+            QuickNodeListView
             {
                 Layout.preferredWidth:240
                 Layout.fillHeight: true
-                color:"#202020"
-                ListView
-                {
-                    id:nodeListView
-                    anchors.fill:parent
-                    model: nodeModelService.model
-
-                    delegate: Rectangle {
-                            id: root
-                            width: ListView.view.width
-                            height: 64
-                            radius: 6
-
-                            color: hovered ? "#3a3a3a" : "#2b2b2b"
-                            border.color: "#444"
-
-                            property bool hovered: false
-
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-
-                                onEntered: root.hovered = true
-                                onExited: root.hovered = false
-
-                                onClicked: {
-                                    console.log("Node selected:", model.name)
-                                    // buradan node create tetiklenebilir
-                                }
-                            }
-
-                            Row {
-                                anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 10
-
-                                // 🔹 Icon (opsiyonel)
-                                Rectangle {
-                                    width: 40
-                                    height: 40
-                                    radius: 4
-                                    color: "#555"
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: model.shortName || "N"
-                                        color: "white"
-                                        font.bold: true
-                                    }
-                                }
-
-                                // 🔹 Text alanı
-                                Column {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 2
-
-                                    Text {
-                                        text: model.name
-                                        color: "#e0e0e0"
-                                        font.pixelSize: 14
-                                        font.bold: true
-                                    }
-
-                                    Text {
-                                        text: "This is test node description" //model.description
-                                        color: "#a0a0a0"
-                                        font.pixelSize: 11
-                                        elide: Text.ElideRight
-                                        width: 160
-                                    }
-                                }
-                            }
-                        }
-                }
+                model: nodeModelService.model
             }
+
             Item
             {
                 Layout.fillHeight: true
@@ -294,6 +223,21 @@ Window {
 
                     }
 
+                DropArea {
+                        anchors.fill: parent
+                        keys: ["application/node"]
+
+                        onDropped: (drop) => {
+
+                            let str = drop.getDataAsString("application/node")
+                            let data = JSON.parse(str)
+
+                            let x = drop.x - data.hotX
+                            let y = drop.y - data.hotY
+                            addNode(data.name, Qt.point(x,y));
+                        }
+                    }
+
                 MouseArea {
                     id: mouseArea
                     property point pos
@@ -318,7 +262,7 @@ Window {
                             text: "Add Node"
                             onTriggered:
                             {
-                                addNode(graphicsView.mapToScene(mouseArea.pos.x,mouseArea.pos.y));
+                                //addNode(graphicsView.mapToScene(mouseArea.pos.x,mouseArea.pos.y));
                             }
 
                         }

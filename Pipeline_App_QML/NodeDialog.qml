@@ -113,6 +113,7 @@ Window {
 
                         Button
                         {
+                            visible: context.inputParameterModel.editable
                             id:addParameterButton
                             icon.source: "qrc:/icons/add_24.svg"
                             Layout.preferredWidth: 22

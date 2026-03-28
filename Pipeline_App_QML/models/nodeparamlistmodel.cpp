@@ -6,6 +6,7 @@ namespace Pipeline::Runtime
 
     NodeParamListModel::NodeParamListModel(QObject *parent)
         : QAbstractListModel(parent)
+        , m_editable(true)
     {}
 
     int NodeParamListModel::rowCount(const QModelIndex &parent) const
@@ -34,7 +35,7 @@ namespace Pipeline::Runtime
             return {};
         }
 
-        if(role == Qt::DisplayRole)
+        if (role == Qt::DisplayRole)
         {
             role = ParameterRoles::ValueRole;
         }
@@ -58,10 +59,8 @@ namespace Pipeline::Runtime
                     if (p.type == ParamType::List)
                     {
                         QStringList list;
-
                         // TODOJ for (const auto& v : p.listValues)
                         //     list << v.toString();
-
                         return list.join(", ");
                     }
                     else if (p.type == ParamType::Table)
@@ -100,10 +99,11 @@ namespace Pipeline::Runtime
         switch (role)
         {
             case ParameterRoles::NameRole:
-                if(!this->m_nodeParamList.updateParameterName(p.name, value.toString().toStdString()))
+                if (!this->m_nodeParamList.updateParameterName(p.name, value.toString().toStdString()))
                 {
                     return false;
                 }
+
                 key = value.toString().toStdString();
                 break;
 
@@ -117,7 +117,6 @@ namespace Pipeline::Runtime
                     {
                         // TODOJ p.listValues.clear();
                         // QStringList parts = value.toString().split(",", Qt::SkipEmptyParts);
-
                         // for (auto& s : parts)
                         //     p.listValues.push_back(s.trimmed());
                     }
@@ -185,6 +184,7 @@ namespace Pipeline::Runtime
     void NodeParamListModel::removeParameter(const QString &name)
     {
         int index = this->m_nodeParamList.getParameterIndex(name.toStdString());
+
         if (index == -1)
         {
             return;
