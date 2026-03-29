@@ -23,6 +23,7 @@ namespace Pipeline
                 QHash<int, QByteArray> roleNames() const override;
                 QVariant data(int role) const override;
                 virtual NodeContextMetadata createMetadata() const = 0;
+                virtual void applyNodeContextMetadata(const NodeContextMetadata&nodeContextMetadata) = 0;
                 virtual QVariant behaviour(const Thread::BehaviourContext& behaviour) = 0;
                 // onStarted is working before starting execution
                 virtual void onStarted() = 0;

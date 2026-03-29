@@ -26,6 +26,7 @@ namespace Pipeline::Runtime
             {
                 return m_params.size();
             }
+            void clear();
             std::string paramTypeToString(ParamType t) const;
 
         private:

@@ -33,6 +33,7 @@ namespace Pipeline::Runtime
             Q_INVOKABLE void addParameter(const QString& name, int type, const QVariant& value = {});
             Q_INVOKABLE void removeParameter(int index);
             Q_INVOKABLE void removeParameter(const QString& name);
+            Q_INVOKABLE void clear();
 
             bool getEditable() const;
             void setEditable(bool newEditable);

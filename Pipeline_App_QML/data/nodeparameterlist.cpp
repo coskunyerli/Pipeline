@@ -290,6 +290,12 @@ namespace Pipeline::Runtime
         }
     }
 
+    void NodeParameterList::clear()
+    {
+        m_params.clear();
+        m_paramsKeys.clear();
+    }
+
     std::string NodeParameterList::paramTypeToString(ParamType t) const
     {
         switch (t)

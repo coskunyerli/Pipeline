@@ -48,6 +48,8 @@ namespace Pipeline::Runtime
 
             NodeParamListModel* getNodeParameterListModel() const;
             void setNodeParameterListModel(NodeParamListModel *newInputParameterModel);
+            void applyNodeContextMetadata(const NodeContextMetadata&nodeContextMetadata) override {}
+
 
             BaseActorNodeDispatcher *getActorAction() const;
 

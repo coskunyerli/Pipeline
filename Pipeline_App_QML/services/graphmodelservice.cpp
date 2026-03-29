@@ -3,6 +3,7 @@
 #include "Models/constants.h"
 #include <Models/constants.h>
 #include <QFile>
+#include <factories/nodefactory.h>
 
 namespace Pipeline
 {
@@ -22,21 +23,15 @@ namespace Pipeline
                 return false;
             }
 
-            auto *node = new PythonProcessActorNode();
-            node->setData("C:\\Users\\yerli\\PycharmProjects\\opengl\\read_csv.py", NodeRoles::PythonFileName);
-            node->setData(nodeMetadata.getName(), UI::Roles::Name);
-            auto *outPort = new UI::MPort(node);
-            auto *inPort = new UI::MPort(node);
-            //auto *inPort2 = new UI::MPort(node);
-            //auto *outPort2 = new UI::MPort(node);
-            // auto *outPort3 = new UI::MPort(node);
-            node->addPort(inPort, true);
-            //node->addPort(inPort2, true);
-            //node->addPort(outPort2, false);
-            // node->addPort(outPort3, false);
-            node->addPort(outPort, false);
+            auto *node = NodeFactory::create(nodeMetadata);
+            if(!node)
+            {
+                return false;
+            }
             node->setX(pos.x());
             node->setY(pos.y());
+
+
             return m_model->addNode(node);
         }
 

@@ -23,7 +23,6 @@ namespace Pipeline
         {
             this->m_nodeParamListModel->addParameter("Name", (int)ParamType::String, "");
             this->m_nodeParamListModel->addParameter("Python File", (int)ParamType::Browse, "");
-            this->m_nodeParamListModel->addParameter("CSV Data", (int)ParamType::Browse, "");
         }
 
         PythonProcessActorNode::~PythonProcessActorNode()
@@ -65,13 +64,12 @@ namespace Pipeline
             process.waitForFinished();
             auto error = process.readAllStandardError();
             QByteArray outputData = process.readAllStandardOutput();
-
             int exitCode = process.exitCode();
             auto status = process.exitStatus();
 
             if (status == QProcess::NormalExit && exitCode == 0)
             {
-                m_pythonError += QString(!m_pythonError.isEmpty() ? "\n": "") + "Process is finished successfully.";
+                m_pythonError += QString(!m_pythonError.isEmpty() ? "\n" : "") + "Process is finished successfully.";
             }
             else
             {
@@ -206,10 +204,11 @@ namespace Pipeline
             metadata.setNodeType(NodeTypes::PythonNode);
             QJsonArray array;
             {
-                for(int i = 0; i < this->m_nodeParamListModel->rowCount(); i++)
+                for (int i = 0; i < this->m_nodeParamListModel->rowCount(); i++)
                 {
-                    auto index = this->m_nodeParamListModel->index(i,0);
-                    if(index.data(ParameterRoles::NameRole).toString() != "Name")
+                    auto index = this->m_nodeParamListModel->index(i, 0);
+
+                    if (index.data(ParameterRoles::NameRole).toString() != "Name")
                     {
                         QJsonObject o;
                         o["name"] = index.data(ParameterRoles::NameRole).toString();
@@ -217,10 +216,9 @@ namespace Pipeline
                         o["type"] = index.data(ParameterRoles::TypeRole).toInt();
                         array.append(o);
                     }
-
                 }
             }
-            metadata.add("parameters",array);
+            metadata.add("parameters", array);
             QJsonObject input;
             {
                 auto root = m_inputDataTable->getRoot();
@@ -228,18 +226,18 @@ namespace Pipeline
                 input["column_count"] = m_inputDataTable->columnCount();
                 const auto & headerList = root->getHeaders();
                 QJsonArray headers;
-                for(auto& pair : headerList)
+
+                for (auto& pair : headerList)
                 {
                     QJsonObject h;
                     h["key"] = pair.first;
                     h["value"] = QString::fromStdString(pair.second);
                     headers.append(h);
                 }
+
                 input["header_data"] = headers;
             }
             metadata.add("input", input);
-
-
             QJsonObject output;
             {
                 auto root = m_outputDataTable->getRoot();
@@ -247,13 +245,15 @@ namespace Pipeline
                 output["column_count"] = m_outputDataTable->columnCount();
                 const auto & headerList = root->getHeaders();
                 QJsonArray headers;
-                for(auto& pair : headerList)
+
+                for (auto& pair : headerList)
                 {
                     QJsonObject h;
                     h["key"] = pair.first;
                     h["value"] = QString::fromStdString(pair.second);
                     headers.append(h);
                 }
+
                 output["header_data"] = headers;
             }
             metadata.add("output", output);
@@ -270,6 +270,68 @@ namespace Pipeline
             return context;
         }
 
+        void PythonProcessActorNode::applyNodeContextMetadata(const NodeContextMetadata &nodeContextMetadata)
+        {
+            m_nodeParamListModel->clear();
+            auto parameters = nodeContextMetadata.getProperty("parameters").toJsonArray();
+            auto input = nodeContextMetadata.getProperty("input").toJsonObject();
+            auto output = nodeContextMetadata.getProperty("output").toJsonObject();
+            // add name parameter
+            m_nodeParamListModel->addParameter("Name", (int)ParamType::String, nodeContextMetadata.getName());
+
+            // apply parameteres
+            for (auto param : parameters)
+            {
+                if (param.isObject())
+                {
+                    auto paramObj = param.toObject();
+
+                    if (paramObj.contains("name") && paramObj.contains("type") && paramObj.contains("value"))
+                    {
+                        m_nodeParamListModel->addParameter(paramObj["name"].toString(), paramObj["type"].toInt(), paramObj["value"].toVariant());
+                    }
+                }
+            }
+
+            {
+                // apply input
+                auto rowCount = input["row_count"].toInt(0);
+                auto columnCount = input["column_count"].toInt(0);
+                m_inputDataTable->setRows(rowCount);
+                m_inputDataTable->setColumns(columnCount);
+                auto headers = input["header_data"].toArray();
+
+                for (auto header : headers)
+                {
+                    auto headerObj = header.toObject();
+
+                    if (headerObj.contains("key") && headerObj.contains("value"))
+                    {
+                        m_inputDataTable->setHeaderData(headerObj["key"].toInt(), Qt::Horizontal, headerObj["value"].toString());
+                    }
+                }
+            }
+
+            {
+                // apply output
+                auto rowCount = output["row_count"].toInt(0);
+                auto columnCount = output["column_count"].toInt(0);
+                m_outputDataTable->setRows(rowCount);
+                m_outputDataTable->setColumns(columnCount);
+                auto headers = output["header_data"].toArray();
+
+                for (auto header : headers)
+                {
+                    auto headerObj = header.toObject();
+
+                    if (headerObj.contains("key") && headerObj.contains("value"))
+                    {
+                        m_outputDataTable->setHeaderData(headerObj["key"].toInt(), Qt::Horizontal, headerObj["value"].toString());
+                    }
+                }
+            }
+        }
+
         void PythonProcessActorNode::saveContext(BaseDataContext *dataContext)
         {
             auto *pythonContext = dynamic_cast<PythonProcessDataContext*>(dataContext);
@@ -278,6 +340,7 @@ namespace Pipeline
             {
                 return;
             }
+
             this->m_pythonError = pythonContext->getPythonError();
 
             if (auto *inputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputDataTable()))

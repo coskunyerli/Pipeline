@@ -22,6 +22,7 @@ namespace Pipeline
                 QVariant data(int role) const override;
                 NodeContextMetadata createMetadata() const override;
                 BaseDataContext* createDataContext(QObject*parent=nullptr) override;
+                void applyNodeContextMetadata(const NodeContextMetadata&nodeContextMetadata) override;
                 void saveContext(BaseDataContext* dataContext) override;
                 void onStarted() override;
                 void onFinished(const QVariant& result) override;

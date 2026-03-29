@@ -68,6 +68,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         data/nodeparameterlist.cpp
         data/contextmetadata.h
         data/contextmetadata.cpp
+        factories/nodefactory.h
+        factories/nodefactory.cpp
+
     )
 
     qt_add_resources(APP_RESOURCES

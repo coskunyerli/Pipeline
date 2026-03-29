@@ -5,6 +5,18 @@ namespace Pipeline::Runtime
 {
 
 
+    QVariant NodeContextMetadata::getProperty(const QString& key) const
+    {
+        auto it = m_properties.find(key);
+
+        if (it == m_properties.end())
+        {
+            return {};
+        }
+
+        return *it;
+    }
+
     QString NodeContextMetadata::serialize() const
     {
         QJsonObject obj;

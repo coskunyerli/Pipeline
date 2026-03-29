@@ -195,6 +195,13 @@ namespace Pipeline::Runtime
         this->endRemoveRows();
     }
 
+    void NodeParamListModel::clear()
+    {
+        this->beginResetModel();
+        this->m_nodeParamList.clear();
+        this->endResetModel();
+    }
+
     bool NodeParamListModel::getEditable() const
     {
         return m_editable;

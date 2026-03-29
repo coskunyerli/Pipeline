@@ -44,6 +44,8 @@ namespace Pipeline::Runtime
                 return m_properties.keys();
             }
 
+            QVariant getProperty(const QString& key) const;
+
             QString serialize() const;
             void deserialize(const QString& jsonString);
         private:

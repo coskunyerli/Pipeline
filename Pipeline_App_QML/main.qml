@@ -223,6 +223,67 @@ Window {
 
                     }
 
+                // Rubber band rectangle
+                    // Rectangle {
+                    //     id: rubberBand
+                    //     visible: false
+                    //     color: "#3399FF33"   // yarı saydam mavi
+                    //     border.color: "#3399FF"
+                    //     border.width: 1
+                    //     z: 100
+                    // }
+
+                    // MouseArea {
+                    //     id: rubberBandArea
+                    //     anchors.fill: parent
+                    //     acceptedButtons: Qt.LeftButton
+                    //     property point startPos
+                    //     drag.target: null
+
+                    //     onPressed: (mouse) => {
+                    //         if (mouse.button === Qt.LeftButton) {
+                    //             startPos = Qt.point(mouse.x, mouse.y)
+                    //             rubberBand.x = startPos.x
+                    //             rubberBand.y = startPos.y
+                    //             rubberBand.width = 0
+                    //             rubberBand.height = 0
+                    //             rubberBand.visible = true
+                    //         }
+                    //     }
+
+                    //     onPositionChanged: (mouse) => {
+                    //         if (mouse.buttons & Qt.LeftButton) {
+                    //             let x = Math.min(startPos.x, mouse.x)
+                    //             let y = Math.min(startPos.y, mouse.y)
+                    //             let w = Math.abs(mouse.x - startPos.x)
+                    //             let h = Math.abs(mouse.y - startPos.y)
+                    //             rubberBand.x = x
+                    //             rubberBand.y = y
+                    //             rubberBand.width = w
+                    //             rubberBand.height = h
+                    //         }
+                    //     }
+
+                    //     onReleased: (mouse) => {
+                    //         if (mouse.button === Qt.LeftButton) {
+                    //             rubberBand.visible = false
+
+                    //             // // Seçim kutusuna giren Node’ları seç
+                    //             // let rect = Qt.rect(rubberBand.x, rubberBand.y, rubberBand.width, rubberBand.height)
+                    //             // for (let i = 0; i < moduleRepeater.count; ++i) {
+                    //             //     let nodeItem = moduleRepeater.itemAt(i)
+                    //             //     if (nodeItem) {
+                    //             //         let nodeRect = Qt.rect(nodeItem.x, nodeItem.y, nodeItem.width, nodeItem.height)
+                    //             //         nodeItem.isSelected = rect.intersects(nodeRect)
+                    //             //         if (nodeItem.isSelected) {
+                    //             //             nodeSelectionModel.setCurrentIndex(nodeGraphViewModel.index(i,0), QM.ItemSelectionModel.SelectCurrent)
+                    //             //         }
+                    //             //     }
+                    //             // }
+                    //         }
+                    //     }
+                    // }
+
                 DropArea {
                         anchors.fill: parent
                         keys: ["application/node"]
