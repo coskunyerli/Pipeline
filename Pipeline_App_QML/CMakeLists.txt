@@ -42,8 +42,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         helpers/stringhelper.cpp
         services/appdataservice.h
         services/appdataservice.cpp
-        models/nodemodel.h
-        models/nodemodel.cpp
+        models/quicknodemodel.h
+        models/quicknodemodel.cpp
         models/nodetablesliceproxymodel.h
         models/nodetablesliceproxymodel.cpp
         services/nodemodelservice.h

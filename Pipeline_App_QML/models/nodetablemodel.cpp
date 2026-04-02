@@ -107,6 +107,11 @@ namespace Pipeline
 
         QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         {
+            if(!m_rootResult)
+            {
+                return {};
+            }
+
             if (!index.isValid())
             {
                 if(role == Qt::DisplayRole)

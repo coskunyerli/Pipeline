@@ -88,7 +88,7 @@ namespace Pipeline::Runtime
         QVariant result;
         QProcess process;
         auto stringList =  QStringList() << m_inputParameterModel->data("Python File").toString();
-        process.start("C:\\Users\\yerli\\AppData\\Local\\Programs\\Python\\Python39\\python.exe", stringList);
+        process.start("C:\\Users\\yerli\\PycharmProjects\\opengl\\venv2\\Scripts\\python.exe", stringList);
 
         if (!process.waitForStarted())
         {
@@ -148,8 +148,16 @@ namespace Pipeline::Runtime
             {
                 const uint8_t* outputDataU8 = reinterpret_cast<const uint8_t*>(outputData.constData());
                 size_t size = static_cast<size_t>(outputData.size());
-                auto* outputResult = HierarchicalTableData::deserialize(outputDataU8, size);
-                result = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(std::shared_ptr<HierarchicalTableData>(outputResult));
+                bool isHierData = HierarchicalTableData::startsWithMagicNumber(outputDataU8,size);
+                if(isHierData)
+                {
+                    auto* outputResult = HierarchicalTableData::deserialize(outputDataU8, size);
+                    result = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(std::shared_ptr<HierarchicalTableData>(outputResult));
+                }
+                else
+                {
+                    result = QString::fromUtf8(outputData);
+                }
             }
         }
         catch (std::runtime_error &error)

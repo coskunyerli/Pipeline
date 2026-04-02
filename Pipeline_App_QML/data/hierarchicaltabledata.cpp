@@ -290,6 +290,23 @@ namespace Pipeline
             return deserialize(buffer.data(), buffer.size());
         }
 
+        bool HierarchicalTableData::startsWithMagicNumber(const uint8_t *data, size_t size)
+        {
+            try
+            {
+                size_t offset = 0;
+                uint32_t magic = SerializeHelper::readU32(data, size, offset);
+
+                if (magic != 0x504E5231)
+                    return false;
+                return true;
+            }
+            catch(std::runtime_error &)
+            {
+                return false;
+            }
+        }
+
         std::pair<size_t, size_t> HierarchicalTableData::cellIndexOf(const HierarchicalTableData *child, bool &has) const
         {
             if (!child)

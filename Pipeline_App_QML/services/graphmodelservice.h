@@ -3,7 +3,7 @@
 #include <QQmlEngine>
 #include <QJSEngine>
 #include "Models/nodegraphtreemodel.h"
-#include <models/nodemodel.h>
+#include <models/quicknodemodel.h>
 #include <QPointF>
 
 namespace Pipeline
@@ -15,7 +15,7 @@ namespace Pipeline
         {
                 Q_OBJECT
                 Q_PROPERTY(UI::NodeGraphTreeModel* model READ model WRITE setModel NOTIFY modelChanged)
-                Q_PROPERTY(NodeModel* quickNodeModel READ quickNodeModel WRITE setQuickNodeModel NOTIFY quickNodeModelChanged)
+                Q_PROPERTY(QuickNodeModel* quickNodeModel READ quickNodeModel WRITE setQuickNodeModel NOTIFY quickNodeModelChanged)
             signals:
                 void modelChanged();
                 void quickNodeModelChanged();
@@ -28,14 +28,14 @@ namespace Pipeline
                 virtual ~GraphModelService();
                 UI::NodeGraphTreeModel* model() const;
                 void setModel(UI::NodeGraphTreeModel* model);
-                NodeModel *quickNodeModel() const;
-                void setQuickNodeModel(NodeModel *newQuickNodeModel);
+                QuickNodeModel *quickNodeModel() const;
+                void setQuickNodeModel(QuickNodeModel *newQuickNodeModel);
 
             private:
                 void onRowsInserted(const QModelIndex &parent, int first, int last);
             private:
                 UI::NodeGraphTreeModel* m_model;
-                NodeModel *m_quickNodeModel = nullptr;
+                QuickNodeModel *m_quickNodeModel = nullptr;
         };
     }
 }

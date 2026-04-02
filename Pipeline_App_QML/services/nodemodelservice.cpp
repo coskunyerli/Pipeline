@@ -1,6 +1,6 @@
 #include "nodemodelservice.h"
 #include <services/appdataservice.h>
-#include <models/nodemodel.h>
+#include <models/quicknodemodel.h>
 namespace Pipeline::Runtime
 {
     // // TODOJ burada nodelar json tutulacak
@@ -13,7 +13,7 @@ namespace Pipeline::Runtime
     NodeModelService::NodeModelService(QObject* parent)
         : QObject(parent)
     {
-        m_model = new NodeModel(this);
+        m_model = new QuickNodeModel(this);
         loadAllNodes();
     }
 

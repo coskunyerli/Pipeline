@@ -63,6 +63,7 @@ namespace Pipeline
                 static std::vector<uint8_t> serialize(const HierarchicalTableData* node);
                 static HierarchicalTableData* deserialize(const uint8_t* data, size_t size);
                 static HierarchicalTableData* deserialize(const std::vector<uint8_t>& buffer);
+                static bool startsWithMagicNumber(const uint8_t* data, size_t size);
             private:
 
                 std::pair<size_t, size_t> mapToCellIndex(size_t index) const;

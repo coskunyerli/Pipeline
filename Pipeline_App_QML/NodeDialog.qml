@@ -74,12 +74,12 @@ Window {
 
             PTabButton {
                 id: controlInput
-                text: "Input"
+                text: "Inputs"
             }
 
             PTabButton {
                 id: controlOutput
-                text: "Output"
+                text: "Outputs"
             }
         }
 
@@ -171,19 +171,6 @@ Window {
                                 }
                         }
 
-
-                        // PTextEdit
-                        // {
-                        //     id:columnCountEdit
-                        //     text: "1"
-                        //     Layout.preferredWidth: 22
-                        //     Layout.preferredHeight: 22
-                        //     ToolTip
-                        //     {
-                        //         text: "Add Parameter"
-                        //     }
-                        // }
-
                     }
                     ParameterGrid
                     {
@@ -197,46 +184,100 @@ Window {
                     }
                 }
 
-                ColumnLayout {
+                SplitView
+                {
                     spacing: 0
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-
-                    WidgetTitleHeader
+                    ColumnLayout
                     {
-                        Layout.fillWidth: true
-                        text:"Input Table"
+
+                        spacing: 0
+                        SplitView.preferredWidth: 200
+                        SplitView.fillHeight: true
+
+                        WidgetTitleHeader
+                        {
+                            Layout.fillWidth: true
+                            text:"Input Ports"
+                        }
+
+                        ListView
+                        {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                        }
                     }
 
-                    HierarchicalTableWidget
+                    ColumnLayout
                     {
-                        id:inputTable
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        referenceModel: context.inputModel
+                        spacing: 0
+                        SplitView.fillWidth: true
+                        SplitView.fillHeight: true
+
+                        WidgetTitleHeader
+                        {
+                            Layout.fillWidth: true
+                            text:"Input Table"
+                        }
+
+                        HierarchicalTableWidget
+                        {
+                            id:inputTable
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            referenceModel: context.inputModel
+                        }
                     }
                 }
 
                 /* ---------------- OUTPUT TAB ---------------- */
 
-                ColumnLayout {
-
+                SplitView
+                {
                     spacing: 0
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-
-                    WidgetTitleHeader
+                    ColumnLayout
                     {
-                        Layout.fillWidth: true
-                        text:"Output Table"
+
+                        spacing: 0
+                        SplitView.preferredWidth: 200
+                        SplitView.fillHeight: true
+
+                        WidgetTitleHeader
+                        {
+                            Layout.fillWidth: true
+                            text:"Output Ports"
+                        }
+
+                        ListView
+                        {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                        }
                     }
 
-                    HierarchicalTableWidget
+                    ColumnLayout
                     {
-                        id:outputTable
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        referenceModel: context.outputModel
+
+                        spacing: 0
+                        SplitView.fillWidth: true
+                        SplitView.fillHeight: true
+
+                        WidgetTitleHeader
+                        {
+                            Layout.fillWidth: true
+                            text:"Output Table"
+                        }
+
+                        HierarchicalTableWidget
+                        {
+                            id:outputTable
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            referenceModel: context.outputModel
+                        }
                     }
                 }
             }

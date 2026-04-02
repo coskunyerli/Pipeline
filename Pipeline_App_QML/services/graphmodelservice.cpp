@@ -125,12 +125,12 @@ namespace Pipeline
         {
         }
 
-        NodeModel* GraphModelService::quickNodeModel() const
+        QuickNodeModel* GraphModelService::quickNodeModel() const
         {
             return m_quickNodeModel;
         }
 
-        void GraphModelService::setQuickNodeModel(NodeModel *newQuickNodeModel)
+        void GraphModelService::setQuickNodeModel(QuickNodeModel *newQuickNodeModel)
         {
             if (m_quickNodeModel == newQuickNodeModel)
                 return;

@@ -1,20 +1,20 @@
-#include "nodemodel.h"
+#include "quicknodemodel.h"
 #include <data/contextmetadata.h>
 #include <constants.h>
 namespace Pipeline::Runtime
 {
 
-    NodeModel::NodeModel(QObject *parent)
+    QuickNodeModel::QuickNodeModel(QObject *parent)
         : QAbstractListModel(parent)
     {
     }
 
-    int NodeModel::rowCount(const QModelIndex &parent) const
+    int QuickNodeModel::rowCount(const QModelIndex &parent) const
     {
         return static_cast<int>(m_nodes.size());
     }
 
-    QVariant NodeModel::data(const QModelIndex &index, int role) const
+    QVariant QuickNodeModel::data(const QModelIndex &index, int role) const
     {
         if (!index.isValid())
         {
@@ -42,24 +42,24 @@ namespace Pipeline::Runtime
         }
     }
 
-    bool NodeModel::setData(const QModelIndex &index, const QVariant &value, int role)
+    bool QuickNodeModel::setData(const QModelIndex &index, const QVariant &value, int role)
     {
         return false;
     }
 
-    void NodeModel::addNode(const QString &description, const NodeContextMetadata &metadata)
+    void QuickNodeModel::addNode(const QString &description, const NodeContextMetadata &metadata)
     {
         int row = static_cast<int>(m_nodes.size());
         beginInsertRows(QModelIndex(), row, row);
 
-        NodeModelItem item(description, metadata);
+        QuickNodeModelItem item(description, metadata);
         m_nodes.push_back(std::move(item));
 
         endInsertRows();
     }
 
     // Remove node
-    void NodeModel::removeNode(const QModelIndex &index)
+    void QuickNodeModel::removeNode(const QModelIndex &index)
     {
         if (!index.isValid())
             return;
@@ -73,7 +73,7 @@ namespace Pipeline::Runtime
         endRemoveRows();
     }
 
-    NodeContextMetadata NodeModel::getNodeContext(const QString &nodeName)
+    NodeContextMetadata QuickNodeModel::getNodeContext(const QString &nodeName)
     {
         for (auto i = 0; i < rowCount(); i++)
         {
@@ -88,7 +88,7 @@ namespace Pipeline::Runtime
         return NodeContextMetadata();
     }
 
-    QHash<int, QByteArray> NodeModel::roleNames() const
+    QHash<int, QByteArray> QuickNodeModel::roleNames() const
     {
         return
         {
@@ -99,7 +99,7 @@ namespace Pipeline::Runtime
         };
     }
 
-    NodeModelItem::NodeModelItem(const QString description, const NodeContextMetadata &metadata)
+    QuickNodeModelItem::QuickNodeModelItem(const QString description, const NodeContextMetadata &metadata)
         : m_description(description)
         , m_metadata(metadata)
     {

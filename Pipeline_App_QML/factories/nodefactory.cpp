@@ -17,7 +17,9 @@ namespace Pipeline::Runtime
             node->applyNodeContextMetadata(metadata);
             auto *outPort = new UI::MPort(node);
             auto *inPort = new UI::MPort(node);
+            auto *inPort2 = new UI::MPort(node);
             node->addPort(inPort, true);
+            node->addPort(inPort2, true);
             node->addPort(outPort, false);
         }
 

@@ -5,7 +5,7 @@
 #include <data/contextmetadata.h>
 namespace Pipeline::Runtime
 {
-    class NodeModel;
+    class QuickNodeModel;
     class AppDataService;
     class NodeContextMetadata;
     class NodeModelService : public QObject
@@ -29,6 +29,6 @@ namespace Pipeline::Runtime
             void loadAllNodes();
 
         private:
-            NodeModel* m_model = nullptr;
+            QuickNodeModel* m_model = nullptr;
     };
 }

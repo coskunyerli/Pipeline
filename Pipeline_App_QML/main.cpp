@@ -10,7 +10,7 @@
 #include <services/appdataservice.h>
 #include <services/nodemodelservice.h>
 #include <models/nodetabledialogmodel.h>
-#include <models/nodemodel.h>
+#include <models/quicknodemodel.h>
 #include <models/nodetablesliceproxymodel.h>
 #include <models/nodeparamlistdialogmodel.h>
 #include <models/nodeparamuilistmodel.h>
@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
     qmlRegisterType<Pipeline::UI::NodeGraphTreeModel>("Pipeline.Models", 1, 0, "NodeGraphTreeModel");
-    qmlRegisterType<Pipeline::Runtime::NodeModel>("Pipeline.Models", 1, 0, "NodeModel");
+    qmlRegisterType<Pipeline::Runtime::QuickNodeModel>("Pipeline.Models", 1, 0, "NodeModel");
     qmlRegisterType<Pipeline::Runtime::NodeTableSliceProxyModel>("Pipeline.Models", 1, 0, "NodeTableSliceProxyModel");
     qmlRegisterType<Pipeline::UI::NodeGraphModel>("Pipeline.Models", 1, 0, "NodeGraphModel");
     qmlRegisterType<Pipeline::UI::NodeGraphViewModel>("Pipeline.Models", 1, 0, "NodeGraphViewModel");
