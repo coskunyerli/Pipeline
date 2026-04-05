@@ -285,7 +285,7 @@ namespace Pipeline::Runtime
                 m_paramsKeys.push_back(key);
             }
         }
-        catch (std::runtime_error &exception)
+        catch (std::runtime_error &)
         {
         }
     }

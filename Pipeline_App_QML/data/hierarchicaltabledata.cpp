@@ -180,6 +180,19 @@ namespace Pipeline
             return it->second;
         }
 
+        std::shared_ptr<HierarchicalTableData> HierarchicalTableData::getCellByName(const std::string &name) const
+        {
+            for(auto& [key,cell] : m_tables)
+            {
+                if(cell->getName() == name)
+                {
+                    return cell;
+                }
+            }
+
+            return nullptr;
+        }
+
         std::string HierarchicalTableData::getCellValue(size_t row, size_t column) const
         {
             size_t index = this->mapFromCellIndex(row, column);

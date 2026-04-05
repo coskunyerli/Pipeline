@@ -53,6 +53,7 @@ namespace Pipeline
                 }
                 void setHeaderData(int section, const std::string& value);
                 std::shared_ptr<HierarchicalTableData> getCell(size_t row, size_t column) const;
+                std::shared_ptr<HierarchicalTableData> getCellByName(const std::string& name) const;
                 std::string getCellValue(size_t row, size_t column) const;
                 ValueType getCellValueType(size_t row, size_t column) const;
                 std::shared_ptr<HierarchicalTableData> getOrCreateCell(size_t row, size_t column);

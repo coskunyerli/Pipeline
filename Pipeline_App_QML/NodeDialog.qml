@@ -19,46 +19,46 @@ Window {
     color: "#252525"
 
 
-    Popup {
-        id: popup
-        modal: false
-        focus: true
-        dim: true
-        x: label.mapToItem(null, 0, 0).x
-        y: label.mapToItem(null, 0, 0).y
+    // Popup {
+    //     id: popup
+    //     modal: false
+    //     focus: true
+    //     dim: true
+    //     x: label.mapToItem(null, 0, 0).x
+    //     y: label.mapToItem(null, 0, 0).y
 
-        Overlay.modeless: Rectangle {
-            color: "#80000000"   // rgba: alpha=0.5
-        }
+    //     Overlay.modeless: Rectangle {
+    //         color: "#80000000"   // rgba: alpha=0.5
+    //     }
 
-        width: root.maxWidth + 8
-        height: 28
+    //     width: root.maxWidth + 8
+    //     height: 28
 
-        background: Rectangle {
-            radius: 3
-            color: "#505050"
-            border.color: "#656565"
-        }
+    //     background: Rectangle {
+    //         radius: 3
+    //         color: "#505050"
+    //         border.color: "#656565"
+    //     }
 
-        contentItem: PTextEdit {
-            id: edit
-            anchors.fill: parent
-            selectByMouse: true
+    //     contentItem: PTextEdit {
+    //         id: edit
+    //         anchors.fill: parent
+    //         selectByMouse: true
 
-            Keys.onReturnPressed: finish()
-            Keys.onEnterPressed: finish()
-            Keys.onEscapePressed: popup.close()
+    //         Keys.onReturnPressed: finish()
+    //         Keys.onEnterPressed: finish()
+    //         Keys.onEscapePressed: popup.close()
 
-            function finish() {
-                modelData.value = text
-                popup.close()
-            }
+    //         function finish() {
+    //             modelData.value = text
+    //             popup.close()
+    //         }
 
-            onFocusChanged: {
-                if (!focus) popup.close()
-            }
-        }
-    }
+    //         onFocusChanged: {
+    //             if (!focus) popup.close()
+    //         }
+    //     }
+    // }
 
     signal dialogClosed()
     signal accepted(var context)

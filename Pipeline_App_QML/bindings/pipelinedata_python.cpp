@@ -17,7 +17,7 @@ PYBIND11_MODULE(PipelineData, m) {
         .value("All", HierarchicalTableData::ValueType::All)
         .export_values();
 
-    py::class_<HierarchicalTableData>(m, "HierarchicalTableData")
+        py::class_<HierarchicalTableData, std::shared_ptr<HierarchicalTableData>>(m, "HierarchicalTableData")
         .def(py::init<>())
         .def("set_size", &HierarchicalTableData::setSize)
         .def("set_header_data", &HierarchicalTableData::setHeaderData)
@@ -27,16 +27,18 @@ PYBIND11_MODULE(PipelineData, m) {
         .def_property("value",
                       &HierarchicalTableData::getValue,
                       &HierarchicalTableData::setValue)
+        .def_property("name",
+                      &HierarchicalTableData::getName,
+                      &HierarchicalTableData::setName)
         .def_property_readonly("value_type", &HierarchicalTableData::getValueType)
         .def_property_readonly("get_cell_value_type", &HierarchicalTableData::getCellValueType)
         .def_property_readonly("child_count", &HierarchicalTableData::getChildCount)
-        .def("get_cell", &HierarchicalTableData::getCell,
-             py::return_value_policy::reference_internal)
-        .def("get_or_create_cell", &HierarchicalTableData::getOrCreateCell,
-             py::return_value_policy::reference_internal)
+        .def("get_cell", &HierarchicalTableData::getCell)
+        .def("get_cell_by_name", &HierarchicalTableData::getCellByName)
+        .def("get_or_create_cell", &HierarchicalTableData::getOrCreateCell)
         .def("__getitem__", [](HierarchicalTableData& self, std::pair<size_t, size_t> idx) {
                 return self.getCellValue(idx.first, idx.second);
-            }, py::return_value_policy::reference_internal)
+            })
         .def("__setitem__", [](HierarchicalTableData& self, std::pair<size_t, size_t> idx, const std::string& val) {
             self.setCellValue(idx.first, idx.second, val);
 
