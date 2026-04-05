@@ -18,6 +18,9 @@ namespace Pipeline::Runtime
             auto *outPort = new UI::MPort(node);
             auto *inPort = new UI::MPort(node);
             auto *inPort2 = new UI::MPort(node);
+            inPort->setName("In Port1");
+            inPort2->setName("In Port2");
+            outPort->setName("Output Port");
             node->addPort(inPort, true);
             node->addPort(inPort2, true);
             node->addPort(outPort, false);

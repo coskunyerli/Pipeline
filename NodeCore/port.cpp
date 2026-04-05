@@ -8,6 +8,7 @@ namespace Pipeline
     {
         struct Port::PrivateData
         {
+            std::string m_name;
             std::vector<Connection*> m_connections;
         };
 
@@ -93,6 +94,16 @@ namespace Pipeline
             }
 
             return false;
+        }
+
+        std::string Port::getName() const
+        {
+            return m_privateData->m_name;
+        }
+
+        void Port::setName(const std::string &name)
+        {
+            m_privateData->m_name = name;
         }
 
         bool Port::hasConnection(Connection *connection) const

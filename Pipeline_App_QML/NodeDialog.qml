@@ -18,17 +18,74 @@ Window {
     visible: true
     color: "#252525"
 
+
+    Popup {
+        id: popup
+        modal: false
+        focus: true
+        dim: true
+        x: label.mapToItem(null, 0, 0).x
+        y: label.mapToItem(null, 0, 0).y
+
+        Overlay.modeless: Rectangle {
+            color: "#80000000"   // rgba: alpha=0.5
+        }
+
+        width: root.maxWidth + 8
+        height: 28
+
+        background: Rectangle {
+            radius: 3
+            color: "#505050"
+            border.color: "#656565"
+        }
+
+        contentItem: PTextEdit {
+            id: edit
+            anchors.fill: parent
+            selectByMouse: true
+
+            Keys.onReturnPressed: finish()
+            Keys.onEnterPressed: finish()
+            Keys.onEscapePressed: popup.close()
+
+            function finish() {
+                modelData.value = text
+                popup.close()
+            }
+
+            onFocusChanged: {
+                if (!focus) popup.close()
+            }
+        }
+    }
+
     signal dialogClosed()
     signal accepted(var context)
     signal saveRequested()
     property var context;
     readonly property var localContext : resultContext
     readonly property var localActor : actor
+
+    QtObject
+    {
+        id:privateObject
+        function createIndexList(model)
+        {
+            let indexArr = []
+            for(let i = 0; i< model.rowCount();i++)
+            {
+                indexArr.push(model.index(i,0));
+            }
+            return indexArr;
+        }
+    }
+
     property var actor : PA.PythonNodeDialogActor
     {
         id:actor
-        inputData : inputTable.model
-        outputData: outputTable.model
+        inputData : dialogInputModel
+        outputData: dialogOutputModel
         inputParameterModel: paramListDialogModel
         onPythonErrorChanged:
         {
@@ -40,8 +97,8 @@ Window {
     {
         id:resultContext
         pythonError : context.pythonError
-        inputModel : inputTable.model
-        outputModel : outputTable.model
+        inputModel : dialogInputModel || null
+        outputModel : dialogOutputModel || null
         inputParameterModel : paramListDialogModel
     }
 
@@ -180,7 +237,7 @@ Window {
                             referenceModel: context.inputParameterModel
                         }
 
-                        columnValue: 1 //Math.max(1,Number(columnCountEdit.text))
+                        columnValue: 1
                     }
                 }
 
@@ -202,10 +259,89 @@ Window {
                             text:"Input Ports"
                         }
 
+                        Component {
+                            id: portDelegate
+
+                            Item {
+                                id: root
+                                width: listView.width
+                                height: 34
+
+                                property bool selected: listView.currentIndex === indexData
+
+                                Rectangle {
+                                    id: background
+                                    anchors.fill: parent
+
+                                    color: root.selected
+                                           ? "#3a82f7"        // selected
+                                           : mouseArea.containsMouse
+                                             ? "#2a2a2a"      // hover
+                                             : "#1e1e1e"      // normal
+
+                                    border.color: root.selected ? "#5aa0ff" : "#2c2c2c"
+                                    border.width: 1
+                                }
+
+                                Text {
+                                    anchors.fill: parent
+                                    padding: 6
+                                    text: (modelData && modelData.cellName) || ""
+                                    color: root.selected ? "white" : "#cccccc"
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+
+                                MouseArea {
+                                    id: mouseArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+
+                                    onClicked: {
+                                        listView.currentIndex = indexData
+                                    }
+                                    onDoubleClicked:
+                                    {
+                                        popup.open()
+                                        edit.text = modelData.cellName
+                                        edit.selectAll()
+                                        edit.forceActiveFocus()
+                                    }
+                                }
+                            }
+                        }
+
                         ListView
                         {
+                            id:portListView
+                            property var currentPortIndex:null
+                            property var indexList : privateObject.createIndexList(dialogInputModel)
+                            onCurrentIndexChanged:
+                            {
+                                portListView.currentPortIndex = indexList[portListView.currentIndex]
+                            }
+
+                            model: context.inputModel
+                            delegate: Loader
+                            {
+                                sourceComponent:portDelegate
+                                property var modelData : model
+                                property var indexData : index
+                                property var listView : portListView
+                            }
+
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                        }
+
+                        PButton
+                        {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 36
+                            text: "Add Port"
+                            onClicked:
+                            {
+
+                            }
                         }
                     }
 
@@ -226,7 +362,32 @@ Window {
                             id:inputTable
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            referenceModel: context.inputModel
+                            proxyModel:PM.NodeTableSliceProxyModel
+                            {
+                                id: inputSliceProxyModel
+                                currentIndex:portListView.currentPortIndex
+                                sourceModel:PM.NodeTableDialogModel
+                                {
+                                    id: dialogInputModel
+                                    referenceModel: context.inputModel
+                                }
+                            }
+                            onBreadcrumbClicked: (modelIndex) =>
+                            {
+                                let i = dialogInputModel.index(modelIndex.row,modelIndex.column,modelIndex.parent);
+                                portListView.indexList[inputTable.rootIndex.row] = i;
+                                portListView.currentPortIndex = i
+                            }
+                            onCellDClicked: (row, column) =>
+                            {
+                                let modelIndex = dialogInputModel.index(row,column, inputSliceProxyModel.currentIndex);
+                                if(!modelIndex.data(Qt.UserRole + 1))
+                                {
+                                    modelIndex = dialogInputModel.createCell(modelIndex);
+                                }
+                                portListView.indexList[inputTable.rootIndex.row] = modelIndex;
+                                portListView.currentPortIndex = modelIndex
+                            }
                         }
                     }
                 }
@@ -253,8 +414,36 @@ Window {
 
                         ListView
                         {
+                            id:outPortListView
+                            property var currentPortIndex:null
+                            property var indexList : privateObject.createIndexList(dialogOutputModel)
+                            onCurrentIndexChanged:
+                            {
+                                outPortListView.currentPortIndex = indexList[outPortListView.currentIndex]
+                            }
+
+                            model: context.outputModel
+                            delegate: Loader
+                            {
+                                sourceComponent:portDelegate
+                                property var modelData : model
+                                property var indexData : index
+                                property var listView : outPortListView
+                            }
+
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                        }
+
+                        PButton
+                        {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 36
+                            text: "Add Port"
+                            onClicked:
+                            {
+
+                            }
                         }
                     }
 
@@ -273,10 +462,35 @@ Window {
 
                         HierarchicalTableWidget
                         {
-                            id:outputTable
+                            id: outputTable
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            referenceModel: context.outputModel
+                            proxyModel:PM.NodeTableSliceProxyModel
+                            {
+                                id: outputSliceProxyModel
+                                currentIndex:outPortListView.currentPortIndex
+                                sourceModel:PM.NodeTableDialogModel
+                                {
+                                    id: dialogOutputModel
+                                    referenceModel: context.outputModel
+                                }
+                            }
+                            onBreadcrumbClicked: (modelIndex) =>
+                            {
+                                let i = dialogOutputModel.index(modelIndex.row,modelIndex.column,modelIndex.parent);
+                                outPortListView.indexList[outputTable.rootIndex.row] = i;
+                                outPortListView.currentPortIndex = i
+                            }
+                            onCellDClicked: (row, column) =>
+                            {
+                                let modelIndex = dialogOutputModel.index(row,column, outputSliceProxyModel.currentIndex);
+                                if(!modelIndex.data(Qt.UserRole + 1))
+                                {
+                                    modelIndex = dialogOutputModel.createCell(modelIndex);
+                                }
+                                outPortListView.indexList[outputTable.rootIndex.row] = modelIndex;
+                                outPortListView.currentPortIndex = modelIndex
+                            }
                         }
                     }
                 }
@@ -349,8 +563,8 @@ Window {
                 Layout.preferredWidth: 90
                 onClicked:
                 {
-                    inputTable.model.resetData();
-                    outputTable.model.resetData();
+                    dialogInputModel.resetData();
+                    dialogOutputModel.resetData();
                     context.pythonError = ""
                 }
             }
@@ -360,8 +574,8 @@ Window {
                 Layout.preferredWidth: 90
                 onClicked:
                 {
-                    inputTable.model.resetData();
-                    outputTable.model.resetData();
+                    dialogInputModel.resetData();
+                    dialogOutputModel.resetData();
                     detachedDialog.close()
                 }
             }

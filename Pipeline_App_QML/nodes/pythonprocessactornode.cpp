@@ -197,6 +197,39 @@ namespace Pipeline
             }
         }
 
+        bool PythonProcessActorNode::addPort(Core::Port *port, bool isIn)
+        {
+            auto res = UI::MNode::addPort(port, isIn);
+            bool has;
+
+            if (isIn)
+            {
+                auto index = this->findInPortIndex(port, has);
+
+                if (has)
+                {
+                    m_inputDataTable->setData(QModelIndex(), static_cast<int>(this->getInPortCount()), NodeTableRoles::Rows);
+                    m_inputDataTable->setData(QModelIndex(), 1, NodeTableRoles::Columns);
+                    auto childIndex = m_inputDataTable->createCell(m_inputDataTable->index(static_cast<int>(index), 0));
+                    m_inputDataTable->setData(childIndex,QString::fromStdString(port->getName()), NodeTableRoles::CellName);
+                }
+            }
+            else
+            {
+                auto index = this->findOutPortIndex(port, has);
+
+                if (has)
+                {
+                    m_outputDataTable->setData(QModelIndex(), static_cast<int>(this->getOutPortCount()), NodeTableRoles::Rows);
+                    m_outputDataTable->setData(QModelIndex(), 1, NodeTableRoles::Columns);
+                    auto childIndex = m_outputDataTable->createCell(m_outputDataTable->index(static_cast<int>(index), 0));
+                    m_outputDataTable->setData(childIndex,QString::fromStdString(port->getName()), NodeTableRoles::CellName);
+                }
+            }
+
+            return res;
+        }
+
         NodeContextMetadata PythonProcessActorNode::createMetadata() const
         {
             NodeContextMetadata metadata;
@@ -297,8 +330,8 @@ namespace Pipeline
                 // apply input
                 auto rowCount = input["row_count"].toInt(0);
                 auto columnCount = input["column_count"].toInt(0);
-                m_inputDataTable->setRows(rowCount);
-                m_inputDataTable->setColumns(columnCount);
+                m_inputDataTable->setData(QModelIndex(), rowCount, NodeTableRoles::Rows);
+                m_inputDataTable->setData(QModelIndex(), columnCount, NodeTableRoles::Columns);
                 auto headers = input["header_data"].toArray();
 
                 for (auto header : headers)
@@ -316,8 +349,8 @@ namespace Pipeline
                 // apply output
                 auto rowCount = output["row_count"].toInt(0);
                 auto columnCount = output["column_count"].toInt(0);
-                m_outputDataTable->setRows(rowCount);
-                m_outputDataTable->setColumns(columnCount);
+                m_outputDataTable->setData(QModelIndex(), rowCount, NodeTableRoles::Rows);
+                m_outputDataTable->setData(QModelIndex(), columnCount, NodeTableRoles::Columns);
                 auto headers = output["header_data"].toArray();
 
                 for (auto header : headers)
@@ -392,9 +425,21 @@ namespace Pipeline
         {
         }
 
-        void PythonProcessActorNode::inConnectionChanged(UI::MPort *inPort, UI::MPort* /*outPort*/)
+        void PythonProcessActorNode::inConnectionChanged(UI::MPort *inPort, UI::MPort* outPort)
         {
             QList<QVariant> dependentDataList;
+
+            if (!outPort)
+            {
+                return;
+            }
+
+            bool has;
+            size_t outputIndex = outPort->getOwnerNode()->findOutPortIndex(outPort, has);
+            if(!has)
+            {
+                return;
+            }
 
             for (size_t i = 0; i < inPort->getConnectionCount(); i++)
             {
@@ -407,16 +452,22 @@ namespace Pipeline
 
                     if (outputTable)
                     {
-                        QVariant v = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(outputTable->getRoot());
+                        QVariant v = outputTable->data(outputTable->index(static_cast<int>(outputIndex),0), NodeTableRoles::ChildCell);
                         dependentDataList.append(v);
                     }
                 }
             }
 
-            auto inputData = this->createInputDataFromContext(dependentDataList);
-            if (inputData)
+            size_t portIndex = this->findInPortIndex(inPort, has);
+            if(has)
             {
-                this->m_inputDataTable->setRoot(inputData);
+                auto inputData = this->createInputDataFromContext(dependentDataList);
+                inputData->setName(inPort->getName());
+                if (inputData)
+                {
+                    QVariant data = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(inputData);
+                    this->m_inputDataTable->setData(this->m_inputDataTable->index(static_cast<int>(portIndex), 0), data, NodeTableRoles::ChildCell);
+                }
             }
         }
 

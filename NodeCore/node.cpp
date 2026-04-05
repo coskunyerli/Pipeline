@@ -145,6 +145,35 @@ namespace Pipeline
 
             has = false;
             return 0;
+
+        }
+
+        size_t Node::findInPortIndex(Port *port, bool &has)
+        {
+            for (size_t i = 0; i < m_privateData->m_inPorts.size(); i++)
+            {
+                auto*p = m_privateData->m_inPorts[i];
+
+                if (p == port)
+                {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        size_t Node::findOutPortIndex(Port *port, bool &has)
+        {
+            for (size_t i = 0; i < m_privateData->m_outPorts.size(); i++)
+            {
+                auto*p = m_privateData->m_outPorts[i];
+
+                if (p == port)
+                {
+                    return i;
+                }
+            }
+            return 0;
         }
 
         size_t Node::findInConnectionCount() const

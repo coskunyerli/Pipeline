@@ -9,13 +9,20 @@ Rectangle {
     implicitHeight: breadcrumbRow.implicitHeight + 8
     signal clicked(var index);
     property var index
+    property int endDepth:0
+    readonly property var rootIndex: privateObject.pRootIndex
+    QtObject
+    {
+        id:privateObject
+        property var pRootIndex:null
+    }
 
     onIndexChanged:
     {
-        getList(index)
+        createIndexList(index)
     }
 
-    function getList(index)
+    function createIndexList(index)
     {
         breadcrumbModel.clear()
 
@@ -26,19 +33,13 @@ Rectangle {
 
         let list = [];
         let temp = index;
-        while(temp.valid)
+        while(temp.parent.valid)
         {
-            let enable = true;
-            if(temp === index)
-            {
-                enable = false;
-            }
-
-            list.push({display:temp.data(Qt.UserRole + 3), modelIndex:temp, enable:enable});
+            list.push({display:temp.data(Qt.UserRole + 3), modelIndex:temp, enable:true});
             temp = temp.parent;
         }
 
-
+        privateObject.pRootIndex = temp;
         list.push({display:"/", modelIndex:temp, enable: list.length > 0});
 
 

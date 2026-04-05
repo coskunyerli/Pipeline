@@ -5,8 +5,10 @@ import Pipeline.Models as PM
 ColumnLayout
 {
     id:root
-    property var referenceModel
-    readonly property alias model: dialogModel
+    readonly property var rootIndex :breadcrumb.rootIndex
+    property alias proxyModel : inputTable.model
+    signal breadcrumbClicked(var modelIndex);
+    signal cellDClicked(var row, var column);
     spacing: 0
     RowLayout
     {
@@ -18,11 +20,11 @@ ColumnLayout
             id : breadcrumb
             color: "transparent"
             Layout.fillWidth: true
-            index: modelProxyModel.currentIndex
+            index: (proxyModel && proxyModel.currentIndex) || null
             onClicked: (modelIndex) =>
-                       {
-                           modelProxyModel.currentIndex = dialogModel.index(modelIndex.row,modelIndex.column,modelIndex.parent)
-                       }
+           {
+               root.breadcrumbClicked(modelIndex);
+           }
         }
 
         Rectangle
@@ -45,11 +47,11 @@ ColumnLayout
                 Layout.preferredWidth: 60
                 bottomPadding: 4
                 topPadding: 4
-                text: modelProxyModel.currentIndexValue
+                text: (proxyModel &&  proxyModel.currentIndexValue) || ""
                 onTextChanged: {
-                    if(modelProxyModel.currentIndexValue !== text)
+                    if(proxyModel.currentIndexValue !== text)
                     {
-                        modelProxyModel.currentIndexValue = text
+                        proxyModel.currentIndexValue = text
                     }
                 }
             }
@@ -66,11 +68,13 @@ ColumnLayout
                 Layout.preferredWidth: 60
                 bottomPadding: 4
                 topPadding: 4
-                text: dialogModel.rows
+                text: (proxyModel && proxyModel.rows ) || 0
                 onTextChanged: {
                     let val = Number(text)
-                    if(dialogModel.rows !== val)
-                        dialogModel.rows = val
+                    if(proxyModel && proxyModel.rows !== val)
+                    {
+                        proxyModel.rows = val
+                    }
                 }
             }
 
@@ -85,11 +89,13 @@ ColumnLayout
                 Layout.preferredWidth: 60
                 bottomPadding: 4
                 topPadding: 4
-                text: dialogModel.columns
+                text: (proxyModel && proxyModel.columns) || 0
                 onTextChanged: {
                     let val = Number(text)
-                    if(dialogModel.columns !== val)
-                        dialogModel.columns = val
+                    if( proxyModel && proxyModel.columns !== val)
+                    {
+                        proxyModel.columns = val
+                    }
                 }
             }
         }
@@ -101,24 +107,9 @@ ColumnLayout
         Layout.fillHeight: true
         // copy inputModel inside
 
-        model:PM.NodeTableSliceProxyModel
-        {
-            id: modelProxyModel
-            sourceModel:PM.NodeTableDialogModel
-            {
-                id: dialogModel
-                referenceModel: root.referenceModel
-            }
-        }
-
         onCellDClicked:(row,column) =>
         {
-            let modelIndex = dialogModel.index(row,column, modelProxyModel.currentIndex);
-            if(!modelIndex.data(Qt.UserRole + 1))
-            {
-                modelIndex = dialogModel.createCell(modelIndex);
-            }
-            modelProxyModel.currentIndex = modelIndex
+            root.cellDClicked(row,column);
         }
     }
 }

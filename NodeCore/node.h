@@ -27,6 +27,8 @@ namespace Pipeline
                 virtual size_t getInPortCount() const;
                 virtual size_t getOutPortCount() const;
                 size_t findPortIndex(Port* port, bool& has, bool& isIn);
+                size_t findInPortIndex(Port* port, bool& has);
+                size_t findOutPortIndex(Port* port, bool& has);
                 size_t findInConnectionCount() const;
                 size_t findOutConnectionCount() const;
                 virtual bool removePort(Port *port);

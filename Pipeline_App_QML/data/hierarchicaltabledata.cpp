@@ -353,6 +353,7 @@ namespace Pipeline
             size_t cols = node->getColumnCount();
             SerializeHelper::writeU64(buf, rows);
             SerializeHelper::writeU64(buf, cols);
+            SerializeHelper::writeString(buf, node->getName());
             SerializeHelper::writeU8(buf, !!node->m_parent);
 
             if (!node->m_parent)
@@ -403,7 +404,9 @@ namespace Pipeline
             auto* node = new HierarchicalTableData(parent);
             uint64_t rows = SerializeHelper::readU64(data, size, offset);
             uint64_t cols = SerializeHelper::readU64(data, size, offset);
+            std::string name = SerializeHelper::readString(data,size,offset);
             bool hasParent = SerializeHelper::readU8(data, size, offset);
+            node->setName(name);
             if(!hasParent)
             {
                 std::string value = SerializeHelper::readString(data, size, offset);

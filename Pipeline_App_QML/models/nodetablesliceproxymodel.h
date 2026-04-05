@@ -4,9 +4,12 @@
 #include <QPersistentModelIndex>
 namespace Pipeline::Runtime
 {
+    class NodeTableModel;
     class NodeTableSliceProxyModel : public QAbstractProxyModel
     {
             Q_OBJECT
+            Q_PROPERTY(size_t rows READ rows WRITE setRows NOTIFY rowsChanged)
+            Q_PROPERTY(size_t columns READ columns WRITE setColumns NOTIFY columnsChanged)
             Q_PROPERTY(QModelIndex currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
             Q_PROPERTY(QString currentIndexValue READ currentIndexValue WRITE setCurrentIndexValue NOTIFY currentIndexValueChanged)
 
@@ -52,9 +55,21 @@ namespace Pipeline::Runtime
 
 
             void setSourceModel(QAbstractItemModel* model) override;
+            size_t rows() const;
+            void setRows(size_t newRows);
+
+            size_t columns() const;
+            void setColumns(size_t newColumns);
+
         signals:
             void currentIndexChanged();
             void currentIndexValueChanged();
+            void rowsChanged();
+
+            void columnsChanged();
+        private:
+            void onSourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                                     const QList<int> &roles = QList<int>());
         private:
             QPersistentModelIndex m_currentIndex;
     };

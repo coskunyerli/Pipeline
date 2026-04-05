@@ -82,4 +82,4 @@ int main(int argc, char* argv[])
 
 
 Q_DECLARE_METATYPE(Pipeline::Runtime::NodeContextMetadata)
-Q_DECLARE_METATYPE(QSharedPointer<Pipeline::Runtime::HierarchicalTableData>);
+Q_DECLARE_METATYPE(std::shared_ptr<Pipeline::Runtime::HierarchicalTableData>);

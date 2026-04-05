@@ -16,7 +16,9 @@ namespace Pipeline::Runtime
         beginResetModel();
         m_currentIndex = index;
         emit this->currentIndexChanged();
-        this->currentIndexValueChanged();
+        emit this->rowsChanged();
+        emit this->columnsChanged();
+        emit this->currentIndexValueChanged();
         endResetModel();
     }
 
@@ -168,18 +170,7 @@ namespace Pipeline::Runtime
             return;
 
         // dataChanged forward
-        connect(model, &QAbstractItemModel::dataChanged,
-                this,
-                [this](const QModelIndex & topLeft,
-                       const QModelIndex & bottomRight,
-                       const QVector<int>& roles)
-        {
-            QModelIndex p1 = mapFromSource(topLeft);
-            QModelIndex p2 = mapFromSource(bottomRight);
-
-            if (p1.isValid() && p2.isValid())
-                emit dataChanged(p1, p2, roles);
-        });
+        connect(model, &QAbstractItemModel::dataChanged, this, &NodeTableSliceProxyModel::onSourceDataChanged);
         // header değişimi forward
         connect(model, &QAbstractItemModel::headerDataChanged,
                 this,
@@ -199,4 +190,67 @@ namespace Pipeline::Runtime
         });
         emit currentIndexValueChanged();
     }
+
+    size_t NodeTableSliceProxyModel::rows() const
+    {
+        if (!sourceModel())
+        {
+            return 0;
+        }
+
+        return this->sourceModel()->rowCount(m_currentIndex);
+    }
+
+    void NodeTableSliceProxyModel::setRows(size_t newRows)
+    {
+        if (!sourceModel() || newRows == this->rows())
+        {
+            return;
+        }
+
+        this->sourceModel()->setData(m_currentIndex, newRows, NodeTableRoles::Rows);
+        emit rowsChanged();
+    }
+
+    size_t NodeTableSliceProxyModel::columns() const
+    {
+        return this->sourceModel()->columnCount(m_currentIndex);
+    }
+
+    void NodeTableSliceProxyModel::setColumns(size_t newColumns)
+    {
+        if (!sourceModel() || this->columns() == newColumns)
+        {
+            return;
+        }
+
+        this->sourceModel()->setData(m_currentIndex, newColumns, NodeTableRoles::Columns);
+        emit columnsChanged();
+    }
+
+    void NodeTableSliceProxyModel::onSourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int>& roles)
+    {
+        QModelIndex p1 = mapFromSource(topLeft);
+        QModelIndex p2 = mapFromSource(bottomRight);
+
+        if (p1.isValid() && p2.isValid())
+        {
+            emit dataChanged(p1, p2, roles);
+        }
+
+        if (roles.contains(NodeTableRoles::Columns))
+        {
+            this->beginResetModel();
+            emit this->columnsChanged();
+            this->endResetModel();
+        }
+
+        if (roles.contains(NodeTableRoles::Rows))
+        {
+            this->beginResetModel();
+            emit this->rowsChanged();
+            this->endResetModel();
+        }
+    }
+
 }

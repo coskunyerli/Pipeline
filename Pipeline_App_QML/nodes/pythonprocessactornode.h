@@ -20,6 +20,7 @@ namespace Pipeline
                 QHash<int, QByteArray> roleNames() const override;
                 bool setData(const QVariant &value, int role, bool emitSignal = false) override;
                 QVariant data(int role) const override;
+                bool addPort(Core::Port *port, bool isIn) override;
                 NodeContextMetadata createMetadata() const override;
                 BaseDataContext* createDataContext(QObject*parent=nullptr) override;
                 void applyNodeContextMetadata(const NodeContextMetadata&nodeContextMetadata) override;

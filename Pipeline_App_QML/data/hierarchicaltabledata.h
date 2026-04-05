@@ -22,6 +22,15 @@ namespace Pipeline
                 virtual ~HierarchicalTableData();
                 bool operator==(const HierarchicalTableData& other) const;
                 void setSize(size_t row, size_t col);
+                void setName(const std::string &name)
+                {
+                    this->m_name = name;
+                }
+
+                std::string getName() const
+                {
+                    return m_name;
+                }
                 size_t getColumnCount() const
                 {
                     return m_columnCount;
@@ -94,6 +103,7 @@ namespace Pipeline
                 };
 
             private:
+                std::string m_name;
                 std::unordered_map<int, std::string> m_headerData;
                 std::string m_value;
                 std::vector<std::string> m_values;

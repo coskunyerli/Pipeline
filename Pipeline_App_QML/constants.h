@@ -34,6 +34,8 @@ namespace Pipeline
             HasTable = Qt::UserRole + 1,
             ChildCell,
             CellName,
+            Rows,
+            Columns,
             HeaderData = Qt::UserRole + 1000,
             HeaderDataEnd = HeaderData + 1000,
         };

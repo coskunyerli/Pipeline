@@ -107,14 +107,14 @@ namespace Pipeline
 
         QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         {
-            if(!m_rootResult)
+            if (!m_rootResult)
             {
                 return {};
             }
 
             if (!index.isValid())
             {
-                if(role == Qt::DisplayRole)
+                if (role == Qt::DisplayRole)
                 {
                     return QString::fromStdString(this->m_rootResult->getValue());
                 }
@@ -145,22 +145,29 @@ namespace Pipeline
             }
             else if (role == NodeTableRoles::CellName)
             {
-                auto keyString = QString("(") + QString::number(index.row()) + ", " + this->data(index.parent(),NodeTableRoles::HeaderData + index.column()).toString() + ")";
+                auto cell = parentTableData->getCell(index.row(), index.column());
+
+                if (cell && !cell->getName().empty())
+                {
+                    return QString::fromStdString(cell->getName());
+                }
+
+                auto keyString = QString("(") + QString::number(index.row()) + ", " + this->data(index.parent(), NodeTableRoles::HeaderData + index.column()).toString() + ")";
                 return keyString;
             }
+            else if (role == NodeTableRoles::ChildCell)
+            {
+                auto cell = parentTableData->getCell(index.row(), index.column());
+                QVariant v = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(cell);
+                return v;
+            }
+
             else if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
             {
                 auto cell = parentTableData->getCell(index.row(), index.column());
-
-                if (!cell)
-                {
-                    return "";
-                }
-
                 int headerDataIndex = role - NodeTableRoles::HeaderData;
                 return QString::fromStdString(cell->getHeaderData(headerDataIndex));
             }
-
             return {};
         }
 
@@ -194,12 +201,31 @@ namespace Pipeline
 
             if (!index.isValid())
             {
-                if(role == Qt::DisplayRole)
+                switch (role)
                 {
-                    this->m_rootResult->setValue(value.toString().toStdString());
-                    this->dataChanged(QModelIndex(),QModelIndex(), {role});
+                    case  Qt::DisplayRole:
+                        {
+                            this->m_rootResult->setValue(value.toString().toStdString());
+                            this->dataChanged(QModelIndex(), QModelIndex(), {role});
+                            return true;
+                        }
+
+                    case NodeTableRoles::Rows:
+                        {
+                            m_rootResult->setSize(value.toInt(), m_rootResult->getColumnCount());
+                            emit dataChanged(index, index, {role});
+                            return true;
+                        }
+
+                    case NodeTableRoles::Columns:
+                        {
+                            m_rootResult->setSize(m_rootResult->getRowCount(), value.toInt());
+                            emit dataChanged(index, index, {role});
+                            return true;
+                        }
                 }
-                else if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
+
+                if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
                 {
                     int headerDataIndex = role - NodeTableRoles::HeaderData;
                     m_rootResult->setHeaderData(headerDataIndex, value.toString().toStdString());
@@ -226,6 +252,43 @@ namespace Pipeline
                         return true;
                     }
 
+                case NodeTableRoles::ChildCell:
+                    {
+                        parentTableData->setCell(index.row(), index.column(), value.value<std::shared_ptr<HierarchicalTableData>>());
+                        emit dataChanged(index, index, {role});
+                        return true;
+                    }
+
+                case NodeTableRoles::CellName:
+                    {
+                        auto cell = parentTableData->getCell(index.row(), index.column());
+                        if(cell)
+                        {
+                            cell->setName(value.toString().toStdString());
+                            emit dataChanged(index, index, {role});
+                            return true;
+                        }
+                    }
+                case NodeTableRoles::Rows:
+                    {
+                        auto cell = parentTableData->getCell(index.row(), index.column());
+                        if(cell)
+                        {
+                            cell->setSize(value.toInt(), cell->getColumnCount());
+                            emit dataChanged(index, index, {role});
+                            return true;
+                        }
+                    }
+                case NodeTableRoles::Columns:
+                    {
+                        auto cell = parentTableData->getCell(index.row(), index.column());
+                        if(cell)
+                        {
+                            cell->setSize(cell->getRowCount(), value.toInt());
+                            emit dataChanged(index, index, {role});
+                            return true;
+                        }
+                    }
                 default:
                     break;
             }
@@ -244,7 +307,6 @@ namespace Pipeline
                 emit this->headerDataChanged(Qt::Horizontal, headerDataIndex, headerDataIndex + 1);
                 return true;
             }
-
             return false;
         }
 
@@ -286,6 +348,7 @@ namespace Pipeline
         {
             auto roleNames = QAbstractItemModel::roleNames();
             roleNames[NodeTableRoles::HasTable] = "hasTable";
+            roleNames[NodeTableRoles::CellName] = "cellName";
             return roleNames;
         }
 
@@ -293,56 +356,9 @@ namespace Pipeline
         {
             this->beginResetModel();
             m_rootResult = root;
-            emit this->columnsChanged();
-            emit this->rowsChanged();
             this->endResetModel();
         }
 
-        int NodeTableModel::rows() const
-        {
-            return this->rowCount();
-        }
-
-        int NodeTableModel::columns() const
-        {
-            return this->columnCount();
-        }
-
-        void NodeTableModel::setRows(int rows)
-        {
-            if (rows == rowCount())
-            {
-                return;
-            }
-
-            if (!m_rootResult)
-            {
-                return;
-            }
-
-            this->beginResetModel();
-            this->m_rootResult->setSize(static_cast<size_t>(rows), static_cast<size_t>(this->columnCount()));
-            this->endResetModel();
-            emit this->rowsChanged();
-        }
-
-        void NodeTableModel::setColumns(int columns)
-        {
-            if (columns == columnCount())
-            {
-                return;
-            }
-
-            if (!m_rootResult)
-            {
-                return;
-            }
-
-            this->beginResetModel();
-            this->m_rootResult->setSize(static_cast<size_t>(this->rowCount()), static_cast<size_t>(columns));
-            this->endResetModel();
-            emit this->columnsChanged();
-        }
 
         HierarchicalTableData* NodeTableModel::getParentTableData(const QModelIndex &index) const
         {

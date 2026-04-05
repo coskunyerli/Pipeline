@@ -61,7 +61,6 @@ Item
 
         border.width: 1
 
-        // Başlık (sürüklenebilir alan)
         Text
         {
             id: title

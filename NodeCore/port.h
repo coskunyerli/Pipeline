@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 #include "pipeline_core_dll.h"
 
 namespace Pipeline
@@ -20,7 +21,8 @@ namespace Pipeline
                 Connection* getConnection(size_t index) const;
                 Connection* getConnection(Port *other) const;
                 size_t findConnection(Connection *connection, bool& has) const;
-
+                std::string getName() const;
+                void setName(const std::string&name);
                 size_t getConnectionCount() const;
                 Node* getOwnerNode() const;
                 void addConnection(Connection* connection);

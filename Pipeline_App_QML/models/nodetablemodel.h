@@ -9,8 +9,6 @@ namespace Pipeline
     {
         class NodeTableModel : public QAbstractItemModel
         {
-                Q_PROPERTY(size_t rows READ rows WRITE setRows NOTIFY rowsChanged)
-                Q_PROPERTY(size_t columns READ columns WRITE setColumns NOTIFY columnsChanged)
                 Q_OBJECT
             public:
                 explicit NodeTableModel(QObject*parent = nullptr);
@@ -31,17 +29,10 @@ namespace Pipeline
 
             public:
                 void setRoot(const std::shared_ptr<HierarchicalTableData>& root);
-                int rows() const;
-                int columns() const;
-                void setRows(int rows);
-                void setColumns(int columns);
                 std::shared_ptr<HierarchicalTableData> getRoot() const
                 {
                     return m_rootResult;
                 }
-            signals:
-                void rowsChanged();
-                void columnsChanged();
             private:
                 HierarchicalTableData* getParentTableData(const QModelIndex& index) const;
                 HierarchicalTableData* accessParentTableData(const QModelIndex& index);
