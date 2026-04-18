@@ -17,8 +17,8 @@ namespace Pipeline
 
         QSize NodeIUManager::nodeSize(const QModelIndex &nodeIndex) const
         {
-            int inPortCount = nodeIndex.data(Roles::InPortCount).toInt();
-            int outPortCount = nodeIndex.data(Roles::InPortCount).toInt();
+            int inPortCount = nodeIndex.data(Constants::Roles::InPortCount).toInt();
+            int outPortCount = nodeIndex.data(Constants::Roles::InPortCount).toInt();
             int maxCount = (std::max(inPortCount, outPortCount) - 1);
             int height = maxCount * this->portSpacing() + maxCount * this->portSize().height() + this->topMargin() + this->bottomMargin();
             return QSize(m_nodeSize.width(), std::max(this->nodeSize().height(), height));
@@ -31,9 +31,9 @@ namespace Pipeline
                 return QPoint();
             }
 
-            auto relatedNodeIndex = portIndex.data(Roles::RelatedNode).toModelIndex();
+            auto relatedNodeIndex = portIndex.data(Constants::Roles::RelatedNode).toModelIndex();
             auto nodeSize = this->nodeSize(relatedNodeIndex);
-            bool isIn = portIndex.data(Roles::PortIsIn).toBool();
+            bool isIn = portIndex.data(Constants::Roles::PortIsIn).toBool();
             auto nodeAreaHeight = nodeSize.height() - m_topMargin - m_bottomMargin;
             QSize portSize = m_portSize;
             int portTop = m_portSpacing * portIndex.row() + portSize.height() * portIndex.row();

@@ -56,7 +56,13 @@ int main(int argc, char* argv[])
 
     qmlRegisterUncreatableMetaObject(
         Pipeline::Runtime::Constants::staticMetaObject,
-        "Pipeline.Constants", 1, 0,
+        "Pipeline.Runtime.Constants", 1, 0,
+        "Roles",
+        "Error: only enums"
+        );
+    qmlRegisterUncreatableMetaObject(
+        Pipeline::UI::Constants::staticMetaObject,
+        "Pipeline.UI.Constants", 1, 0,
         "Roles",
         "Error: only enums"
         );

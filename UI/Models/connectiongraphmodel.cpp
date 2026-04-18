@@ -12,12 +12,12 @@ namespace
 
         for (int i = 0; i < sourceNodeIndex.row(); i++)
         {
-            totalConnectionCount += sourceNodeIndex.siblingAtRow(i).data(Pipeline::UI::Roles::OutConnectionCount).toInt();
+            totalConnectionCount += sourceNodeIndex.siblingAtRow(i).data(Pipeline::UI::Constants::Roles::OutConnectionCount).toInt();
         }
 
         for (int index = 0; index < sourcePortIndex.row(); index++)
         {
-            totalConnectionCount += sourcePortIndex.siblingAtRow(index).data(Pipeline::UI::Roles::ConnectionCount).toInt();
+            totalConnectionCount += sourcePortIndex.siblingAtRow(index).data(Pipeline::UI::Constants::Roles::ConnectionCount).toInt();
         }
 
         return totalConnectionCount;
@@ -93,12 +93,12 @@ namespace Pipeline
 
             for (int nodeIndex = 0; nodeIndex < sourceModel()->rowCount(m_flowIndex); nodeIndex++)
             {
-                auto portContainerIndex = sourceModel()->index(nodeIndex, ColumnNames::OutPortColumn, m_flowIndex);
+                auto portContainerIndex = sourceModel()->index(nodeIndex, Constants::ColumnNames::OutPortColumn, m_flowIndex);
 
                 for (int portIndex = 0; portIndex < sourceModel()->rowCount(portContainerIndex); portIndex++)
                 {
                     auto portModelIndex = sourceModel()->index(portIndex, 0, portContainerIndex);
-                    int connectionCount = portModelIndex.data(Roles::ConnectionCount).toInt();
+                    int connectionCount = portModelIndex.data(Constants::Roles::ConnectionCount).toInt();
 
                     if (totalConnectionIndex - connectionCount < 0)
                     {
@@ -114,12 +114,12 @@ namespace Pipeline
 
         QModelIndex ConnectionGraphModel::mapFromSource(const QModelIndex &sourceIndex) const
         {
-            switch (sourceIndex.data(Roles::Type).toInt())
+            switch (sourceIndex.data(Constants::Roles::Type).toInt())
             {
-                case DataType::Connection:
+                case Constants::DataType::Connection:
                     {
                         // TODO burada node kadar gitmem gerekiyor daha sonra node üzerinden sayım yapacağım
-                        if (sourceIndex.parent().data(Roles::Type).toInt() != DataType::Port)
+                        if (sourceIndex.parent().data(Constants::Roles::Type).toInt() != Constants::DataType::Port)
                         {
                             return QModelIndex();
                         }
@@ -141,7 +141,7 @@ namespace Pipeline
 
         int ConnectionGraphModel::rowCount(const QModelIndex &parent) const
         {
-            auto count = graphModel()->data(this->m_flowIndex, Roles::ChildConnectionCount).toLongLong();
+            auto count = graphModel()->data(this->m_flowIndex, Constants::Roles::ChildConnectionCount).toLongLong();
             return count;
         }
 
@@ -206,19 +206,19 @@ namespace Pipeline
                 {
                     auto sourceIndex = sourceModel->index(i, j, topLeft.parent());
 
-                    if ((roles.contains(Roles::PosX) || roles.contains(Roles::PosY)) && sourceIndex.data(Roles::Type) == DataType::Node)
+                    if ((roles.contains(Constants::Roles::PosX) || roles.contains(Constants::Roles::PosY)) && sourceIndex.data(Constants::Roles::Type) == Constants::DataType::Node)
                     {
-                        auto inPortCount = sourceIndex.data(Roles::InPortCount).toInt();
-                        auto outPortCount = sourceIndex.data(Roles::OutPortCount).toInt();
+                        auto inPortCount = sourceIndex.data(Constants::Roles::InPortCount).toInt();
+                        auto outPortCount = sourceIndex.data(Constants::Roles::OutPortCount).toInt();
 
                         for (int i = 0; i < outPortCount; i++)
                         {
-                            auto outPortIndex = sourceIndex.data(Roles::NodePortIndex + i).toModelIndex();
-                            auto connectionCount = outPortIndex.data(Roles::ConnectionCount).toInt();
+                            auto outPortIndex = sourceIndex.data(Constants::Roles::NodePortIndex + i).toModelIndex();
+                            auto connectionCount = outPortIndex.data(Constants::Roles::ConnectionCount).toInt();
 
                             for (int c = 0; c < connectionCount; c++)
                             {
-                                auto connectionIndex = outPortIndex.data(Roles::PortConnectionIndex + c).toModelIndex();
+                                auto connectionIndex = outPortIndex.data(Constants::Roles::PortConnectionIndex + c).toModelIndex();
                                 connectionList.insert(mapFromSource(connectionIndex));
                             }
 
@@ -227,12 +227,12 @@ namespace Pipeline
 
                         for (int i = outPortCount; i < outPortCount + inPortCount; i++)
                         {
-                            auto inPortIndex = sourceIndex.data(Roles::NodePortIndex + i).toModelIndex();
-                            auto connectionCount = inPortIndex.data(Roles::ConnectionCount).toInt();
+                            auto inPortIndex = sourceIndex.data(Constants::Roles::NodePortIndex + i).toModelIndex();
+                            auto connectionCount = inPortIndex.data(Constants::Roles::ConnectionCount).toInt();
 
                             for (int c = 0; c < connectionCount; c++)
                             {
-                                auto connectionIndex = inPortIndex.data(Roles::PortConnectionIndex + c).toModelIndex();
+                                auto connectionIndex = inPortIndex.data(Constants::Roles::PortConnectionIndex + c).toModelIndex();
                                 connectionList.insert(mapFromSource(connectionIndex));
                             }
 
@@ -250,10 +250,10 @@ namespace Pipeline
                 auto maxConnectionIndex = this->index(minMax.second.x(), minMax.second.y());
                 emit this->dataChanged(minConnectionIndex, maxConnectionIndex,
                 {
-                    ConnectionGraphRoles::OutRelatedNodePosX,
-                    ConnectionGraphRoles::OutRelatedNodePosY,
-                    ConnectionGraphRoles::InRelatedNodePosX,
-                    ConnectionGraphRoles::InRelatedNodePosY
+                    Constants::ConnectionGraphRoles::OutRelatedNodePosX,
+                    Constants::ConnectionGraphRoles::OutRelatedNodePosY,
+                    Constants::ConnectionGraphRoles::InRelatedNodePosX,
+                    Constants::ConnectionGraphRoles::InRelatedNodePosY
                 });
             }
 
@@ -283,9 +283,9 @@ namespace Pipeline
                 return;
             }
 
-            switch (sourceModel->data(parent, Roles::Type).toInt())
+            switch (sourceModel->data(parent, Constants::Roles::Type).toInt())
             {
-                case DataType::Port:
+                case Constants::DataType::Port:
                     {
                         // find start connection index of related port
                         break;
@@ -302,9 +302,9 @@ namespace Pipeline
                 return;
             }
 
-            switch (sourceModel->data(parent, Roles::Type).toInt())
+            switch (sourceModel->data(parent, Constants::Roles::Type).toInt())
             {
-                case DataType::Port:
+                case Constants::DataType::Port:
                     {
                         int startConnectionIndex = findStartConnectionIndexPort(parent);
                         int start = startConnectionIndex + first;

@@ -57,7 +57,7 @@ namespace Pipeline
 
             auto *interface = static_cast<ModelItemInterface*>(proxyIndex.internalPointer());
 
-            if (interface->getType() == DataType::Port)
+            if (interface->getType() == Constants::DataType::Port)
             {
                 auto *port = dynamic_cast<Pipeline::UI::MPort*>(interface);
                 Core::Node* ownerNode = port->getOwnerNode();
@@ -71,7 +71,7 @@ namespace Pipeline
                 }
 
                 size_t nodeIndex = ownerNode->parent()->indexOf(ownerNode, has);
-                QModelIndex parentSource = sourceModel()->index(static_cast<int>(nodeIndex), isIn ? ColumnNames::InPortColumn : ColumnNames::OutPortColumn);
+                QModelIndex parentSource = sourceModel()->index(static_cast<int>(nodeIndex), isIn ? Constants::ColumnNames::InPortColumn : Constants::ColumnNames::OutPortColumn);
                 return sourceModel()->index(proxyIndex.row(), proxyIndex.column(), parentSource);
             }
             else
@@ -87,10 +87,10 @@ namespace Pipeline
                 return QModelIndex();
             }
 
-            switch (sourceIndex.data(Roles::Type).toInt())
+            switch (sourceIndex.data(Constants::Roles::Type).toInt())
             {
-                case DataType::Node:
-                case DataType::Port:
+                case Constants::DataType::Node:
+                case Constants::DataType::Port:
                     {
                         return createIndex(sourceIndex.row(), 0, sourceIndex.internalPointer());
                     }
@@ -198,9 +198,9 @@ namespace Pipeline
                 return;
             }
 
-            switch (sourceModel->data(parent, Roles::Type).toInt())
+            switch (sourceModel->data(parent, Constants::Roles::Type).toInt())
             {
-                case DataType::Node:
+                case Constants::DataType::Node:
                     {
                         this->beginInsertRows(QModelIndex(), first, last);
                         this->endInsertRows();

@@ -61,26 +61,26 @@ namespace Pipeline
 
         QVariant NodeGraphTreeModel::data(const QModelIndex &index, int role) const
         {
-            if (role == Roles::DataIndex)
+            if (role == Constants::Roles::DataIndex)
             {
                 return index;
             }
 
-            if (role == Roles::Type)
+            if (role == Constants::Roles::Type)
             {
                 ModelItemInterface *modelItemInterface = getData(index);
 
                 if (!modelItemInterface)
                 {
-                    return DataType::None;
+                    return Constants::DataType::None;
                 }
 
                 return modelItemInterface->getType();
             }
 
-            if (role >= Roles::NodePortIndex && role < Roles::NodePortIndexEnd)
+            if (role >= Constants::Roles::NodePortIndex && role < Constants::Roles::NodePortIndexEnd)
             {
-                if (index.data(Roles::Type) != DataType::Node)
+                if (index.data(Constants::Roles::Type) != Constants::DataType::Node)
                 {
                     return {};
                 }
@@ -89,8 +89,8 @@ namespace Pipeline
 
                 if (node)
                 {
-                    int portIndex = role - Roles::NodePortIndex;
-                    auto outPortCount = index.data(Roles::OutPortCount).toInt();
+                    int portIndex = role - Constants::Roles::NodePortIndex;
+                    auto outPortCount = index.data(Constants::Roles::OutPortCount).toInt();
                     bool isIn = false;
 
                     if (portIndex >= outPortCount)
@@ -99,14 +99,14 @@ namespace Pipeline
                         isIn = true;
                     }
 
-                    auto column = isIn ? ColumnNames::InPortColumn : ColumnNames::OutPortColumn;
+                    auto column = isIn ? Constants::ColumnNames::InPortColumn : Constants::ColumnNames::OutPortColumn;
                     return this->index(portIndex, 0, index.siblingAtColumn(column));
                 }
             }
 
-            if (role >= Roles::PortConnectionIndex && role < Roles::PortConnectionIndexEnd)
+            if (role >= Constants::Roles::PortConnectionIndex && role < Constants::Roles::PortConnectionIndexEnd)
             {
-                if (index.data(Roles::Type) != DataType::Port)
+                if (index.data(Constants::Roles::Type) != Constants::DataType::Port)
                 {
                     return {};
                 }
@@ -117,7 +117,7 @@ namespace Pipeline
                 // güncellenecek
                 if (port)
                 {
-                    int connectionIndex = role - Roles::PortConnectionIndex;
+                    int connectionIndex = role - Constants::Roles::PortConnectionIndex;
                     bool has;
                     auto *connection = port->getConnection(connectionIndex);
                     auto *outPort = dynamic_cast<MPort*>(connection->getOutPort());
@@ -148,14 +148,14 @@ namespace Pipeline
 
             switch (role)
             {
-                case Roles::ChildConnectionCount:
+                case Constants::Roles::ChildConnectionCount:
                     {
                         size_t total = 0;
                         int rows = rowCount(index);
 
                         for (int i = 0; i < rows; i++)
                         {
-                            total += this->index(i, 0, index).data(Roles::OutConnectionCount).toLongLong();
+                            total += this->index(i, 0, index).data(Constants::Roles::OutConnectionCount).toLongLong();
                         }
 
                         return total;
@@ -165,7 +165,7 @@ namespace Pipeline
                     break;
             }
 
-            if (index.data(Roles::Type) == DataType::Node)
+            if (index.data(Constants::Roles::Type) == Constants::DataType::Node)
             {
                 MNode* node = getData<MNode>(index);
                 return node->data(role);
@@ -174,21 +174,21 @@ namespace Pipeline
             {
                 switch (role)
                 {
-                    case Roles::OutPortIndex:
-                    case Roles::InPortIndex:
-                    case Roles::InRelatedNode:
-                    case Roles::InRelatedPort:
-                    case Roles::OutRelatedNode:
-                    case Roles::OutRelatedPort:
+                    case Constants::Roles::OutPortIndex:
+                    case Constants::Roles::InPortIndex:
+                    case Constants::Roles::InRelatedNode:
+                    case Constants::Roles::InRelatedPort:
+                    case Constants::Roles::OutRelatedNode:
+                    case Constants::Roles::OutRelatedPort:
                         {
                             // For Connection Role names
                             auto* connection = getData<MConnection>(index);
 
-                            if (index.data(Roles::Type) == DataType::Connection && connection)
+                            if (index.data(Constants::Roles::Type) == Constants::DataType::Connection && connection)
                             {
                                 switch (role)
                                 {
-                                    case Roles::OutPortIndex:
+                                    case Constants::Roles::OutPortIndex:
                                         {
                                             auto *outPort = connection->getOutPort();
 
@@ -200,7 +200,7 @@ namespace Pipeline
                                             return QModelIndex();
                                         }
 
-                                    case Roles::InPortIndex:
+                                    case Constants::Roles::InPortIndex:
                                         {
                                             Core::Port *inPort = connection->getInPort();
 
@@ -218,7 +218,7 @@ namespace Pipeline
                                             return QModelIndex();
                                         }
 
-                                    case Roles::InRelatedPort:
+                                    case Constants::Roles::InRelatedPort:
                                         {
                                             if (auto *inPort = connection->getInPort())
                                             {
@@ -237,7 +237,7 @@ namespace Pipeline
                                             return QModelIndex();
                                         }
 
-                                    case Roles::InRelatedNode:
+                                    case Constants::Roles::InRelatedNode:
                                         {
                                             if (auto *inPort = connection->getInPort())
                                             {
@@ -256,12 +256,12 @@ namespace Pipeline
                                             return QModelIndex();
                                         }
 
-                                    case Roles::OutRelatedNode:
+                                    case Constants::Roles::OutRelatedNode:
                                         {
-                                            return index.parent().parent().siblingAtColumn(ColumnNames::NodeColumn);
+                                            return index.parent().parent().siblingAtColumn(Constants::ColumnNames::NodeColumn);
                                         }
 
-                                    case Roles::OutRelatedPort:
+                                    case Constants::Roles::OutRelatedPort:
                                         {
                                             return index.parent();
                                         }
@@ -270,40 +270,40 @@ namespace Pipeline
 
                             break;
                         }
-                    case Roles::PortName:
-                    case Roles::RelatedNode:
-                    case Roles::ConnectionCount:
-                    case Roles::PortIsIn:
-                    case Roles::HasConnection:
+                    case Constants::Roles::PortName:
+                    case Constants::Roles::RelatedNode:
+                    case Constants::Roles::ConnectionCount:
+                    case Constants::Roles::PortIsIn:
+                    case Constants::Roles::HasConnection:
                         {
                             // for port role names
                             auto* port = getData<MPort>(index);
 
-                            if (index.data(Roles::Type) == DataType::Port && port)
+                            if (index.data(Constants::Roles::Type) == Constants::DataType::Port && port)
                             {
                                 switch (role)
                                 {
-                                    case Roles::RelatedNode:
+                                    case Constants::Roles::RelatedNode:
                                         {
-                                            return index.parent().siblingAtColumn(ColumnNames::NodeColumn);
+                                            return index.parent().siblingAtColumn(Constants::ColumnNames::NodeColumn);
                                         }
 
-                                    case Roles::ConnectionCount:
+                                    case Constants::Roles::ConnectionCount:
                                         {
                                             return port->getConnectionCount();
                                         }
 
-                                    case Roles::PortIsIn:
+                                    case Constants::Roles::PortIsIn:
                                         {
-                                            return index.parent().column() == ColumnNames::InPortColumn ? true : false;
+                                            return index.parent().column() == Constants::ColumnNames::InPortColumn ? true : false;
                                         }
 
-                                    case Roles::PortName:
+                                    case Constants::Roles::PortName:
                                         {
                                             return QString::fromStdString(port->getName());
                                         }
 
-                                    case Roles::HasConnection:
+                                    case Constants::Roles::HasConnection:
                                         {
                                             return port->getConnectionCount() > 0;
                                         }
@@ -320,17 +320,17 @@ namespace Pipeline
 
         int NodeGraphTreeModel::rowCount(const QModelIndex &parent) const
         {
-            switch (data(parent, Roles::Type).toInt())
+            switch (data(parent, Constants::Roles::Type).toInt())
             {
-                case DataType::Node:
+                case Constants::DataType::Node:
                     {
-                        if (parent.column() == ColumnNames::OutPortColumn)
+                        if (parent.column() == Constants::ColumnNames::OutPortColumn)
                         {
-                            return data(parent, Roles::OutPortCount).toInt();
+                            return data(parent, Constants::Roles::OutPortCount).toInt();
                         }
-                        else if (parent.column() == ColumnNames::InPortColumn)
+                        else if (parent.column() == Constants::ColumnNames::InPortColumn)
                         {
-                            return data(parent, Roles::InPortCount).toInt();
+                            return data(parent, Constants::Roles::InPortCount).toInt();
                         }
                         else
                         {
@@ -343,7 +343,7 @@ namespace Pipeline
                         }
                     }
 
-                case DataType::Port:
+                case Constants::DataType::Port:
                     {
                         if (auto *port = getData<MPort>(parent))
                         {
@@ -363,7 +363,7 @@ namespace Pipeline
             // TODOj parent node could be ports or could be port or could be Node,
             // if parent node is node Node column count should be 3 one is for child nodes, one is out port one is in port
             // otherwise should be 1
-            if (data(parent, Roles::Type).toInt() == DataType::Node)
+            if (data(parent, Constants::Roles::Type).toInt() == Constants::DataType::Node)
             {
                 return int(3);
             }
@@ -378,11 +378,11 @@ namespace Pipeline
 
         QModelIndex NodeGraphTreeModel::index(int row, int column, const QModelIndex &parent) const
         {
-            switch (data(parent, Roles::Type).toInt())
+            switch (data(parent, Constants::Roles::Type).toInt())
             {
-                case DataType::Node:
+                case Constants::DataType::Node:
                     {
-                        if (parent.column() == ColumnNames::OutPortColumn)
+                        if (parent.column() == Constants::ColumnNames::OutPortColumn)
                         {
                             if (MNode *node = getData<MNode>(parent))
                             {
@@ -390,7 +390,7 @@ namespace Pipeline
                                     return createIndex(row, column, dynamic_cast<MPort*>(node->getOutPort(row)));
                             }
                         }
-                        else if (parent.column() == ColumnNames::InPortColumn)
+                        else if (parent.column() == Constants::ColumnNames::InPortColumn)
                         {
                             if (MNode *node = getData<MNode>(parent))
                             {
@@ -410,9 +410,9 @@ namespace Pipeline
                         return QModelIndex();
                     }
 
-                case DataType::Port:
+                case Constants::DataType::Port:
                     {
-                        if (parent.data(Roles::PortIsIn).toBool())
+                        if (parent.data(Constants::Roles::PortIsIn).toBool())
                         {
                             return QModelIndex();
                         }
@@ -435,11 +435,11 @@ namespace Pipeline
 
         QModelIndex NodeGraphTreeModel::parent(const QModelIndex &child) const
         {
-            int type = data(child, Roles::Type).toInt();
+            int type = data(child, Constants::Roles::Type).toInt();
 
             switch (type)
             {
-                case DataType::Node:
+                case Constants::DataType::Node:
                     {
                         if (MNode *node = getData<MNode>(child))
                         {
@@ -471,7 +471,7 @@ namespace Pipeline
                         }
                     }
 
-                case DataType::Port:
+                case Constants::DataType::Port:
                     {
                         if (Core::Port *port = getData<MPort>(child))
                         {
@@ -499,14 +499,14 @@ namespace Pipeline
 
                             if (has)
                             {
-                                return createIndex(static_cast<int>(nodeIndex), ColumnNames::InPortColumn, ownerNode);
+                                return createIndex(static_cast<int>(nodeIndex), Constants::ColumnNames::InPortColumn, ownerNode);
                             }
 
                             indexOfPort(ownerNode, port, false, has);
 
                             if (has)
                             {
-                                return createIndex(static_cast<int>(nodeIndex), ColumnNames::OutPortColumn, ownerNode);
+                                return createIndex(static_cast<int>(nodeIndex), Constants::ColumnNames::OutPortColumn, ownerNode);
                             }
 
                             return QModelIndex();
@@ -515,7 +515,7 @@ namespace Pipeline
                         return QModelIndex();
                     }
 
-                case DataType::Connection:
+                case Constants::DataType::Connection:
                     {
                         if (auto *connection = getData<MConnection>(child))
                         {
@@ -554,7 +554,7 @@ namespace Pipeline
 
         bool NodeGraphTreeModel::addConnection(const QModelIndex inPortIndex, const QModelIndex outPortIndex)
         {
-            if (inPortIndex.data(Roles::Type) != DataType::Port || outPortIndex.data(Roles::Type) != DataType::Port)
+            if (inPortIndex.data(Constants::Roles::Type) != Constants::DataType::Port || outPortIndex.data(Constants::Roles::Type) != Constants::DataType::Port)
             {
                 return false;
             }
@@ -567,11 +567,11 @@ namespace Pipeline
                 return false;
             }
 
-            this->beginInsertRows(outPortIndex, outPortIndex.data(Roles::ConnectionCount).toInt(), outPortIndex.data(Roles::ConnectionCount).toInt());
+            this->beginInsertRows(outPortIndex, outPortIndex.data(Constants::Roles::ConnectionCount).toInt(), outPortIndex.data(Constants::Roles::ConnectionCount).toInt());
             outPort->connect(inPort);
             this->endInsertRows();
-            auto inPortRelatedNode = inPortIndex.data(Roles::RelatedNode).toModelIndex();
-            auto outPortRelatedNode = outPortIndex.data(Roles::RelatedNode).toModelIndex();
+            auto inPortRelatedNode = inPortIndex.data(Constants::Roles::RelatedNode).toModelIndex();
+            auto outPortRelatedNode = outPortIndex.data(Constants::Roles::RelatedNode).toModelIndex();
             auto* inPortNode = getData<MNode>(inPortRelatedNode);
             auto* outPortNode = getData<MNode>(outPortRelatedNode);
 
@@ -585,10 +585,10 @@ namespace Pipeline
                 outPortNode->outConnectionChanged(outPort, inPort);
             }
 
-            emit dataChanged(inPortIndex, inPortIndex, {Roles::HasConnection});
-            emit dataChanged(outPortIndex, outPortIndex, {Roles::HasConnection});
-            emit dataChanged(inPortRelatedNode, inPortRelatedNode, {Roles::InConnectionCount, Roles::ChildConnectionCount});
-            emit dataChanged(outPortRelatedNode, outPortRelatedNode, {Roles::OutConnectionCount, Roles::ChildConnectionCount});
+            emit dataChanged(inPortIndex, inPortIndex, {Constants::Roles::HasConnection});
+            emit dataChanged(outPortIndex, outPortIndex, {Constants::Roles::HasConnection});
+            emit dataChanged(inPortRelatedNode, inPortRelatedNode, {Constants::Roles::InConnectionCount, Constants::Roles::ChildConnectionCount});
+            emit dataChanged(outPortRelatedNode, outPortRelatedNode, {Constants::Roles::OutConnectionCount, Constants::Roles::ChildConnectionCount});
             return true;
         }
 
@@ -623,7 +623,7 @@ namespace Pipeline
 
         bool NodeGraphTreeModel::addPort(MPort *port, const QModelIndex &index, bool isIn)
         {
-            if (index.data(Roles::Type) != DataType::Node)
+            if (index.data(Constants::Roles::Type) != Constants::DataType::Node)
             {
                 return false;
             }
@@ -635,20 +635,20 @@ namespace Pipeline
                 return false;
             }
 
-            int columnIndex = isIn ? ColumnNames::InPortColumn : ColumnNames::OutPortColumn;
+            int columnIndex = isIn ? Constants::ColumnNames::InPortColumn : Constants::ColumnNames::OutPortColumn;
             size_t portCount = isIn ? node->getInPortCount() : node->getOutPortCount();
             this->beginInsertRows(index.siblingAtColumn(columnIndex), static_cast<int>(portCount), static_cast<int>(portCount));
             node->addPort(port, isIn);
             this->endInsertRows();
-            emit this->dataChanged(index.siblingAtColumn(columnIndex), index.siblingAtColumn(columnIndex), {isIn ? Roles::InPortCount : Roles::OutPortCount});
+            emit this->dataChanged(index.siblingAtColumn(columnIndex), index.siblingAtColumn(columnIndex), {isIn ? Constants::Roles::InPortCount : Constants::Roles::OutPortCount});
             return true;
         }
 
         bool NodeGraphTreeModel::setData(const QModelIndex &index, const QVariant &value, int role)
         {
-            switch (data(index, Roles::Type).toInt())
+            switch (data(index, Constants::Roles::Type).toInt())
             {
-                case DataType::Node:
+                case Constants::DataType::Node:
                     {
                         MNode* node = getData<MNode>(index);
                         auto roles = node->roleNames();
@@ -714,7 +714,7 @@ namespace Pipeline
 
             switch (role)
             {
-                case Roles::PosX:
+                case Constants::Roles::PosX:
                     {
                         int posX = value.toInt(&res);
                         this->setX(posX);
@@ -722,7 +722,7 @@ namespace Pipeline
                         break;
                     }
 
-                case Roles::PosY:
+                case Constants::Roles::PosY:
                     {
                         int posY = value.toInt(&res);
                         this->setY(posY);
@@ -730,7 +730,7 @@ namespace Pipeline
                         break;
                     }
 
-                case Roles::Name:
+                case Constants::Roles::Name:
                     {
                         QString name = value.toString();
                         this->setName(name.toStdString());
@@ -752,35 +752,35 @@ namespace Pipeline
             switch (role)
             {
                 case Qt::DisplayRole:
-                case Roles::Name:
+                case Constants::Roles::Name:
                     return QString::fromStdString(this->getName());
 
-                case Roles::InConnectionCount:
+                case Constants::Roles::InConnectionCount:
                     {
                         return this->findInConnectionCount();
                     }
 
-                case Roles::OutConnectionCount:
+                case Constants::Roles::OutConnectionCount:
                     {
                         return this->findOutConnectionCount();
                     }
 
-                case Roles::InPortCount:
+                case Constants::Roles::InPortCount:
                     {
                         return this->getInPortCount();
                     }
 
-                case Roles::OutPortCount:
+                case Constants::Roles::OutPortCount:
                     {
                         return this->getOutPortCount();
                     }
 
-                case Roles::PosX:
+                case Constants::Roles::PosX:
                     {
                         return this->getX();
                     }
 
-                case Roles::PosY:
+                case Constants::Roles::PosY:
                     {
                         return this->getY();
                     }

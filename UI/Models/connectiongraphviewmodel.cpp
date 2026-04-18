@@ -23,9 +23,9 @@ namespace Pipeline
                         }
 
                         //auto portCenter = m_uiManager->portSize() / 2;
-                        auto portIndex = proxyIndex.data(Roles::InPortIndex).toModelIndex();
-                        auto relatedNodeIndex = portIndex.data(Roles::RelatedNode).toModelIndex();
-                        auto nodeX = relatedNodeIndex.data(Roles::PosX).toInt();
+                        auto portIndex = proxyIndex.data(Constants::Roles::InPortIndex).toModelIndex();
+                        auto relatedNodeIndex = portIndex.data(Constants::Roles::RelatedNode).toModelIndex();
+                        auto nodeX = relatedNodeIndex.data(Constants::Roles::PosX).toInt();
                         //auto portPos = m_uiManager->portPosition(portIndex);
                         return nodeX; // + portPos.x() + portCenter.width();
                     }
@@ -38,9 +38,9 @@ namespace Pipeline
                         }
 
                         auto portCenter = m_uiManager->portSize() / 2;
-                        auto portIndex = proxyIndex.data(Roles::InPortIndex).toModelIndex();
-                        auto relatedNodeIndex = portIndex.data(Roles::RelatedNode).toModelIndex();
-                        auto nodeY = relatedNodeIndex.data(Roles::PosY).toInt();
+                        auto portIndex = proxyIndex.data(Constants::Roles::InPortIndex).toModelIndex();
+                        auto relatedNodeIndex = portIndex.data(Constants::Roles::RelatedNode).toModelIndex();
+                        auto nodeY = relatedNodeIndex.data(Constants::Roles::PosY).toInt();
                         auto portPos = m_uiManager->portPosition(portIndex);
                         return nodeY + portPos.y() + portCenter.height();
                     }
@@ -53,9 +53,9 @@ namespace Pipeline
                         }
 
                         auto portCenter = m_uiManager->portSize() / 2;
-                        auto portIndex = proxyIndex.data(Roles::OutPortIndex).toModelIndex();
-                        auto relatedNodeIndex = portIndex.data(Roles::RelatedNode).toModelIndex();
-                        auto nodeX = relatedNodeIndex.data(Roles::PosX).toInt();
+                        auto portIndex = proxyIndex.data(Constants::Roles::OutPortIndex).toModelIndex();
+                        auto relatedNodeIndex = portIndex.data(Constants::Roles::RelatedNode).toModelIndex();
+                        auto nodeX = relatedNodeIndex.data(Constants::Roles::PosX).toInt();
                         auto portPos = m_uiManager->portPosition(portIndex);
                         return nodeX + portPos.x() + portCenter.width();
                     }
@@ -68,9 +68,9 @@ namespace Pipeline
                         }
 
                         auto portCenter = m_uiManager->portSize() / 2;
-                        auto portIndex = proxyIndex.data(Roles::OutPortIndex).toModelIndex();
-                        auto relatedNodeIndex = portIndex.data(Roles::RelatedNode).toModelIndex();
-                        auto nodeY = relatedNodeIndex.data(Roles::PosY).toInt();
+                        auto portIndex = proxyIndex.data(Constants::Roles::OutPortIndex).toModelIndex();
+                        auto relatedNodeIndex = portIndex.data(Constants::Roles::RelatedNode).toModelIndex();
+                        auto nodeY = relatedNodeIndex.data(Constants::Roles::PosY).toInt();
                         auto portPos = m_uiManager->portPosition(portIndex);
                         return nodeY + portPos.y() + portCenter.height();
                     }
@@ -129,10 +129,10 @@ namespace Pipeline
         void ConnectionGraphViewModel::onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int>& roles)
         {
             if (
-                roles.contains(ConnectionGraphRoles::InRelatedNodePosX) ||
-                roles.contains(ConnectionGraphRoles::InRelatedNodePosY) ||
-                roles.contains(ConnectionGraphRoles::OutRelatedNodePosX) ||
-                roles.contains(ConnectionGraphRoles::OutRelatedNodePosY))
+                roles.contains(Constants::ConnectionGraphRoles::InRelatedNodePosX) ||
+                roles.contains(Constants::ConnectionGraphRoles::InRelatedNodePosY) ||
+                roles.contains(Constants::ConnectionGraphRoles::OutRelatedNodePosX) ||
+                roles.contains(Constants::ConnectionGraphRoles::OutRelatedNodePosY))
             {
                 emit dataChanged(topLeft, bottomRight, {ConnectionRoles::ConnectionInX, ConnectionRoles::ConnectionInY, ConnectionRoles::ConnectionOutX, ConnectionRoles::ConnectionOutY});
             }

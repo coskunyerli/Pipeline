@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Pipeline.Constants as PC
+import Pipeline.Runtime.Constants as PRC
 Rectangle {
     id:root
     width: 600
@@ -35,7 +35,7 @@ Rectangle {
         let temp = index;
         while(temp.parent.valid)
         {
-            list.push({display:temp.data(PC.Roles.CellName), modelIndex:temp, enable:true});
+            list.push({display:temp.data(PRC.Roles.CellName), modelIndex:temp, enable:true});
             temp = temp.parent;
         }
 

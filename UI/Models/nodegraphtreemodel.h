@@ -13,17 +13,17 @@ namespace Pipeline
         class ModelItemInterface
         {
             public:
-                explicit ModelItemInterface(DataType type)
+            explicit ModelItemInterface(Constants::DataType type)
                     : m_type(type)
                 {}
 
                 virtual ~ModelItemInterface() {}
-                virtual DataType getType() const
+                virtual Constants::DataType getType() const
                 {
                     return m_type;
                 };
             protected:
-                DataType m_type;
+                Constants::DataType m_type;
 
         };
 
@@ -31,7 +31,7 @@ namespace Pipeline
         {
             public:
                 explicit MNode()
-                    : ModelItemInterface(DataType::Node)
+                    : ModelItemInterface(Constants::DataType::Node)
                     , Core::Node()
 
                 {
@@ -43,23 +43,23 @@ namespace Pipeline
                 {
                     return
                     {
-                        {Roles::Name, "name"},
-                        {Roles::DataIndex, "dataIndex"},
-                        {Roles::Type, "type"},
-                        {Roles::PosX, "posX"},
-                        {Roles::PosY, "posY"},
-                        {Roles::InConnectionCount, "inConnectionCount"},
-                        {Roles::OutConnectionCount, "outConnectionCount"},
-                        {Roles::ChildConnectionCount, "childConnectionCount"},
-                        {Roles::InPortCount, "inPortCount"},
-                        {Roles::OutPortCount, "outPortCount"},
-                        {Roles::OutPortIndex, "outPortIndex"},
-                        {Roles::InPortIndex, "inPortIndex"},
-                        {Roles::InRelatedNode, "inRelatedNode"},
-                        {Roles::OutRelatedNode, "outRelatedNode"},
-                        {Roles::RelatedNode, "relatedNode"},
-                        {Roles::ConnectionCount, "connectionCount"},
-                        {Roles::HasConnection, "hasConnection"},
+                        {Constants::Roles::Name, "name"},
+                        {Constants::Roles::DataIndex, "dataIndex"},
+                        {Constants::Roles::Type, "type"},
+                        {Constants::Roles::PosX, "posX"},
+                        {Constants::Roles::PosY, "posY"},
+                        {Constants::Roles::InConnectionCount, "inConnectionCount"},
+                        {Constants::Roles::OutConnectionCount, "outConnectionCount"},
+                        {Constants::Roles::ChildConnectionCount, "childConnectionCount"},
+                        {Constants::Roles::InPortCount, "inPortCount"},
+                        {Constants::Roles::OutPortCount, "outPortCount"},
+                        {Constants::Roles::OutPortIndex, "outPortIndex"},
+                        {Constants::Roles::InPortIndex, "inPortIndex"},
+                        {Constants::Roles::InRelatedNode, "inRelatedNode"},
+                        {Constants::Roles::OutRelatedNode, "outRelatedNode"},
+                        {Constants::Roles::RelatedNode, "relatedNode"},
+                        {Constants::Roles::ConnectionCount, "connectionCount"},
+                        {Constants::Roles::HasConnection, "hasConnection"},
                     };
                 }
                 std::function<void(QList<int> roles)> notifyChanged;
@@ -75,7 +75,7 @@ namespace Pipeline
         {
             public:
                 explicit MFlowNode()
-                    : ModelItemInterface(DataType::Node)
+                    : ModelItemInterface(Constants::DataType::Node)
                     , Core::FlowNode()
                 {
                 }
@@ -89,7 +89,7 @@ namespace Pipeline
         {
             public:
                 explicit MConnection(Core::Port* in, Core::Port *out)
-                    : ModelItemInterface(DataType::Connection)
+                    : ModelItemInterface(Constants::DataType::Connection)
                     , Core::Connection(in, out)
                 {
                 }
@@ -102,12 +102,12 @@ namespace Pipeline
         {
             public:
                 explicit MPort()
-                    : ModelItemInterface(DataType::Port)
+                    : ModelItemInterface(Constants::DataType::Port)
                     , Core::Port(nullptr)
                 {
                 }
                 explicit MPort(Core::Node* node)
-                    : ModelItemInterface(DataType::Port)
+                    : ModelItemInterface(Constants::DataType::Port)
                     , Core::Port(node)
                 {
                 }
@@ -119,11 +119,11 @@ namespace Pipeline
                 {
                     return
                     {
-                        {Roles::PortName, "portName"},
-                        {Roles::RelatedNode, "portRelatedNode"},
-                        {Roles::ConnectionCount, "portConnectionCount"},
-                        {Roles::HasConnection, "portHasConnection"},
-                        {Roles::PortIsIn, "portIsIn"},
+                        {Constants::Roles::PortName, "portName"},
+                        {Constants::Roles::RelatedNode, "portRelatedNode"},
+                        {Constants::Roles::ConnectionCount, "portConnectionCount"},
+                        {Constants::Roles::HasConnection, "portHasConnection"},
+                        {Constants::Roles::PortIsIn, "portIsIn"},
                     };
                 }
 

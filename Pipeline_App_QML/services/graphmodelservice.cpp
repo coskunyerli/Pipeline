@@ -95,9 +95,9 @@ namespace Pipeline
         {
             auto index = m_model->index(first, 0, parent);
 
-            switch (index.data(UI::Roles::Type).toInt())
+            switch (index.data(UI::Constants::Roles::Type).toInt())
             {
-                case UI::DataType::Connection:
+                case UI::Constants::DataType::Connection:
                     {
                         auto* connection = m_model->getData<UI::MConnection>(index);
 

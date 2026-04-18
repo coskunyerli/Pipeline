@@ -7,7 +7,7 @@ import Pipeline.Actors as PA
 import Pipeline.Services as PS
 import Pipeline.Contexts as PC
 import Pipeline.Models as PM
-import Pipeline.Constants as PC
+import Pipeline.Runtime.Constants as PRC
 
 Window {
     id: detachedDialog
@@ -376,7 +376,7 @@ Window {
                             {
                                 // add new Rows
                                 let newRowCount = portListView.count + 1;
-                                dialogInputModel.setData(dialogInputModel.index(-1,-1), newRowCount , PC.Roles.Rows);
+                                dialogInputModel.setData(dialogInputModel.index(-1,-1), newRowCount , PRC.Roles.Rows);
                                 let newIndex = dialogInputModel.index(newRowCount - 1,0);
                                 dialogInputModel.createCell(newIndex);
                             }
@@ -392,7 +392,7 @@ Window {
                         WidgetTitleHeader
                         {
                             Layout.fillWidth: true
-                            text: portListView.currentPortIndex.data(PC.Roles.CellName)
+                            text: portListView.currentPortIndex.data(PRC.Roles.CellName)
                         }
 
                         HierarchicalTableWidget
@@ -415,7 +415,7 @@ Window {
                             onCellDClicked: (row, column) =>
                             {
                                 let modelIndex = dialogInputModel.index(row,column, inputSliceProxyModel.currentIndex);
-                                if(!modelIndex.data(PC.Roles.HasTable))
+                                if(!modelIndex.data(PRC.Roles.HasTable))
                                 {
                                     modelIndex = dialogInputModel.createCell(modelIndex);
                                 }
@@ -522,7 +522,7 @@ Window {
                             onCellDClicked: (row, column) =>
                             {
                                 let modelIndex = dialogOutputModel.index(row,column, outputSliceProxyModel.currentIndex);
-                                if(!modelIndex.data(PC.Roles.HasTable))
+                                if(!modelIndex.data(PRC.Roles.HasTable))
                                 {
                                     modelIndex = dialogOutputModel.createCell(modelIndex);
                                 }

@@ -23,7 +23,7 @@ namespace Pipeline
 
             enum NodeRoles
             {
-                PythonFileName = UI::Roles::PortConnectionIndexEnd + 100,
+                PythonFileName = UI::Constants::Roles::PortConnectionIndexEnd + 100,
                 PythonScript,
                 PythonError,
                 ActorAction,

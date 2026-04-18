@@ -29,7 +29,7 @@ namespace Pipeline
                 return QModelIndex();
             }
 
-            int parentColumn = isInPort() ? ColumnNames::InPortColumn : ColumnNames::OutPortColumn;
+            int parentColumn = isInPort() ? Constants::ColumnNames::InPortColumn : Constants::ColumnNames::OutPortColumn;
             // TODOJ Burada connection index invalid oluyor ondan sorun var bak buraya
             auto sourceIndex = sourceModel->index(row, 0, m_nodeIndex.sibling(m_nodeIndex.row(), parentColumn));
             auto index = createIndex(row, 0, sourceIndex.internalPointer());
@@ -113,8 +113,8 @@ namespace Pipeline
                 return QModelIndex();
             }
 
-            int role = isInPort() ? Roles::InPortCount : Roles::OutPortCount;
-            int sourceColumn = isInPort() ? ColumnNames::InPortColumn : ColumnNames::OutPortColumn;
+            int role = isInPort() ? Constants::Roles::InPortCount : Constants::Roles::OutPortCount;
+            int sourceColumn = isInPort() ? Constants::ColumnNames::InPortColumn : Constants::ColumnNames::OutPortColumn;
             auto rowCount = m_nodeIndex.data(role).toInt();
 
             if (proxyIndex.row() >= 0 && proxyIndex.row() < rowCount)
@@ -143,7 +143,7 @@ namespace Pipeline
 
         int PortGraphViewModel::rowCount(const QModelIndex &parent) const
         {
-            int role = isInPort() ? Roles::InPortCount : Roles::OutPortCount;
+            int role = isInPort() ? Constants::Roles::InPortCount : Constants::Roles::OutPortCount;
             int count = m_nodeIndex.data(role).toInt();
             return count;
         }

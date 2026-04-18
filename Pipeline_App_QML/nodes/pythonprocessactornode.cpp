@@ -117,7 +117,7 @@ namespace Pipeline
                 this->m_nodeParamListModel->setData("Python File", value.toString(), Constants::ParameterRoles::ValueRole);
                 result = true;
             }
-            else if (role == UI::Roles::Name)
+            else if (role == UI::Constants::Roles::Name)
             {
                 this->m_nodeParamListModel->setData("Name", value.toString(), Constants::ParameterRoles::ValueRole);
                 result = true;
@@ -164,7 +164,7 @@ namespace Pipeline
             {
                 return this->m_nodeParamListModel->data("Python File", Constants::ParameterRoles::ValueRole).toString();
             }
-            else if (role == UI::Roles::Name)
+            else if (role == UI::Constants::Roles::Name)
             {
                 return this->m_nodeParamListModel->data("Name", Constants::ParameterRoles::ValueRole).toString();
             }
@@ -233,7 +233,7 @@ namespace Pipeline
         NodeContextMetadata PythonProcessActorNode::createMetadata() const
         {
             NodeContextMetadata metadata;
-            metadata.setName(this->data(UI::Roles::Name).toString());
+            metadata.setName(this->data(UI::Constants::Roles::Name).toString());
             metadata.setNodeType(Constants::NodeTypes::PythonNode);
             QJsonArray array;
             {
@@ -449,7 +449,7 @@ namespace Pipeline
             }
 
             this->m_pythonError = pythonContext->getPythonError();
-            std::unordered_set<int> roles = {UI::Roles::Name, Constants::NodeRoles::PythonFileName, Constants::NodeRoles::PythonFileName, Constants::NodeRoles:: InputTableModel,
+            std::unordered_set<int> roles = {UI::Constants::Roles::Name, Constants::NodeRoles::PythonFileName, Constants::NodeRoles::PythonFileName, Constants::NodeRoles:: InputTableModel,
                                              Constants::NodeRoles::NodeParameterListModel,
                                              Constants::NodeRoles::OutputTableModel
                                             };

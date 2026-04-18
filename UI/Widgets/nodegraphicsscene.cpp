@@ -45,7 +45,7 @@ namespace Pipeline
             QGraphicsScene::dragEnterEvent(event);
             auto *mimeData = event->mimeData();
             bool ok;
-            size_t portIndex = mimeData->property("nodePort").toLongLong(&ok);
+            mimeData->property("nodePort").toLongLong(&ok);
             QPointF startPos = mimeData->property("startPos").toPointF();
 
             if (ok)
@@ -125,16 +125,16 @@ namespace Pipeline
             {
                 auto index = model->index(first, 0, parent);
 
-                if (index.data(Roles::Type).toInt() == DataType::Node)
+                if (index.data(Constants::Roles::Type).toInt() == Constants::DataType::Node)
                 {
                     auto *nodeGraphicsItem = new BaseNodeGraphicsItem(index);
-                    nodeGraphicsItem->setPos(index.data(Roles::PosX).toFloat(), index.data(Roles::PosY).toFloat());
+                    nodeGraphicsItem->setPos(index.data(Constants::Roles::PosX).toFloat(), index.data(Constants::Roles::PosY).toFloat());
                     //this->addItem(nodeGraphicsItem);
                 }
-                else if (index.data(Roles::Type).toInt() == DataType::Connection)
+                else if (index.data(Constants::Roles::Type).toInt() == Constants::DataType::Connection)
                 {
                     auto *nodeGraphicsItem = new BaseNodeGraphicsItem(index);
-                    nodeGraphicsItem->setPos(index.data(Roles::PosX).toFloat(), index.data(Roles::PosY).toFloat());
+                    nodeGraphicsItem->setPos(index.data(Constants::Roles::PosX).toFloat(), index.data(Constants::Roles::PosY).toFloat());
                     //this->addItem(nodeGraphicsItem);
                 }
             }

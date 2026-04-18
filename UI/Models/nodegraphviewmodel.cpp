@@ -13,7 +13,7 @@ namespace Pipeline
 
         bool NodeGraphViewModel::setData(const QModelIndex &index, const QVariant &value, int role)
         {
-            if (role == Roles::PosX || role == Roles::PosY)
+            if (role == Constants::Roles::PosX || role == Constants::Roles::PosY)
             {
                 bool res = QIdentityProxyModel::setData(index, value, role);
 
@@ -32,7 +32,7 @@ namespace Pipeline
 
         QVariant NodeGraphViewModel::data(const QModelIndex &proxyIndex, int role) const
         {
-            if (role == Roles::DataIndex)
+            if (role == Constants::Roles::DataIndex)
             {
                 return proxyIndex;
             }
@@ -67,9 +67,9 @@ namespace Pipeline
                         }
 
                         auto portCenter = m_uiManager->portSize() / 2;
-                        auto portIndex = proxyIndex.data(Roles::OutPortIndex).toModelIndex();
-                        auto relatedNodeIndex = portIndex.data(Roles::RelatedNode).toModelIndex();
-                        auto nodeX = relatedNodeIndex.data(Roles::PosX).toInt();
+                        auto portIndex = proxyIndex.data(Constants::Roles::OutPortIndex).toModelIndex();
+                        auto relatedNodeIndex = portIndex.data(Constants::Roles::RelatedNode).toModelIndex();
+                        auto nodeX = relatedNodeIndex.data(Constants::Roles::PosX).toInt();
                         auto portPos = m_uiManager->portPosition(portIndex);
                         return nodeX + portPos.x() + portCenter.width();
                     }
