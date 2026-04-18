@@ -24,6 +24,7 @@ GridLayout {
             // sadece fillWidth TextEdit için
             Layout.columnSpan: model.columnSpan
             Layout.fillWidth: model.fillWidth
+            property var modelData : model
             sourceComponent: {
                 switch(model.uiType) {
                 case 0: return labelDelegate
@@ -32,7 +33,46 @@ GridLayout {
                 case 3: return checkboxDelegate
                 }
             }
-            property var modelData : model
+
+        }
+    }
+
+    Popup {
+        property var modelData
+        id: popup
+        modal: false
+        focus: true
+        dim: true
+
+        Overlay.modeless: Rectangle {
+            color: "#80000000"   // rgba: alpha=0.5
+        }
+
+        height: 28
+
+        background: Rectangle {
+            radius: 3
+            color: "#505050"
+            border.color: "#656565"
+        }
+
+        contentItem: PTextEdit {
+            id: edit
+            anchors.fill: parent
+            selectByMouse: true
+
+            Keys.onReturnPressed: finish()
+            Keys.onEnterPressed: finish()
+            Keys.onEscapePressed: popup.close()
+
+            function finish() {
+                popup.modelData.value = text
+                popup.close()
+            }
+
+            onFocusChanged: {
+                if (!focus) popup.close()
+            }
         }
     }
 
@@ -58,58 +98,21 @@ GridLayout {
             Label {
                 id: label
                 anchors.fill: parent
-                text: modelData.value + ":"
+                text: ((modelData && modelData.value) || "") + ":"
                 color: "#e0e0e0"
                 verticalAlignment: Text.AlignVCenter
 
                 MouseArea {
                     anchors.fill: parent
                     onDoubleClicked: {
+                        popup.x = label.mapToItem(root, 0, 0).x
+                        popup.y = label.mapToItem(root, 0, 0).y
+                        popup.width = root.maxWidth + 8
+                        popup.modelData = modelData
                         popup.open()
                         edit.text = modelData.value
                         edit.selectAll()
                         edit.forceActiveFocus()
-                    }
-                }
-            }
-
-            Popup {
-                id: popup
-                modal: false
-                focus: true
-                dim: true
-                x: label.mapToItem(null, 0, 0).x
-                y: label.mapToItem(null, 0, 0).y
-
-                Overlay.modeless: Rectangle {
-                    color: "#80000000"   // rgba: alpha=0.5
-                }
-
-                width: root.maxWidth + 8
-                height: 28
-
-                background: Rectangle {
-                    radius: 3
-                    color: "#505050"
-                    border.color: "#656565"
-                }
-
-                contentItem: PTextEdit {
-                    id: edit
-                    anchors.fill: parent
-                    selectByMouse: true
-
-                    Keys.onReturnPressed: finish()
-                    Keys.onEnterPressed: finish()
-                    Keys.onEscapePressed: popup.close()
-
-                    function finish() {
-                        modelData.value = text
-                        popup.close()
-                    }
-
-                    onFocusChanged: {
-                        if (!focus) popup.close()
                     }
                 }
             }
@@ -119,7 +122,7 @@ GridLayout {
     Component {
         id: inputDelegate
         PTextEdit {
-            text: modelData.value
+            text: (modelData && modelData.value) || ""
             Layout.fillWidth: true
             onEditingFinished: {
 
@@ -133,7 +136,7 @@ GridLayout {
         CheckBox {
 
             id: control
-            checked: modelData.value
+            checked: (modelData && modelData.value) || false
             onClicked:
             {
                 if(modelData.value !== checked)
@@ -199,7 +202,7 @@ GridLayout {
             spacing: 4
 
             PButton {
-                text: modelData.value
+                text: (modelData && modelData.value) || ""
                 Layout.fillWidth: true
                 Layout.preferredWidth: 40
                 onClicked: fileDialog.open()

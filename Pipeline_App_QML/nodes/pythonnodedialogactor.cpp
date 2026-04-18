@@ -22,62 +22,79 @@ namespace Pipeline::Runtime
     NodeContextMetadata PythonNodeDialogActor::createMetadata() const
     {
         NodeContextMetadata metadata;
-        metadata.setName(this->m_inputParameterModel->data("Name", ParameterRoles::ValueRole).toString());
-        metadata.setNodeType(NodeTypes::PythonNode);
-
+        metadata.setName(this->m_inputParameterModel->data("Name", Constants::ParameterRoles::ValueRole).toString());
+        metadata.setNodeType(Constants::NodeTypes::PythonNode);
         QJsonArray array;
         {
-            for(int i = 0; i < this->m_inputParameterModel->rowCount(); i++)
+            for (int i = 0; i < this->m_inputParameterModel->rowCount(); i++)
             {
-                auto index = this->m_inputParameterModel->index(i,0);
-                if(index.data(ParameterRoles::NameRole).toString() != "Name")
+                auto index = this->m_inputParameterModel->index(i, 0);
+
+                if (index.data(Constants::ParameterRoles::NameRole).toString() != "Name")
                 {
                     QJsonObject o;
-                    o["name"] = index.data(ParameterRoles::NameRole).toString();
-                    o["value"] = index.data(ParameterRoles::ValueRole).toString();
-                    o["type"] = index.data(ParameterRoles::TypeRole).toInt();
+                    o["name"] = index.data(Constants::ParameterRoles::NameRole).toString();
+                    o["value"] = index.data(Constants::ParameterRoles::ValueRole).toString();
+                    o["type"] = index.data(Constants::ParameterRoles::TypeRole).toInt();
                     array.append(o);
                 }
-
             }
         }
-        metadata.add("parameters",array);
-        QJsonObject input;
+        metadata.add("parameters", array);
+        QJsonArray inputPorts;
         {
             auto root = m_inputDataTable->getRoot();
-            input["row_count"] = m_inputDataTable->rowCount();
-            input["column_count"] = m_inputDataTable->columnCount();
-            const auto & headerList = root->getHeaders();
-            QJsonArray headers;
-            for(auto& pair : headerList)
+
+            for (int inPortIndex = 0; inPortIndex < m_inputDataTable->rowCount(); inPortIndex++)
             {
-                QJsonObject h;
-                h["key"] = pair.first;
-                h["value"] = QString::fromStdString(pair.second);
-                headers.append(h);
+                QJsonObject input;
+                auto inPort = root->getCell(inPortIndex, 0);
+                input["name"] = QString::fromStdString(inPort->getName());
+                input["row_count"] = static_cast<int>(inPort->getRowCount());
+                input["column_count"] = static_cast<int>(inPort->getColumnCount());
+                const auto & headerList = inPort->getHeaders();
+                QJsonArray headers;
+
+                for (auto& pair : headerList)
+                {
+                    QJsonObject h;
+                    h["key"] = pair.first;
+                    h["value"] = QString::fromStdString(pair.second);
+                    headers.append(h);
+                }
+
+                input["header_data"] = headers;
+                inputPorts.append(input);
             }
-            input["header_data"] = headers;
         }
-        metadata.add("input", input);
-
-
-        QJsonObject output;
+        metadata.add("inputPorts", inputPorts);
+        QJsonArray outputPorts;
         {
             auto root = m_outputDataTable->getRoot();
-            output["row_count"] = m_outputDataTable->rowCount();
-            output["column_count"] = m_outputDataTable->columnCount();
-            const auto & headerList = root->getHeaders();
-            QJsonArray headers;
-            for(auto& pair : headerList)
+
+            for (int outPortIndex = 0; outPortIndex < m_outputDataTable->rowCount(); outPortIndex++)
             {
-                QJsonObject h;
-                h["key"] = pair.first;
-                h["value"] = QString::fromStdString(pair.second);
-                headers.append(h);
+                QJsonObject output;
+                auto outPort = root->getCell(outPortIndex, 0);
+                output["name"] = QString::fromStdString(outPort->getName());
+                output["row_count"] = static_cast<int>(outPort->getRowCount());
+                output["column_count"] = static_cast<int>(outPort->getColumnCount());
+                const auto & headerList = outPort->getHeaders();
+                QJsonArray headers;
+
+                for (auto& pair : headerList)
+                {
+                    QJsonObject h;
+                    h["key"] = pair.first;
+                    h["value"] = QString::fromStdString(pair.second);
+                    headers.append(h);
+                }
+
+                output["header_data"] = headers;
+                outputPorts.append(output);
             }
-            output["header_data"] = headers;
         }
-        metadata.add("output", output);
+        metadata.add("outputPorts", outputPorts);
         return metadata;
     }
 
@@ -97,42 +114,33 @@ namespace Pipeline::Runtime
         }
 
         std::vector<uint8_t> data;
-
         auto rootTableData = m_inputDataTable->getRoot();
         auto tableData = rootTableData->serialize();
-
         std::vector<uint8_t> parameter;
         m_inputParameterModel->serialize(parameter);
-
-
         // boyutları ekle
         uint32_t parameterSize = static_cast<uint32_t>(parameter.size());
         uint32_t tableSize = static_cast<uint32_t>(tableData.size());
-
         // data vector içine yaz
         data.insert(data.end(), reinterpret_cast<uint8_t*>(&parameterSize), reinterpret_cast<uint8_t*>(&parameterSize) + sizeof(parameterSize));
         data.insert(data.end(), parameter.begin(), parameter.end());
-
         data.insert(data.end(), reinterpret_cast<uint8_t*>(&tableSize), reinterpret_cast<uint8_t*>(&tableSize) + sizeof(tableSize));
         data.insert(data.end(), tableData.begin(), tableData.end());
-
         QByteArray buffer(
             reinterpret_cast<const char*>(data.data()),
             static_cast<int>(data.size())
         );
-
         process.write(buffer);
         process.closeWriteChannel();
         process.waitForFinished();
         QByteArray outputData = process.readAllStandardOutput();
         auto error = process.readAllStandardError();
-
         int exitCode = process.exitCode();
         auto status = process.exitStatus();
 
         if (status == QProcess::NormalExit && exitCode == 0)
         {
-            m_pythonError += QString(!m_pythonError.isEmpty() ? "\n": "") + "Process is finished successfully.";
+            m_pythonError += QString(!m_pythonError.isEmpty() ? "\n" : "") + "Process is finished successfully.";
             emit this->pythonErrorChanged();
         }
         else
@@ -144,12 +152,13 @@ namespace Pipeline::Runtime
 
         try
         {
-            if(!m_pythonThrowError)
+            if (!m_pythonThrowError)
             {
                 const uint8_t* outputDataU8 = reinterpret_cast<const uint8_t*>(outputData.constData());
                 size_t size = static_cast<size_t>(outputData.size());
-                bool isHierData = HierarchicalTableData::startsWithMagicNumber(outputDataU8,size);
-                if(isHierData)
+                bool isHierData = HierarchicalTableData::startsWithMagicNumber(outputDataU8, size);
+
+                if (isHierData)
                 {
                     auto* outputResult = HierarchicalTableData::deserialize(outputDataU8, size);
                     result = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(std::shared_ptr<HierarchicalTableData>(outputResult));
@@ -214,13 +223,12 @@ namespace Pipeline::Runtime
 
     void PythonNodeDialogActor::onStarted()
     {
-
     }
 
     void PythonNodeDialogActor::onFinished(const QVariant &result)
     {
         // this is main thread we need to set root here beacuse of UI update
-        if(!m_pythonThrowError)
+        if (!m_pythonThrowError)
         {
             auto outputResult = result.value<std::shared_ptr<HierarchicalTableData>>();
             m_outputDataTable->setRoot(outputResult);
@@ -231,7 +239,7 @@ namespace Pipeline::Runtime
     {
     }
 
-    NodeParamListModel *PythonNodeDialogActor::getNodeParameterListModel() const
+    NodeParamListModel* PythonNodeDialogActor::getNodeParameterListModel() const
     {
         return m_inputParameterModel;
     }
@@ -244,7 +252,7 @@ namespace Pipeline::Runtime
         emit nodeParameterListModelChanged();
     }
 
-    BaseActorNodeDispatcher *PythonNodeDialogActor::getActorAction() const
+    BaseActorNodeDispatcher* PythonNodeDialogActor::getActorAction() const
     {
         return getDispatcher();
     }

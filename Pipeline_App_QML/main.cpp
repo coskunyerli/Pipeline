@@ -53,6 +53,14 @@ int main(int argc, char* argv[])
     // reach from qml but not created form qml
     qmlRegisterUncreatableType<Pipeline::Runtime::NodeTableModel>("Pipeline.Models", 1, 0, "NodeTableModel", "NodeTableModel cannot be created from QML");
     qmlRegisterUncreatableType<Pipeline::Runtime::PythonProcessActorNode>("Pipeline.Actors", 1, 0, "PythonProcessActorNode", "PythonProcessActorNode cannot be created from QML");
+
+    qmlRegisterUncreatableMetaObject(
+        Pipeline::Runtime::Constants::staticMetaObject,
+        "Pipeline.Constants", 1, 0,
+        "Roles",
+        "Error: only enums"
+        );
+
     // qmlRegisterSingletonType<Pipeline::Runtime::AppDataService>(
     //     "Pipeline.Services", 1, 0, "AppDataService",
     //     &Pipeline::Runtime::AppDataService::instance

@@ -11,10 +11,9 @@ namespace Pipeline::Runtime
     {
         ActorNode *node = nullptr;
 
-        if (metadata.getNodeType() == NodeTypes::PythonNode)
+        if (metadata.getNodeType() == Constants::NodeTypes::PythonNode)
         {
             node = new PythonProcessActorNode();
-            node->applyNodeContextMetadata(metadata);
             auto *outPort = new UI::MPort(node);
             auto *inPort = new UI::MPort(node);
             auto *inPort2 = new UI::MPort(node);
@@ -24,6 +23,7 @@ namespace Pipeline::Runtime
             node->addPort(inPort, true);
             node->addPort(inPort2, true);
             node->addPort(outPort, false);
+            node->applyNodeContextMetadata(metadata);
         }
 
         return node;

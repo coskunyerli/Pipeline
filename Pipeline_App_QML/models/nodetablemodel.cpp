@@ -21,6 +21,11 @@ namespace Pipeline
         {
             HierarchicalTableData* parentTableData;
 
+            if (!m_rootResult)
+            {
+                return 0;
+            }
+
             if (!parent.isValid())
             {
                 parentTableData = this->m_rootResult.get();
@@ -41,6 +46,11 @@ namespace Pipeline
 
         int NodeTableModel::columnCount(const QModelIndex &parent) const
         {
+            if (!m_rootResult)
+            {
+                return 0;
+            }
+
             HierarchicalTableData* parentTableData;
 
             if (!parent.isValid())
@@ -63,6 +73,11 @@ namespace Pipeline
 
         QModelIndex NodeTableModel::index(int row, int column, const QModelIndex &parent) const
         {
+            if (!m_rootResult)
+            {
+                return QModelIndex();
+            }
+
             HierarchicalTableData* parentTableData = m_rootResult.get();
 
             if (parent.isValid())
@@ -79,6 +94,11 @@ namespace Pipeline
 
         QModelIndex NodeTableModel::parent(const QModelIndex &child) const
         {
+            if (!m_rootResult)
+            {
+                return QModelIndex();
+            }
+
             if (!child.isValid())
                 return QModelIndex();
 
@@ -118,9 +138,9 @@ namespace Pipeline
                 {
                     return QString::fromStdString(this->m_rootResult->getValue());
                 }
-                else if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
+                else if (role >= Constants::NodeTableRoles::HeaderData && role < Constants::NodeTableRoles::HeaderDataEnd)
                 {
-                    int headerDataIndex = role - NodeTableRoles::HeaderData;
+                    int headerDataIndex = role - Constants::NodeTableRoles::HeaderData;
                     return QString::fromStdString(m_rootResult->getHeaderData(headerDataIndex));
                 }
 
@@ -138,12 +158,12 @@ namespace Pipeline
             {
                 return QString::fromStdString(parentTableData->getCellValue(index.row(), index.column()));
             }
-            else if (role == NodeTableRoles::HasTable)
+            else if (role == Constants::NodeTableRoles::HasTable)
             {
                 return static_cast<HierarchicalTableData::ValueType>(parentTableData->getCellValueType(index.row(),
                         index.column()) & HierarchicalTableData::ValueType::Matrix) != HierarchicalTableData::ValueType::None;
             }
-            else if (role == NodeTableRoles::CellName)
+            else if (role == Constants::NodeTableRoles::CellName)
             {
                 auto cell = parentTableData->getCell(index.row(), index.column());
 
@@ -152,20 +172,20 @@ namespace Pipeline
                     return QString::fromStdString(cell->getName());
                 }
 
-                auto keyString = QString("(") + QString::number(index.row()) + ", " + this->data(index.parent(), NodeTableRoles::HeaderData + index.column()).toString() + ")";
+                auto keyString = QString("(") + QString::number(index.row()) + ", " + this->data(index.parent(), Constants::NodeTableRoles::HeaderData + index.column()).toString() + ")";
                 return keyString;
             }
-            else if (role == NodeTableRoles::ChildCell)
+            else if (role == Constants::NodeTableRoles::ChildCell)
             {
                 auto cell = parentTableData->getCell(index.row(), index.column());
                 QVariant v = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(cell);
                 return v;
             }
 
-            else if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
+            else if (role >= Constants::NodeTableRoles::HeaderData && role < Constants::NodeTableRoles::HeaderDataEnd)
             {
                 auto cell = parentTableData->getCell(index.row(), index.column());
-                int headerDataIndex = role - NodeTableRoles::HeaderData;
+                int headerDataIndex = role - Constants::NodeTableRoles::HeaderData;
                 return QString::fromStdString(cell->getHeaderData(headerDataIndex));
             }
             return {};
@@ -184,7 +204,7 @@ namespace Pipeline
                 {
                     case Qt::DisplayRole:
                         {
-                            return this->setData(QModelIndex(), value, NodeTableRoles::HeaderData + section);;
+                            return this->setData(QModelIndex(), value, Constants::NodeTableRoles::HeaderData + section);;
                         }
                 }
             }
@@ -194,6 +214,11 @@ namespace Pipeline
 
         bool NodeTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
         {
+            if (!m_rootResult)
+            {
+                return false;
+            }
+
             if (role == Qt::EditRole)
             {
                 role = Qt::DisplayRole;
@@ -210,24 +235,76 @@ namespace Pipeline
                             return true;
                         }
 
-                    case NodeTableRoles::Rows:
+                    case Constants::NodeTableRoles::Rows:
                         {
+                            int newRow = value.toInt();
+                            int oldRowCount =  this->rowCount();
+                            if(newRow == oldRowCount)
+                            {
+                                return false;
+                            }
+
+                            if (newRow < oldRowCount)
+                            {
+                                this->beginRemoveRows(QModelIndex(), newRow, oldRowCount - 1);
+                            }
+                            else if (newRow > oldRowCount)
+                            {
+                                this->beginInsertRows(QModelIndex(), oldRowCount, oldRowCount);
+                            }
+
                             m_rootResult->setSize(value.toInt(), m_rootResult->getColumnCount());
                             emit dataChanged(index, index, {role});
+
+                            if (newRow < oldRowCount)
+                            {
+                                this->endRemoveRows();
+                            }
+                            else if (newRow > oldRowCount)
+                            {
+                                this->endInsertRows();
+                            }
+
                             return true;
                         }
 
-                    case NodeTableRoles::Columns:
+                    case Constants::NodeTableRoles::Columns:
                         {
+                            int newColumn = value.toInt();
+                            int oldColumnCount =  this->rowCount();
+                            if(newColumn == oldColumnCount)
+                            {
+                                return false;
+                            }
+
+                            if (newColumn < oldColumnCount)
+                            {
+                                this->beginRemoveColumns(QModelIndex(), newColumn, oldColumnCount - 1);
+                            }
+                            else if (newColumn > oldColumnCount)
+                            {
+                                this->beginInsertColumns(QModelIndex(), oldColumnCount, oldColumnCount);
+                            }
+
                             m_rootResult->setSize(m_rootResult->getRowCount(), value.toInt());
                             emit dataChanged(index, index, {role});
+
+                            if (newColumn < oldColumnCount)
+                            {
+                                this->endRemoveColumns();
+                            }
+                            else if (newColumn > oldColumnCount)
+                            {
+                                this->endInsertColumns();
+                            }
+
                             return true;
                         }
                 }
 
-                if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
+                if (role >= Constants::NodeTableRoles::HeaderData && role < Constants::NodeTableRoles::HeaderDataEnd)
                 {
-                    int headerDataIndex = role - NodeTableRoles::HeaderData;
+                    int headerDataIndex = role - Constants::NodeTableRoles::HeaderData;
                     m_rootResult->setHeaderData(headerDataIndex, value.toString().toStdString());
                     emit this->headerDataChanged(Qt::Horizontal, headerDataIndex, headerDataIndex + 1);
                     return true;
@@ -252,14 +329,14 @@ namespace Pipeline
                         return true;
                     }
 
-                case NodeTableRoles::ChildCell:
+                case Constants::NodeTableRoles::ChildCell:
                     {
                         parentTableData->setCell(index.row(), index.column(), value.value<std::shared_ptr<HierarchicalTableData>>());
                         emit dataChanged(index, index, {role});
                         return true;
                     }
 
-                case NodeTableRoles::CellName:
+                case Constants::NodeTableRoles::CellName:
                     {
                         auto cell = parentTableData->getCell(index.row(), index.column());
                         if(cell)
@@ -269,7 +346,7 @@ namespace Pipeline
                             return true;
                         }
                     }
-                case NodeTableRoles::Rows:
+                case Constants::NodeTableRoles::Rows:
                     {
                         auto cell = parentTableData->getCell(index.row(), index.column());
                         if(cell)
@@ -279,7 +356,7 @@ namespace Pipeline
                             return true;
                         }
                     }
-                case NodeTableRoles::Columns:
+                case Constants::NodeTableRoles::Columns:
                     {
                         auto cell = parentTableData->getCell(index.row(), index.column());
                         if(cell)
@@ -293,9 +370,9 @@ namespace Pipeline
                     break;
             }
 
-            if (role >= NodeTableRoles::HeaderData && role < NodeTableRoles::HeaderDataEnd)
+            if (role >= Constants::NodeTableRoles::HeaderData && role < Constants::NodeTableRoles::HeaderDataEnd)
             {
-                int headerDataIndex = role - NodeTableRoles::HeaderData;
+                int headerDataIndex = role - Constants::NodeTableRoles::HeaderData;
                 auto cell = parentTableData->getCell(index.row(), index.column());
 
                 if (!cell)
@@ -312,6 +389,11 @@ namespace Pipeline
 
         QVariant NodeTableModel::headerData(int section, Qt::Orientation orientation, int role) const
         {
+            if (!m_rootResult)
+            {
+                return {};
+            }
+
             if (orientation == Qt::Vertical)
             {
                 return section;
@@ -326,6 +408,11 @@ namespace Pipeline
 
         QModelIndex NodeTableModel::createCell(const QModelIndex &index)
         {
+            if (!m_rootResult)
+            {
+                return QModelIndex();
+            }
+
             if (!index.isValid())
             {
                 return QModelIndex();
@@ -340,15 +427,15 @@ namespace Pipeline
 
             auto child = parentTableData->getOrCreateCell(index.row(), index.column());
             child->setSize(10, 10);
-            emit dataChanged(index, index, {NodeTableRoles::ChildCell, NodeTableRoles::HasTable});
+            emit dataChanged(index, index, {Constants::NodeTableRoles::ChildCell, Constants::NodeTableRoles::HasTable});
             return this->index(index.row(), index.column(), index.parent());
         }
 
         QHash<int, QByteArray> NodeTableModel::roleNames() const
         {
             auto roleNames = QAbstractItemModel::roleNames();
-            roleNames[NodeTableRoles::HasTable] = "hasTable";
-            roleNames[NodeTableRoles::CellName] = "cellName";
+            roleNames[Constants::NodeTableRoles::HasTable] = "hasTable";
+            roleNames[Constants::NodeTableRoles::CellName] = "cellName";
             return roleNames;
         }
 

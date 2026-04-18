@@ -7,6 +7,7 @@ import Pipeline.Actors as PA
 import Pipeline.Services as PS
 import Pipeline.Contexts as PC
 import Pipeline.Models as PM
+import Pipeline.Constants as PC
 
 Window {
     id: detachedDialog
@@ -19,46 +20,44 @@ Window {
     color: "#252525"
 
 
-    // Popup {
-    //     id: popup
-    //     modal: false
-    //     focus: true
-    //     dim: true
-    //     x: label.mapToItem(null, 0, 0).x
-    //     y: label.mapToItem(null, 0, 0).y
+    Popup {
+        property var modelData
+        id: popup
+        modal: false
+        focus: true
+        dim: true
 
-    //     Overlay.modeless: Rectangle {
-    //         color: "#80000000"   // rgba: alpha=0.5
-    //     }
+        Overlay.modeless: Rectangle {
+            color: "#80000000"   // rgba: alpha=0.5
+        }
 
-    //     width: root.maxWidth + 8
-    //     height: 28
+        height: 28
 
-    //     background: Rectangle {
-    //         radius: 3
-    //         color: "#505050"
-    //         border.color: "#656565"
-    //     }
+        background: Rectangle {
+            radius: 3
+            color: "#505050"
+            border.color: "#656565"
+        }
 
-    //     contentItem: PTextEdit {
-    //         id: edit
-    //         anchors.fill: parent
-    //         selectByMouse: true
+        contentItem: PTextEdit {
+            id: edit
+            anchors.fill: parent
+            selectByMouse: true
 
-    //         Keys.onReturnPressed: finish()
-    //         Keys.onEnterPressed: finish()
-    //         Keys.onEscapePressed: popup.close()
+            Keys.onReturnPressed: finish()
+            Keys.onEnterPressed: finish()
+            Keys.onEscapePressed: popup.close()
 
-    //         function finish() {
-    //             modelData.value = text
-    //             popup.close()
-    //         }
+            function finish() {
+                popup.modelData.cellName = text
+                popup.close()
+            }
 
-    //         onFocusChanged: {
-    //             if (!focus) popup.close()
-    //         }
-    //     }
-    // }
+            onFocusChanged: {
+                if (!focus) popup.close()
+            }
+        }
+    }
 
     signal dialogClosed()
     signal accepted(var context)
@@ -75,7 +74,9 @@ Window {
             let indexArr = []
             for(let i = 0; i< model.rowCount();i++)
             {
-                indexArr.push(model.index(i,0));
+
+                let ind = model.index(i,0);
+                indexArr.push(ind);
             }
             return indexArr;
         }
@@ -269,6 +270,25 @@ Window {
 
                                 property bool selected: listView.currentIndex === indexData
 
+                                Image {
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.topMargin: 4
+                                    anchors.rightMargin: 4
+                                    sourceSize: Qt.size(10,10)
+                                    z: 10                 // diğer itemların üstünde
+                                    source: "qrc:/icons/close_24.svg"
+                                    fillMode: Image.PreserveAspectFit
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            console.log(333)
+                                            //rootItem.model.removeNode(rootItem.model.index(index,0))
+                                        }
+                                    }
+                                }
+
                                 Rectangle {
                                     id: background
                                     anchors.fill: parent
@@ -301,6 +321,11 @@ Window {
                                     }
                                     onDoubleClicked:
                                     {
+                                        popup.x = root.mapToItem(detachedDialog.contentItem, 0, 0).x
+                                        popup.y = root.mapToItem(detachedDialog.contentItem, 0, 0).y
+                                        popup.width = listView.width
+                                        popup.height = 34
+                                        popup.modelData = modelData
                                         popup.open()
                                         edit.text = modelData.cellName
                                         edit.selectAll()
@@ -318,9 +343,18 @@ Window {
                             onCurrentIndexChanged:
                             {
                                 portListView.currentPortIndex = indexList[portListView.currentIndex]
+
+                            }
+                            onCountChanged:
+                            {
+                                portListView.indexList = privateObject.createIndexList(dialogInputModel);
                             }
 
-                            model: context.inputModel
+                            model: PM.NodeTableDialogModel
+                            {
+                                id: dialogInputModel
+                                referenceModel: context.inputModel
+                            }
                             delegate: Loader
                             {
                                 sourceComponent:portDelegate
@@ -340,7 +374,11 @@ Window {
                             text: "Add Port"
                             onClicked:
                             {
-
+                                // add new Rows
+                                let newRowCount = portListView.count + 1;
+                                dialogInputModel.setData(dialogInputModel.index(-1,-1), newRowCount , PC.Roles.Rows);
+                                let newIndex = dialogInputModel.index(newRowCount - 1,0);
+                                dialogInputModel.createCell(newIndex);
                             }
                         }
                     }
@@ -354,7 +392,7 @@ Window {
                         WidgetTitleHeader
                         {
                             Layout.fillWidth: true
-                            text:"Input Table"
+                            text: portListView.currentPortIndex.data(PC.Roles.CellName)
                         }
 
                         HierarchicalTableWidget
@@ -366,11 +404,7 @@ Window {
                             {
                                 id: inputSliceProxyModel
                                 currentIndex:portListView.currentPortIndex
-                                sourceModel:PM.NodeTableDialogModel
-                                {
-                                    id: dialogInputModel
-                                    referenceModel: context.inputModel
-                                }
+                                sourceModel:dialogInputModel
                             }
                             onBreadcrumbClicked: (modelIndex) =>
                             {
@@ -381,7 +415,7 @@ Window {
                             onCellDClicked: (row, column) =>
                             {
                                 let modelIndex = dialogInputModel.index(row,column, inputSliceProxyModel.currentIndex);
-                                if(!modelIndex.data(Qt.UserRole + 1))
+                                if(!modelIndex.data(PC.Roles.HasTable))
                                 {
                                     modelIndex = dialogInputModel.createCell(modelIndex);
                                 }
@@ -422,7 +456,15 @@ Window {
                                 outPortListView.currentPortIndex = indexList[outPortListView.currentIndex]
                             }
 
-                            model: context.outputModel
+                            model: PM.NodeTableDialogModel
+                            {
+                                id: dialogOutputModel
+                                referenceModel: context.outputModel
+                                onReferenceModelChanged:
+                                {
+                                    outPortListView.indexList = privateObject.createIndexList(dialogOutputModel);
+                                }
+                            }
                             delegate: Loader
                             {
                                 sourceComponent:portDelegate
@@ -469,11 +511,7 @@ Window {
                             {
                                 id: outputSliceProxyModel
                                 currentIndex:outPortListView.currentPortIndex
-                                sourceModel:PM.NodeTableDialogModel
-                                {
-                                    id: dialogOutputModel
-                                    referenceModel: context.outputModel
-                                }
+                                sourceModel:dialogOutputModel
                             }
                             onBreadcrumbClicked: (modelIndex) =>
                             {
@@ -484,7 +522,7 @@ Window {
                             onCellDClicked: (row, column) =>
                             {
                                 let modelIndex = dialogOutputModel.index(row,column, outputSliceProxyModel.currentIndex);
-                                if(!modelIndex.data(Qt.UserRole + 1))
+                                if(!modelIndex.data(PC.Roles.HasTable))
                                 {
                                     modelIndex = dialogOutputModel.createCell(modelIndex);
                                 }

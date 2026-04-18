@@ -1,4 +1,5 @@
 import QtQuick 2.12
+import QtQuick.Controls
 import Pipeline.Models 1.0 as PM
 Item
 {
@@ -122,6 +123,9 @@ Item
 
                 Port
                 {
+
+                    ToolTip.visible: portMouseArea.containsMouse
+                    ToolTip.delay: 500   // ms
                     id: inPort
                     x:model.portX
                     y:model.portY
@@ -130,6 +134,20 @@ Item
 
                     borderColor: "#00bcd4"
                     color: model.hasConnection || portDropArea.containsDrag ? "#0097a7" : "#404040"
+
+                    MouseArea {
+                        id:portMouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onContainsMouseChanged:
+                        {
+                            if(portMouseArea.containsMouse)
+                            {
+                                inPort.ToolTip.text = model.portName
+                            }
+                        }
+                    }
+
                     DropArea
                     {
                         id:portDropArea
@@ -171,6 +189,9 @@ Item
                 Port
                 {
                     //color: "#f57c00"
+                    ToolTip.visible: outPortMouseArea.containsMouse
+                    ToolTip.text: model.portName || ""
+                    ToolTip.delay: 500   // ms
                     id:outPort
                     x:model.portX
                     y:model.portY
@@ -206,6 +227,15 @@ Item
 
                             connectionPreview.dragActive = drag.active
                         }
+
+                        onContainsMouseChanged:
+                        {
+                            if(outPortMouseArea.containsMouse)
+                            {
+                                outPort.ToolTip.text = model.portName
+                            }
+                        }
+
                     }
                 }
             }

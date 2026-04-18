@@ -9,7 +9,7 @@
 #include <models/nodetabledialogmodel.h>
 #include <models/nodeparamlistdialogmodel.h>
 #include <data/contextmetadata.h>
-
+#include <unordered_set>
 namespace Pipeline
 {
     namespace Runtime
@@ -44,7 +44,7 @@ namespace Pipeline
             m_pythonThrowError = false;
             QVariant result;
             QProcess process;
-            QString filename = this->data(NodeRoles::PythonFileName).toString();
+            QString filename = this->data(Constants::NodeRoles::PythonFileName).toString();
 
             if (filename.isEmpty())
             {
@@ -99,12 +99,12 @@ namespace Pipeline
         QHash<int, QByteArray> PythonProcessActorNode::roleNames() const
         {
             auto roles = ActorNode::roleNames();
-            roles[NodeRoles::PythonFileName] = "pythonFilename";
-            roles[NodeRoles::InputTableModel] = "inputTableModel";
-            roles[NodeRoles::NodeParameterListModel] = "nodeParameterListModel";
-            roles[NodeRoles::OutputTableModel] = "outputTableModel";
-            roles[NodeRoles::PythonError] = "pythonError";
-            roles[NodeRoles::NodeRunningState] = "runningState";
+            roles[Constants::NodeRoles::PythonFileName] = "pythonFilename";
+            roles[Constants::NodeRoles::InputTableModel] = "inputTableModel";
+            roles[Constants::NodeRoles::NodeParameterListModel] = "nodeParameterListModel";
+            roles[Constants::NodeRoles::OutputTableModel] = "outputTableModel";
+            roles[Constants::NodeRoles::PythonError] = "pythonError";
+            roles[Constants::NodeRoles::NodeRunningState] = "runningState";
             return roles;
         }
 
@@ -112,34 +112,34 @@ namespace Pipeline
         {
             bool result = false;
 
-            if (role == NodeRoles::PythonFileName)
+            if (role == Constants::NodeRoles::PythonFileName)
             {
-                this->m_nodeParamListModel->setData("Python File", value.toString(), ParameterRoles::ValueRole);
+                this->m_nodeParamListModel->setData("Python File", value.toString(), Constants::ParameterRoles::ValueRole);
                 result = true;
             }
             else if (role == UI::Roles::Name)
             {
-                this->m_nodeParamListModel->setData("Name", value.toString(), ParameterRoles::ValueRole);
+                this->m_nodeParamListModel->setData("Name", value.toString(), Constants::ParameterRoles::ValueRole);
                 result = true;
             }
-            else if (role == NodeRoles::PythonError)
+            else if (role == Constants::NodeRoles::PythonError)
             {
                 this->m_pythonError = value.toString();
                 result = true;
             }
-            else if (role == NodeRoles::InputTableModel)
+            else if (role == Constants::NodeRoles::InputTableModel)
             {
                 NodeTableModel* model = value.value<NodeTableModel*>();
                 m_inputDataTable = model;
                 result = true;
             }
-            else if (role == NodeRoles::NodeParameterListModel)
+            else if (role == Constants::NodeRoles::NodeParameterListModel)
             {
                 NodeParamListModel* model = value.value<NodeParamListModel*>();
                 m_nodeParamListModel = model;
                 result = true;
             }
-            else if (role == NodeRoles::OutputTableModel)
+            else if (role == Constants::NodeRoles::OutputTableModel)
             {
                 NodeTableModel* model = value.value<NodeTableModel*>();
                 m_outputDataTable = model;
@@ -160,34 +160,34 @@ namespace Pipeline
 
         QVariant PythonProcessActorNode::data(int role) const
         {
-            if (role == NodeRoles::PythonFileName)
+            if (role == Constants::NodeRoles::PythonFileName)
             {
-                return this->m_nodeParamListModel->data("Python File", ParameterRoles::ValueRole).toString();
+                return this->m_nodeParamListModel->data("Python File", Constants::ParameterRoles::ValueRole).toString();
             }
             else if (role == UI::Roles::Name)
             {
-                return this->m_nodeParamListModel->data("Name", ParameterRoles::ValueRole).toString();
+                return this->m_nodeParamListModel->data("Name", Constants::ParameterRoles::ValueRole).toString();
             }
-            else if (role == NodeRoles::PythonError)
+            else if (role == Constants::NodeRoles::PythonError)
             {
                 return m_pythonError;
             }
-            else if (role == NodeRoles::InputTableModel)
+            else if (role == Constants::NodeRoles::InputTableModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_inputDataTable));
                 return v;
             }
-            else if (role == NodeRoles::NodeParameterListModel)
+            else if (role == Constants::NodeRoles::NodeParameterListModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_nodeParamListModel));
                 return v;
             }
-            else if (role == NodeRoles::OutputTableModel)
+            else if (role == Constants::NodeRoles::OutputTableModel)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(m_outputDataTable));
                 return v;
             }
-            else if (role == NodeRoles::NodeRunningState)
+            else if (role == Constants::NodeRoles::NodeRunningState)
             {
                 return this->getState();
             }
@@ -208,10 +208,10 @@ namespace Pipeline
 
                 if (has)
                 {
-                    m_inputDataTable->setData(QModelIndex(), static_cast<int>(this->getInPortCount()), NodeTableRoles::Rows);
-                    m_inputDataTable->setData(QModelIndex(), 1, NodeTableRoles::Columns);
+                    m_inputDataTable->setData(QModelIndex(), static_cast<int>(this->getInPortCount()), Constants::NodeTableRoles::Rows);
+                    m_inputDataTable->setData(QModelIndex(), 1, Constants::NodeTableRoles::Columns);
                     auto childIndex = m_inputDataTable->createCell(m_inputDataTable->index(static_cast<int>(index), 0));
-                    m_inputDataTable->setData(childIndex,QString::fromStdString(port->getName()), NodeTableRoles::CellName);
+                    m_inputDataTable->setData(childIndex, QString::fromStdString(port->getName()), Constants::NodeTableRoles::CellName);
                 }
             }
             else
@@ -220,10 +220,10 @@ namespace Pipeline
 
                 if (has)
                 {
-                    m_outputDataTable->setData(QModelIndex(), static_cast<int>(this->getOutPortCount()), NodeTableRoles::Rows);
-                    m_outputDataTable->setData(QModelIndex(), 1, NodeTableRoles::Columns);
+                    m_outputDataTable->setData(QModelIndex(), static_cast<int>(this->getOutPortCount()), Constants::NodeTableRoles::Rows);
+                    m_outputDataTable->setData(QModelIndex(), 1, Constants::NodeTableRoles::Columns);
                     auto childIndex = m_outputDataTable->createCell(m_outputDataTable->index(static_cast<int>(index), 0));
-                    m_outputDataTable->setData(childIndex,QString::fromStdString(port->getName()), NodeTableRoles::CellName);
+                    m_outputDataTable->setData(childIndex, QString::fromStdString(port->getName()), Constants::NodeTableRoles::CellName);
                 }
             }
 
@@ -234,62 +234,78 @@ namespace Pipeline
         {
             NodeContextMetadata metadata;
             metadata.setName(this->data(UI::Roles::Name).toString());
-            metadata.setNodeType(NodeTypes::PythonNode);
+            metadata.setNodeType(Constants::NodeTypes::PythonNode);
             QJsonArray array;
             {
                 for (int i = 0; i < this->m_nodeParamListModel->rowCount(); i++)
                 {
                     auto index = this->m_nodeParamListModel->index(i, 0);
 
-                    if (index.data(ParameterRoles::NameRole).toString() != "Name")
+                    if (index.data(Constants::ParameterRoles::NameRole).toString() != "Name")
                     {
                         QJsonObject o;
-                        o["name"] = index.data(ParameterRoles::NameRole).toString();
-                        o["value"] = index.data(ParameterRoles::ValueRole).toString();
-                        o["type"] = index.data(ParameterRoles::TypeRole).toInt();
+                        o["name"] = index.data(Constants::ParameterRoles::NameRole).toString();
+                        o["value"] = index.data(Constants::ParameterRoles::ValueRole).toString();
+                        o["type"] = index.data(Constants::ParameterRoles::TypeRole).toInt();
                         array.append(o);
                     }
                 }
             }
             metadata.add("parameters", array);
-            QJsonObject input;
+            QJsonArray inputPorts;
             {
                 auto root = m_inputDataTable->getRoot();
-                input["row_count"] = m_inputDataTable->rowCount();
-                input["column_count"] = m_inputDataTable->columnCount();
-                const auto & headerList = root->getHeaders();
-                QJsonArray headers;
 
-                for (auto& pair : headerList)
+                for (int inPortIndex = 0; inPortIndex < m_inputDataTable->rowCount(); inPortIndex++)
                 {
-                    QJsonObject h;
-                    h["key"] = pair.first;
-                    h["value"] = QString::fromStdString(pair.second);
-                    headers.append(h);
-                }
+                    QJsonObject input;
+                    auto inPort = root->getCell(inPortIndex, 0);
+                    input["name"] = QString::fromStdString(inPort->getName());
+                    input["row_count"] = static_cast<int>(inPort->getRowCount());
+                    input["column_count"] = static_cast<int>(inPort->getColumnCount());
+                    const auto & headerList = inPort->getHeaders();
+                    QJsonArray headers;
 
-                input["header_data"] = headers;
+                    for (auto& pair : headerList)
+                    {
+                        QJsonObject h;
+                        h["key"] = pair.first;
+                        h["value"] = QString::fromStdString(pair.second);
+                        headers.append(h);
+                    }
+
+                    input["header_data"] = headers;
+                    inputPorts.append(input);
+                }
             }
-            metadata.add("input", input);
-            QJsonObject output;
+            metadata.add("inputPorts", inputPorts);
+            QJsonArray outputPorts;
             {
                 auto root = m_outputDataTable->getRoot();
-                output["row_count"] = m_outputDataTable->rowCount();
-                output["column_count"] = m_outputDataTable->columnCount();
-                const auto & headerList = root->getHeaders();
-                QJsonArray headers;
 
-                for (auto& pair : headerList)
+                for (int outPortIndex = 0; outPortIndex < m_outputDataTable->rowCount(); outPortIndex++)
                 {
-                    QJsonObject h;
-                    h["key"] = pair.first;
-                    h["value"] = QString::fromStdString(pair.second);
-                    headers.append(h);
-                }
+                    QJsonObject output;
+                    auto outPort = root->getCell(outPortIndex, 0);
+                    output["name"] = QString::fromStdString(outPort->getName());
+                    output["row_count"] = static_cast<int>(outPort->getRowCount());
+                    output["column_count"] = static_cast<int>(outPort->getColumnCount());
+                    const auto & headerList = outPort->getHeaders();
+                    QJsonArray headers;
 
-                output["header_data"] = headers;
+                    for (auto& pair : headerList)
+                    {
+                        QJsonObject h;
+                        h["key"] = pair.first;
+                        h["value"] = QString::fromStdString(pair.second);
+                        headers.append(h);
+                    }
+
+                    output["header_data"] = headers;
+                    inputPorts.append(output);
+                }
             }
-            metadata.add("output", output);
+            metadata.add("outputPorts", outputPorts);
             return metadata;
         }
 
@@ -307,8 +323,8 @@ namespace Pipeline
         {
             m_nodeParamListModel->clear();
             auto parameters = nodeContextMetadata.getProperty("parameters").toJsonArray();
-            auto input = nodeContextMetadata.getProperty("input").toJsonObject();
-            auto output = nodeContextMetadata.getProperty("output").toJsonObject();
+            auto inputPorts = nodeContextMetadata.getProperty("inputPorts").toJsonArray();
+            auto outputPorts = nodeContextMetadata.getProperty("outputPorts").toJsonArray();
             // add name parameter
             m_nodeParamListModel->addParameter("Name", (int)ParamType::String, nodeContextMetadata.getName());
 
@@ -326,43 +342,101 @@ namespace Pipeline
                 }
             }
 
+            auto inPortRoot = m_inputDataTable->getRoot();
+
+            if (inPortRoot)
             {
-                // apply input
-                auto rowCount = input["row_count"].toInt(0);
-                auto columnCount = input["column_count"].toInt(0);
-                m_inputDataTable->setData(QModelIndex(), rowCount, NodeTableRoles::Rows);
-                m_inputDataTable->setData(QModelIndex(), columnCount, NodeTableRoles::Columns);
-                auto headers = input["header_data"].toArray();
+                inPortRoot->setSize(inputPorts.size(), 1);
 
-                for (auto header : headers)
+                for (int inPortIndex = 0; inPortIndex < inputPorts.size(); inPortIndex++)
                 {
-                    auto headerObj = header.toObject();
 
-                    if (headerObj.contains("key") && headerObj.contains("value"))
+
+                    auto inputValue = inputPorts.at(inPortIndex);
+
+                    if (!inputValue.isObject())
                     {
-                        m_inputDataTable->setHeaderData(headerObj["key"].toInt(), Qt::Horizontal, headerObj["value"].toString());
+                        continue;
+                    }
+
+                    auto inPortChildCell = inPortRoot->getOrCreateCell(inPortIndex, 0);
+
+                    auto cellVariant = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(inPortChildCell);
+                    auto index = m_inputDataTable->index(inPortIndex, 0);
+                    auto input = inputValue.toObject();
+                    // apply input
+                    inPortChildCell->setName(input["name"].toString().toStdString());
+                    auto rowCount = input["row_count"].toInt(0);
+                    auto columnCount = input["column_count"].toInt(0);
+                    m_inputDataTable->setData(index, cellVariant, Constants::NodeTableRoles::ChildCell);
+                    m_inputDataTable->setData(index, rowCount, Constants::NodeTableRoles::Rows);
+                    m_inputDataTable->setData(index, columnCount, Constants::NodeTableRoles::Columns);
+                    auto headers = input["header_data"].toArray();
+
+                    auto* inPort = this->getInPort(inPortIndex);
+                    if(inPort)
+                    {
+                        inPort->setName(input["name"].toString().toStdString());
+                    }
+
+                    for (auto header : headers)
+                    {
+                        auto headerObj = header.toObject();
+
+                        if (headerObj.contains("key") && headerObj.contains("value"))
+                        {
+                            m_inputDataTable->setData(index, headerObj["value"].toString(), Constants::NodeTableRoles::HeaderData + headerObj["key"].toInt());
+                        }
                     }
                 }
             }
 
+            auto outPortRoot = m_outputDataTable->getRoot();
+
+            if (outPortRoot)
             {
-                // apply output
-                auto rowCount = output["row_count"].toInt(0);
-                auto columnCount = output["column_count"].toInt(0);
-                m_outputDataTable->setData(QModelIndex(), rowCount, NodeTableRoles::Rows);
-                m_outputDataTable->setData(QModelIndex(), columnCount, NodeTableRoles::Columns);
-                auto headers = output["header_data"].toArray();
+                outPortRoot->setSize(outputPorts.size(), 1);
 
-                for (auto header : headers)
+                for(int outPortIndex = 0; outPortIndex < outputPorts.size(); outPortIndex++)
                 {
-                    auto headerObj = header.toObject();
-
-                    if (headerObj.contains("key") && headerObj.contains("value"))
+                    auto outputValue = outputPorts.at(outPortIndex);
+                    if(!outputValue.isObject())
                     {
-                        m_outputDataTable->setHeaderData(headerObj["key"].toInt(), Qt::Horizontal, headerObj["value"].toString());
+                        continue;
+                    }
+
+                    auto outPortChildCell = outPortRoot->getOrCreateCell(outPortIndex, 0);
+                    auto cellVariant = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(outPortChildCell);
+                    auto index = m_outputDataTable->index(outPortIndex, 0);
+                    auto output = outputValue.toObject();
+                    // apply output
+                    auto rowCount = output["row_count"].toInt(0);
+                    auto columnCount = output["column_count"].toInt(0);
+                    outPortChildCell->setName(output["name"].toString().toStdString());
+                    m_outputDataTable->setData(index, cellVariant, Constants::NodeTableRoles::ChildCell);
+                    m_outputDataTable->setData(index, rowCount, Constants::NodeTableRoles::Rows);
+                    m_outputDataTable->setData(index, columnCount, Constants::NodeTableRoles::Columns);
+                    auto headers = output["header_data"].toArray();
+
+                    auto* outPort = this->getOutPort(outPortIndex);
+                    if(outPort)
+                    {
+                        outPort->setName(output["name"].toString().toStdString());
+                    }
+
+
+                    for (auto header : headers)
+                    {
+                        auto headerObj = header.toObject();
+
+                        if (headerObj.contains("key") && headerObj.contains("value"))
+                        {
+                            m_outputDataTable->setData(index, headerObj["value"].toString(), Constants::NodeTableRoles::HeaderData + headerObj["key"].toInt());
+                        }
                     }
                 }
             }
+
         }
 
         void PythonProcessActorNode::saveContext(BaseDataContext *dataContext)
@@ -375,9 +449,25 @@ namespace Pipeline
             }
 
             this->m_pythonError = pythonContext->getPythonError();
+            std::unordered_set<int> roles = {UI::Roles::Name, Constants::NodeRoles::PythonFileName, Constants::NodeRoles::PythonFileName, Constants::NodeRoles:: InputTableModel,
+                                             Constants::NodeRoles::NodeParameterListModel,
+                                             Constants::NodeRoles::OutputTableModel
+                                            };
 
             if (auto *inputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getInputDataTable()))
             {
+                for (size_t portIndex = 0; portIndex < this->getInPortCount(); portIndex++)
+                {
+                    auto *port = this->getInPort(portIndex);
+                    auto refIndex = inputDialogModel->referenceModel()->index(static_cast<int>(portIndex), 0);
+                    auto dilogIndex = inputDialogModel->index(static_cast<int>(portIndex), 0);
+
+                    if (refIndex.data(Constants::NodeTableRoles::CellName) != dilogIndex.data(Constants::NodeTableRoles::CellName))
+                    {
+                        port->setName(dilogIndex.data(Constants::NodeTableRoles::CellName).toString().toStdString());
+                    }
+                }
+
                 inputDialogModel->saveData();
             }
 
@@ -388,12 +478,22 @@ namespace Pipeline
 
             if (auto *outputDialogModel = dynamic_cast<NodeTableDialogModel*>(pythonContext->getOutputDataTable()))
             {
+                for (size_t portIndex = 0; portIndex < this->getInPortCount(); portIndex++)
+                {
+                    auto *port = this->getOutPort(portIndex);
+                    auto refIndex = outputDialogModel->referenceModel()->index(static_cast<int>(portIndex), 0);
+                    auto dilogIndex = outputDialogModel->index(static_cast<int>(portIndex), 0);
+
+                    if (refIndex.data(Constants::NodeTableRoles::CellName) != dilogIndex.data(Constants::NodeTableRoles::CellName))
+                    {
+                        port->setName(dilogIndex.data(Constants::NodeTableRoles::CellName).toString().toStdString());
+                    }
+                }
+
                 outputDialogModel->saveData();
             }
 
-            notifyChanged({UI::Roles::Name, NodeRoles::PythonFileName, NodeRoles::PythonFileName, NodeRoles:: InputTableModel,
-                           NodeRoles::NodeParameterListModel,
-                           NodeRoles::OutputTableModel,});
+            notifyChanged({roles.begin(), roles.end()});
         }
 
         void PythonProcessActorNode::onStarted()
@@ -417,7 +517,7 @@ namespace Pipeline
             {
                 auto outputResult = result.value<std::shared_ptr<HierarchicalTableData>>();
                 m_outputDataTable->setRoot(outputResult);
-                notifyChanged({NodeRoles::NodeRunningState});
+                notifyChanged({Constants::NodeRoles::NodeRunningState});
             }
         }
 
@@ -436,7 +536,8 @@ namespace Pipeline
 
             bool has;
             size_t outputIndex = outPort->getOwnerNode()->findOutPortIndex(outPort, has);
-            if(!has)
+
+            if (!has)
             {
                 return;
             }
@@ -448,25 +549,27 @@ namespace Pipeline
 
                 if (dependentNode)
                 {
-                    auto outputTable = dependentNode->data(NodeRoles::OutputTableModel).value<NodeTableModel*>();
+                    auto outputTable = dependentNode->data(Constants::NodeRoles::OutputTableModel).value<NodeTableModel*>();
 
                     if (outputTable)
                     {
-                        QVariant v = outputTable->data(outputTable->index(static_cast<int>(outputIndex),0), NodeTableRoles::ChildCell);
+                        QVariant v = outputTable->data(outputTable->index(static_cast<int>(outputIndex), 0), Constants::NodeTableRoles::ChildCell);
                         dependentDataList.append(v);
                     }
                 }
             }
 
             size_t portIndex = this->findInPortIndex(inPort, has);
-            if(has)
+
+            if (has)
             {
                 auto inputData = this->createInputDataFromContext(dependentDataList);
                 inputData->setName(inPort->getName());
+
                 if (inputData)
                 {
                     QVariant data = QVariant::fromValue<std::shared_ptr<HierarchicalTableData>>(inputData);
-                    this->m_inputDataTable->setData(this->m_inputDataTable->index(static_cast<int>(portIndex), 0), data, NodeTableRoles::ChildCell);
+                    this->m_inputDataTable->setData(this->m_inputDataTable->index(static_cast<int>(portIndex), 0), data, Constants::NodeTableRoles::ChildCell);
                 }
             }
         }

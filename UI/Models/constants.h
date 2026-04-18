@@ -41,6 +41,7 @@ namespace Pipeline
             OutRelatedPort,
             OutRelatedNode,
             // Port Rules
+            PortName,
             RelatedNode,
             ConnectionCount,
             HasConnection,

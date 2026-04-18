@@ -14,6 +14,7 @@ namespace Pipeline::Runtime
     NodeTableDialogModel::NodeTableDialogModel(QObject *parent)
         : NodeTableModel(parent)
     {
+        this->setRoot(nullptr);
     }
 
     void NodeTableDialogModel::setReferenceModel(NodeTableModel *referenceModel)

@@ -323,7 +323,7 @@ Window {
                             text: "Add Node"
                             onTriggered:
                             {
-                                //addNode(graphicsView.mapToScene(mouseArea.pos.x,mouseArea.pos.y));
+                                addNode("Test", graphicsView.mapToScene(mouseArea.pos.x,mouseArea.pos.y));
                             }
 
                         }

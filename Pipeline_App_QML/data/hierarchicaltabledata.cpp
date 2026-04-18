@@ -182,9 +182,9 @@ namespace Pipeline
 
         std::shared_ptr<HierarchicalTableData> HierarchicalTableData::getCellByName(const std::string &name) const
         {
-            for(auto& [key,cell] : m_tables)
+            for (auto& [key, cell] : m_tables)
             {
-                if(cell->getName() == name)
+                if (cell->getName() == name)
                 {
                     return cell;
                 }
@@ -303,7 +303,7 @@ namespace Pipeline
             return deserialize(buffer.data(), buffer.size());
         }
 
-        bool HierarchicalTableData::startsWithMagicNumber(const uint8_t *data, size_t size)
+        bool HierarchicalTableData::startsWithMagicNumber(const uint8_t* data, size_t size)
         {
             try
             {
@@ -312,9 +312,10 @@ namespace Pipeline
 
                 if (magic != 0x504E5231)
                     return false;
+
                 return true;
             }
-            catch(std::runtime_error &)
+            catch (std::runtime_error&)
             {
                 return false;
             }
@@ -417,7 +418,7 @@ namespace Pipeline
             auto* node = new HierarchicalTableData(parent);
             uint64_t rows = SerializeHelper::readU64(data, size, offset);
             uint64_t cols = SerializeHelper::readU64(data, size, offset);
-            std::string name = SerializeHelper::readString(data,size,offset);
+            std::string name = SerializeHelper::readString(data, size, offset);
             bool hasParent = SerializeHelper::readU8(data, size, offset);
             node->setName(name);
             if(!hasParent)
@@ -464,6 +465,11 @@ namespace Pipeline
 
         void HierarchicalTableData::setCell(size_t row, size_t column, std::shared_ptr<HierarchicalTableData> child)
         {
+            if (row >= this->getRowCount() || column >= this->getColumnCount())
+            {
+                return;
+            }
+
             CellKey key = {row, column};
             auto it = m_tables.find(key);
 
@@ -480,6 +486,11 @@ namespace Pipeline
 
         void HierarchicalTableData::setCell(size_t index,  std::shared_ptr<HierarchicalTableData> child)
         {
+            if (index >= this->getChildCount())
+            {
+                return;
+            }
+
             auto pair = this->mapToCellIndex(index);
             this->setCell(pair.first, pair.second, child);
         }

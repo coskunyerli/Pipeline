@@ -93,25 +93,7 @@ namespace Pipeline
 
             m_parameterModel = newParameterModel;
             beginResetModel();
-            m_items.clear();
-            m_maxColumns = 0;
-            const int rowCount = newParameterModel->rowCount();
-
-            // 1️⃣ maxColumns hesapla
-            for (int i = 0; i < rowCount; ++i)
-            {
-                int type = newParameterModel->data(newParameterModel->index(i, 0), ParameterRoles::TypeRole).toInt();
-                int columnsNeeded = (type == static_cast<int>(ParamType::Browse)) ? 3 : 2;
-
-                if (columnsNeeded > m_maxColumns) m_maxColumns = columnsNeeded;
-            }
-
-            // 2️⃣ Her parametreyi UIItem’e dönüştür
-            for (int i = 0; i < rowCount; ++i)
-            {
-                addRowToUI(i);
-            }
-
+            this->updateAllData();
             endResetModel();
             emit maxColumnsChanged();
             emit this->parameterModelChanged();
@@ -121,8 +103,7 @@ namespace Pipeline
                 Q_UNUSED(parent)
                 beginResetModel();
 
-                for (int row = first; row <= last; ++row)
-                    addRowToUI(row);
+                this->updateAllData();
 
                 endResetModel();
                 emit maxColumnsChanged();
@@ -157,10 +138,10 @@ namespace Pipeline
         void NodeParamUIListModel::addRowToUI(int row)
         {
             QModelIndex idx = m_parameterModel->index(row, 0);
-            ParamType type = static_cast<ParamType>(m_parameterModel->data(idx, ParameterRoles::TypeRole).toInt());
+            ParamType type = static_cast<ParamType>(m_parameterModel->data(idx, Constants::ParameterRoles::TypeRole).toInt());
             int textColumnSpan = m_maxColumns - 1;
             // Label
-            m_items.push_back({{}, ParamUIType::Label, row, false, 1, ParameterRoles::NameRole});
+            m_items.push_back({{}, ParamUIType::Label, row, false, 1, Constants::ParameterRoles::NameRole});
 
             switch (type)
             {
@@ -177,21 +158,48 @@ namespace Pipeline
                 case ParamType::String:
                 case ParamType::Float:
                 case ParamType::Int:
-                    m_items.push_back({{}, ParamUIType::Input, row, true, textColumnSpan,  ParameterRoles::ValueRole});
+                    m_items.push_back({{}, ParamUIType::Input, row, true, textColumnSpan,  Constants::ParameterRoles::ValueRole});
                     break;
 
                 case ParamType::Bool:
-                    m_items.push_back({{}, ParamUIType::CheckBox, row, false, textColumnSpan, ParameterRoles::ValueRole});
+                    m_items.push_back({{}, ParamUIType::CheckBox, row, false, textColumnSpan, Constants::ParameterRoles::ValueRole});
                     break;
 
                 case ParamType::Browse:
-                    m_items.push_back({{}, ParamUIType::Input, row, true, textColumnSpan, ParameterRoles::ValueRole});
+                    m_items.push_back({{}, ParamUIType::Input, row, true, textColumnSpan, Constants::ParameterRoles::ValueRole});
                     m_items.push_back({"...", ParamUIType::Button, row, false, 1, 0});
                     break;
 
                 default:
                     break;
             }
+        }
+
+        void NodeParamUIListModel::updateAllData()
+        {
+            m_items.clear();
+            m_maxColumns = 0;
+            if(!m_parameterModel)
+            {
+                return;
+            }
+
+            const int rowCount = m_parameterModel->rowCount();
+
+            for (int i = 0; i < rowCount; ++i)
+            {
+                int type = m_parameterModel->data(m_parameterModel->index(i, 0), Constants::ParameterRoles::TypeRole).toInt();
+                int columnsNeeded = (type == static_cast<int>(ParamType::Browse)) ? 3 : 2;
+
+                if (columnsNeeded > m_maxColumns) m_maxColumns = columnsNeeded;
+            }
+
+            // 2️⃣ Her parametreyi UIItem’e dönüştür
+            for (int i = 0; i < rowCount; ++i)
+            {
+                addRowToUI(i);
+            }
+
         }
 
     }

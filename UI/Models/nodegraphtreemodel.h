@@ -101,6 +101,11 @@ namespace Pipeline
         class MPort : public ModelItemInterface, public Core::Port
         {
             public:
+                explicit MPort()
+                    : ModelItemInterface(DataType::Port)
+                    , Core::Port(nullptr)
+                {
+                }
                 explicit MPort(Core::Node* node)
                     : ModelItemInterface(DataType::Port)
                     , Core::Port(node)
@@ -108,6 +113,18 @@ namespace Pipeline
                 }
                 virtual ~MPort()
                 {
+                }
+
+                virtual QHash<int, QByteArray> roleNames() const
+                {
+                    return
+                    {
+                        {Roles::PortName, "portName"},
+                        {Roles::RelatedNode, "portRelatedNode"},
+                        {Roles::ConnectionCount, "portConnectionCount"},
+                        {Roles::HasConnection, "portHasConnection"},
+                        {Roles::PortIsIn, "portIsIn"},
+                    };
                 }
 
                 Core::Connection* connect(Port *other) override;

@@ -18,10 +18,10 @@ namespace Pipeline
 
             auto nodeMetadata = m_quickNodeModel->getNodeContext(quickNodeName);
 
-            if (!nodeMetadata.isValid())
-            {
-                return false;
-            }
+            // if (!nodeMetadata.isValid())
+            // {
+            //     return false;
+            // }
 
             auto *node = NodeFactory::create(nodeMetadata);
             if(!node)
@@ -78,6 +78,7 @@ namespace Pipeline
             if (m_model)
             {
                 m_model->registerNodeType<PythonProcessActorNode>();
+                m_model->registerNodeType<UI::MPort>();
                 connect(m_model, &QAbstractItemModel::rowsInserted, this, &GraphModelService::onRowsInserted);
                 // connect(sourceModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, &ConnectionGraphViewModel::onRowsAboutToBeRemoved);
                 // connect(sourceModel, &QAbstractItemModel::rowsAboutToBeInserted, this, &ConnectionGraphViewModel::onRowsAboutToBeInserted);

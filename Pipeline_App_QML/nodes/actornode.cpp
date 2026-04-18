@@ -69,13 +69,13 @@ namespace Pipeline
         QHash<int, QByteArray> ActorNode::roleNames() const
         {
             auto roles = UI::MNode::roleNames();
-            roles[NodeRoles::ActorAction] = "actorAction";
+            roles[Constants::NodeRoles::ActorAction] = "actorAction";
             return roles;
         }
 
         QVariant ActorNode::data(int role) const
         {
-            if (role == NodeRoles::ActorAction)
+            if (role == Constants::NodeRoles::ActorAction)
             {
                 QVariant v = QVariant::fromValue(static_cast<QObject*>(this->getDispatcher()));
                 return v;

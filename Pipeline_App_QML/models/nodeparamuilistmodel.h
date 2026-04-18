@@ -54,6 +54,7 @@ namespace Pipeline::Runtime
             void maxColumnsChanged();
         private:
             void addRowToUI(int row);
+            void updateAllData();
         private:
             std::vector<UIItem> m_items;
             NodeParamListModel* m_parameterModel = nullptr;

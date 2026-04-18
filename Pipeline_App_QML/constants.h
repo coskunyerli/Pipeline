@@ -5,50 +5,59 @@ namespace Pipeline
 {
     namespace Runtime
     {
-        enum NodeTypes
+        namespace Constants
         {
-            PythonNode = 0,
-        };
-        enum NodeModelRoles
-        {
-            NodeNameRole,
-            NodeShortNameRole,
-            NodeDescriptionRole,
-            NodeTypeRole,
-        };
+            Q_NAMESPACE
+            enum NodeTypes
+            {
+                PythonNode = 0,
+            };
+            enum NodeModelRoles
+            {
+                NodeNameRole,
+                NodeShortNameRole,
+                NodeDescriptionRole,
+                NodeTypeRole,
+            };
+            Q_ENUM_NS(NodeModelRoles)
 
-        enum NodeRoles
-        {
-            PythonFileName = UI::Roles::PortConnectionIndexEnd + 100,
-            PythonScript,
-            PythonError,
-            ActorAction,
-            InputTableModel,
-            NodeParameterListModel,
-            OutputTableModel,
-            NodeRunningState,
-        };
+            enum NodeRoles
+            {
+                PythonFileName = UI::Roles::PortConnectionIndexEnd + 100,
+                PythonScript,
+                PythonError,
+                ActorAction,
+                InputTableModel,
+                NodeParameterListModel,
+                OutputTableModel,
+                NodeRunningState,
+            };
+            Q_ENUM_NS(NodeRoles)
 
-        enum NodeTableRoles
-        {
-            HasTable = Qt::UserRole + 1,
-            ChildCell,
-            CellName,
-            Rows,
-            Columns,
-            HeaderData = Qt::UserRole + 1000,
-            HeaderDataEnd = HeaderData + 1000,
-        };
-        // --------------------
-        // Roles
-        // --------------------
-        enum ParameterRoles
-        {
-            NameRole = Qt::UserRole + 1,
-            TypeRole,
-            ValueRole,
-            TypeStringRole,
-            IsBrowseRole
-        };
+            enum NodeTableRoles
+            {
+                HasTable = Qt::UserRole + 1,
+                ChildCell,
+                CellName,
+                Rows,
+                Columns,
+                HeaderData = Qt::UserRole + 1000,
+                HeaderDataEnd = HeaderData + 1000,
+            };
+            Q_ENUM_NS(NodeTableRoles)
+            // --------------------
+            // Roles
+            // --------------------
+            enum ParameterRoles
+            {
+                NameRole = Qt::UserRole + 1,
+                TypeRole,
+                ValueRole,
+                TypeStringRole,
+                IsBrowseRole
+            };
+            Q_ENUM_NS(ParameterRoles)
+        }
+
     }
 }

@@ -270,7 +270,7 @@ namespace Pipeline
 
                             break;
                         }
-
+                    case Roles::PortName:
                     case Roles::RelatedNode:
                     case Roles::ConnectionCount:
                     case Roles::PortIsIn:
@@ -296,6 +296,11 @@ namespace Pipeline
                                     case Roles::PortIsIn:
                                         {
                                             return index.parent().column() == ColumnNames::InPortColumn ? true : false;
+                                        }
+
+                                    case Roles::PortName:
+                                        {
+                                            return QString::fromStdString(port->getName());
                                         }
 
                                     case Roles::HasConnection:
@@ -565,18 +570,17 @@ namespace Pipeline
             this->beginInsertRows(outPortIndex, outPortIndex.data(Roles::ConnectionCount).toInt(), outPortIndex.data(Roles::ConnectionCount).toInt());
             outPort->connect(inPort);
             this->endInsertRows();
-
             auto inPortRelatedNode = inPortIndex.data(Roles::RelatedNode).toModelIndex();
             auto outPortRelatedNode = outPortIndex.data(Roles::RelatedNode).toModelIndex();
-
             auto* inPortNode = getData<MNode>(inPortRelatedNode);
             auto* outPortNode = getData<MNode>(outPortRelatedNode);
-            if(inPortNode)
+
+            if (inPortNode)
             {
                 inPortNode->inConnectionChanged(inPort, outPort);
             }
 
-            if(outPortNode)
+            if (outPortNode)
             {
                 outPortNode->outConnectionChanged(outPort, inPort);
             }

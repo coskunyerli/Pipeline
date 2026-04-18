@@ -25,16 +25,16 @@ namespace Pipeline::Runtime
 
         switch (role)
         {
-            case NodeModelRoles::NodeNameRole:
+            case Constants::NodeModelRoles::NodeNameRole:
                 return modelItem.getMetadata().getName();
 
-            case NodeModelRoles::NodeShortNameRole:
+            case Constants::NodeModelRoles::NodeShortNameRole:
                 return modelItem.getMetadata().getName().left(2);
 
-            case NodeModelRoles::NodeDescriptionRole:
+            case Constants::NodeModelRoles::NodeDescriptionRole:
                 return modelItem.getDescription();
 
-            case NodeModelRoles::NodeTypeRole:
+            case Constants::NodeModelRoles::NodeTypeRole:
                 return modelItem.getMetadata().getNodeType();
 
             default:
@@ -92,10 +92,10 @@ namespace Pipeline::Runtime
     {
         return
         {
-            {NodeModelRoles::NodeNameRole, "name"},
-            {NodeModelRoles::NodeShortNameRole, "shortName"},
-            {NodeModelRoles::NodeDescriptionRole, "description"},
-            {NodeModelRoles::NodeTypeRole, "type"},
+            {Constants::NodeModelRoles::NodeNameRole, "name"},
+            {Constants::NodeModelRoles::NodeShortNameRole, "shortName"},
+            {Constants::NodeModelRoles::NodeDescriptionRole, "description"},
+            {Constants::NodeModelRoles::NodeTypeRole, "type"},
         };
     }
 

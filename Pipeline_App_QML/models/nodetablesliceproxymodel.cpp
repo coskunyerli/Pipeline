@@ -131,7 +131,7 @@ namespace Pipeline::Runtime
 
         if (orientation == Qt::Horizontal)
         {
-            return this->sourceModel()->data(this->m_currentIndex, NodeTableRoles::HeaderData + section).toString();
+            return this->sourceModel()->data(this->m_currentIndex, Constants::NodeTableRoles::HeaderData + section).toString();
         }
         else
         {
@@ -146,7 +146,7 @@ namespace Pipeline::Runtime
 
         if (orientation == Qt::Horizontal)
         {
-            return this->sourceModel()->setData(this->m_currentIndex, value, NodeTableRoles::HeaderData + section);
+            return this->sourceModel()->setData(this->m_currentIndex, value, Constants::NodeTableRoles::HeaderData + section);
         }
         else
         {
@@ -208,12 +208,17 @@ namespace Pipeline::Runtime
             return;
         }
 
-        this->sourceModel()->setData(m_currentIndex, newRows, NodeTableRoles::Rows);
+        this->sourceModel()->setData(m_currentIndex, newRows, Constants::NodeTableRoles::Rows);
         emit rowsChanged();
     }
 
     size_t NodeTableSliceProxyModel::columns() const
     {
+        if(!sourceModel())
+        {
+            return 0;
+        }
+
         return this->sourceModel()->columnCount(m_currentIndex);
     }
 
@@ -224,7 +229,7 @@ namespace Pipeline::Runtime
             return;
         }
 
-        this->sourceModel()->setData(m_currentIndex, newColumns, NodeTableRoles::Columns);
+        this->sourceModel()->setData(m_currentIndex, newColumns, Constants::NodeTableRoles::Columns);
         emit columnsChanged();
     }
 
@@ -238,14 +243,14 @@ namespace Pipeline::Runtime
             emit dataChanged(p1, p2, roles);
         }
 
-        if (roles.contains(NodeTableRoles::Columns))
+        if (roles.contains(Constants::NodeTableRoles::Columns))
         {
             this->beginResetModel();
             emit this->columnsChanged();
             this->endResetModel();
         }
 
-        if (roles.contains(NodeTableRoles::Rows))
+        if (roles.contains(Constants::NodeTableRoles::Rows))
         {
             this->beginResetModel();
             emit this->rowsChanged();

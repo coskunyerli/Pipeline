@@ -20,25 +20,15 @@ Rectangle
             color: hovered ? "#3a3a3a" : "#2b2b2b"
             border.color: "#444"
 
-            // Delegate içindeki en üst seviyeye ekle
-            Rectangle {
-                id: closeButton
-                width: 16
-                height: 16
-                radius: 8
-                color: "#202020"      // arkaplan kırmızı
+            Image {
                 anchors.top: parent.top
                 anchors.right: parent.right
                 anchors.topMargin: 4
                 anchors.rightMargin: 4
+                sourceSize :Qt.size(10,10)
                 z: 10                 // diğer itemların üstünde
-
-                Image {
-                    anchors.fill: parent
-                    source: "qrc:/icons/close_24.svg"
-                    fillMode: Image.PreserveAspectFit
-                }
-
+                source: "qrc:/icons/close_24.svg"
+                fillMode: Image.PreserveAspectFit
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor

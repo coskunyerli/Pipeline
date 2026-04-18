@@ -37,24 +37,24 @@ namespace Pipeline::Runtime
 
         if (role == Qt::DisplayRole)
         {
-            role = ParameterRoles::ValueRole;
+            role = Constants::ParameterRoles::ValueRole;
         }
 
         switch (role)
         {
-            case ParameterRoles::NameRole:
+            case Constants::ParameterRoles::NameRole:
                 return QString::fromStdString(p.name);
 
-            case ParameterRoles::TypeRole:
+            case Constants::ParameterRoles::TypeRole:
                 return static_cast<int>(p.type);
 
-            case ParameterRoles::TypeStringRole:
+            case Constants::ParameterRoles::TypeStringRole:
                 return QString::fromStdString(this->m_nodeParamList.paramTypeToString(p.type));
 
-            case IsBrowseRole:
+            case Constants::IsBrowseRole:
                 return p.type == ParamType::Browse;
 
-            case ParameterRoles::ValueRole:
+            case Constants::ParameterRoles::ValueRole:
                 {
                     if (p.type == ParamType::List)
                     {
@@ -83,7 +83,7 @@ namespace Pipeline::Runtime
 
         if (role == Qt::EditRole || role == Qt::DisplayRole)
         {
-            role = ParameterRoles::ValueRole;
+            role = Constants::ParameterRoles::ValueRole;
         }
 
         auto paramName = this->m_nodeParamList.getParameterName(index.row());
@@ -98,7 +98,7 @@ namespace Pipeline::Runtime
 
         switch (role)
         {
-            case ParameterRoles::NameRole:
+            case Constants::ParameterRoles::NameRole:
                 if (!this->m_nodeParamList.updateParameterName(p.name, value.toString().toStdString()))
                 {
                     return false;
@@ -111,7 +111,7 @@ namespace Pipeline::Runtime
             //     p.type = static_cast<ParamType>(value.toInt());
             //     break;
 
-            case ParameterRoles::ValueRole:
+            case Constants::ParameterRoles::ValueRole:
                 {
                     if (p.type == ParamType::List)
                     {
@@ -152,11 +152,11 @@ namespace Pipeline::Runtime
     {
         return
         {
-            {ParameterRoles::NameRole, "name"},
-            {ParameterRoles::TypeRole, "type"},
-            {ParameterRoles::ValueRole, "value"},
-            {ParameterRoles::TypeStringRole, "typeString"},
-            {IsBrowseRole, "isBrowse"}
+            {Constants::ParameterRoles::NameRole, "name"},
+            {Constants::ParameterRoles::TypeRole, "type"},
+            {Constants::ParameterRoles::ValueRole, "value"},
+            {Constants::ParameterRoles::TypeStringRole, "typeString"},
+            {Constants::IsBrowseRole, "isBrowse"}
         };
     }
 
